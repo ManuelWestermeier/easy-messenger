@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavigationBar } from "./comp/nabigation-bar";
 import { ChatRoom } from "./comp/chat-room";
 import { JoinChat } from "./comp/join-chat";
-import { useWsClient } from "./hook/use-ws-client";
+import { useWsClient } from "./hooks/use-ws-client";
 
 // Main Application Component
 export default function App() {

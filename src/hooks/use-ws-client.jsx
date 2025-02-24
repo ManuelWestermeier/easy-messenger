@@ -7,7 +7,7 @@ import { decrypt } from "../utils/crypto";
 export function useWsClient() {
     const [data, setData] = useState({});
     const [client, state, reCreateClient, isClosed] = useClient(() => {
-        const client = new Client("ws://localhost:8080");
+        const client = new Client(document.location.protocol == "http:" ? "ws://localhost:8080" : "wss://easy-messenger.onrender.com");
 
         client.onSay("message", ({ id, message }) => {
             setData((old) => {
