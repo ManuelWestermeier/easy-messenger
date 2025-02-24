@@ -1,5 +1,163 @@
-* {
-  margin: 5px;
-  padding: 5px;
-  font-family: monospace;
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+}
+
+/* Grid Layout for the Application */
+.app-container {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "nav main"
+    "aside main";
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+}
+
+/* Header */
+header {
+  grid-area: header;
+  background-color: #4CAF50;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+/* Navigation Bar */
+.nav-bar {
+  grid-area: nav;
+  background-color: #333;
+  padding: 1rem;
+}
+
+.nav-bar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-bar li {
+  margin-bottom: 0.5rem;
+}
+
+.nav-bar button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.nav-bar li.active button,
+.nav-bar button:hover {
+  background-color: #575757;
+}
+
+/* Main Content */
+main {
+  grid-area: main;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Aside / Join Chat Form */
+aside {
+  grid-area: aside;
+  background-color: #fff;
+  padding: 1rem;
+  border-left: 1px solid #ddd;
+}
+
+/* Chat Room Styling */
+.chat-room {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.messages {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.message {
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.message:last-child {
+  border-bottom: none;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+/* Message Form */
+.message-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.message-form select,
+.message-form input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.message-form button {
+  padding: 0.5rem 1rem;
+  background-color: #4CAF50;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.message-form button:hover {
+  background-color: #45a049;
+}
+
+/* Join Chat Form */
+.join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.join-form input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.join-form button {
+  padding: 0.5rem;
+  background-color: #4CAF50;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.join-form button:hover {
+  background-color: #45a049;
+}
+
+/* No Chat Selected Message */
+.no-chat-selected {
+  text-align: center;
+  color: #777;
 }
