@@ -9,11 +9,12 @@ body {
 .app-container {
   display: grid;
   grid-template-areas:
-    "header header"
-    "nav main"
-    "aside main";
-  grid-template-columns: 220px 1fr;
-  grid-template-rows: auto 1fr auto;
+    "header"
+    "nav"
+    "main"
+    "aside";
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr auto;
   height: 100vh;
 }
 
@@ -71,7 +72,7 @@ aside {
   grid-area: aside;
   background-color: #fff;
   padding: 1rem;
-  border-left: 1px solid #ddd;
+  border-top: 1px solid #ddd;
 }
 
 /* Chat Room Styling */
@@ -115,6 +116,7 @@ aside {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  flex: 1;
 }
 
 .message-form button {
@@ -160,4 +162,21 @@ aside {
 .no-chat-selected {
   text-align: center;
   color: #777;
+}
+
+/* Media Query for Mobile Phones */
+@media (min-width: 768px) {
+  .app-container {
+    grid-template-areas:
+      "header header"
+      "nav main"
+      "aside main";
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  aside {
+    border-top: none;
+    border-left: 1px solid #ddd;
+  }
 }

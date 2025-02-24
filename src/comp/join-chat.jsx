@@ -16,7 +16,7 @@ export function JoinChat({ client, setData, setCurrentChat }) {
             ...old,
             [chatId]: {
                 password,
-                messages: []
+                messages: [],
             }
         }));
 
