@@ -1,13 +1,9 @@
 import { useClient } from "wsnet-client-react";
 import Client from "wsnet-client";
 import { useEffect } from "react";
-import { decrypt } from "../utils/crypto";
-import useLocalStorage from "use-local-storage";
 
 // Custom hook to handle the WebSocket client connection and incoming messages
-export function useWsClient() {
-  const [data, setData] = useLocalStorage("enc-chat-data", {});
-
+export function useWsClient(data, setData) {
   const [client, state, reCreateClient, isClosed] = useClient(
     () => {
       const client = new Client(
@@ -58,5 +54,12 @@ export function useWsClient() {
     for (const chatId in data) client.get("join", chatId);
   }, [client]);
 
-  return { data, setData, client, state, reCreateClient, isClosed };
+  return {
+    data,
+    setData,
+    client,
+    state,
+    reCreateClient,
+    isClosed,
+  };
 }

@@ -28,14 +28,30 @@ export function JoinChat({ client, setData, setCurrentChat }) {
 
   return (
     <form onSubmit={handleJoin} className="join-form">
-      <input type="text" name="id" placeholder="Group to join..." required />
       <input
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck="false"
+        type="text"
+        name="id"
+        placeholder="Group to join..."
+        required
+      />
+      <input
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck="false"
         type="password"
         name="password"
         placeholder="Encryption password..."
         required
       />
-      <input type="text" name="author" placeholder="Your name..." required />
+      <input
+        type="text"
+        name="author"
+        placeholder="Your name..."
+        required
+      />
       <button type="submit">Join Chat</button>
     </form>
   );

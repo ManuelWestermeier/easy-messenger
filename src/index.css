@@ -1,9 +1,72 @@
-/* Global Styles */
+/* Login and Account Creation Styles */
 body {
   margin: 0;
+  padding: 20px;
   font-family: Arial, sans-serif;
   scroll-behavior: smooth;
   background-color: #f2f2f2;
+}
+
+fieldset.login {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: #fff;
+}
+
+legend h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+form.form {
+  display: flex;
+  flex-direction: column;
+}
+
+form.form p {
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+input.input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+p.error {
+  color: red;
+  font-size: 0.9em;
+  min-height: 1.2em;
+}
+
+button.button {
+  padding: 10px;
+  background: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+button.button:hover {
+  background: #0056b3;
+}
+
+/* ------------------------------------------------- */
+/* App & Chat Global Styles (App Container, Nav, etc.) */
+/* ------------------------------------------------- */
+
+/* Global Styles */
+body {
+  /* (merged with above) */
 }
 
 /* Grid Layout for the Application */
@@ -121,7 +184,6 @@ aside {
     opacity: 0.5;
     transform: scale(0) rotate(30deg) translate(-100px, -100px);
   }
-
   100% {
     opacity: 1;
     transform: unset;
@@ -133,7 +195,6 @@ aside {
     opacity: 0.5;
     transform: scale(0) rotate(-30deg) translate(100px, -100px);
   }
-
   100% {
     opacity: 1;
     transform: unset;

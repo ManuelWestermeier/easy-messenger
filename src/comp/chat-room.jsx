@@ -63,6 +63,9 @@ export function ChatRoom({ chatId, chatData, client, setData }) {
           name="text"
           placeholder="Type your message..."
           required
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck="false"
         />
         <button type="submit">Send</button>
       </form>

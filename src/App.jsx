@@ -5,9 +5,11 @@ import { JoinChat } from "./comp/join-chat";
 import { useWsClient } from "./hooks/use-ws-client";
 
 // Main Application Component
-export default function App() {
-  const { data, setData, client, state, reCreateClient, isClosed } =
-    useWsClient();
+export default function App({ setData, data }) {
+  const { client, state, reCreateClient, isClosed } = useWsClient(
+    data,
+    setData
+  );
   const [currentChat, setCurrentChat] = useState(
     Object.keys(data || {})?.[0] ?? null
   );
