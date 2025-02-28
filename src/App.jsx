@@ -6,8 +6,11 @@ import { useWsClient } from "./hooks/use-ws-client";
 
 // Main Application Component
 export default function App() {
-  const { data, setData, client, state, reCreateClient, isClosed } = useWsClient();
-  const [currentChat, setCurrentChat] = useState(null);
+  const { data, setData, client, state, reCreateClient, isClosed } =
+    useWsClient();
+  const [currentChat, setCurrentChat] = useState(
+    Object.keys(data || {})?.[0] ?? null
+  );
 
   if (state === "failed" || isClosed) {
     return <button onClick={() => reCreateClient()}>Reconnect</button>;
@@ -17,21 +20,33 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <header>
-        <h1>MW-S-ENC-Chat</h1>
-      </header>
-      <NavigationBar chats={data} currentChat={currentChat} setCurrentChat={setCurrentChat} />
+      <NavigationBar
+        chats={data}
+        currentChat={currentChat}
+        setCurrentChat={setCurrentChat}
+      />
       <main>
         {currentChat && data[currentChat] ? (
-          <ChatRoom chatId={currentChat} chatData={data[currentChat]} client={client} setData={setData} />
+          <ChatRoom
+            chatId={currentChat}
+            chatData={data[currentChat]}
+            client={client}
+            setData={setData}
+          />
         ) : (
           <div className="no-chat-selected">
-            <p>Please select a chat from the navigation bar or join a new chat.</p>
+            <p>
+              Please select a chat from the navigation bar or join a new chat.
+            </p>
           </div>
         )}
       </main>
       <aside>
-        <JoinChat setCurrentChat={setCurrentChat} client={client} setData={setData} />
+        <JoinChat
+          setCurrentChat={setCurrentChat}
+          client={client}
+          setData={setData}
+        />
       </aside>
     </div>
   );
