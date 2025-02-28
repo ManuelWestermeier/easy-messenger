@@ -10,32 +10,9 @@
 </head>
 
 <body>
-  <div id="root"></div>
   <button id="installBtn">Install App</button>
+  <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
-  <script>
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.style.display = 'block';
-    });
-
-    installBtn.addEventListener('click', () => {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        } else {
-          console.log('User dismissed the install prompt');
-        }
-        deferredPrompt = null;
-        installBtn.style.display = 'none';
-      });
-    });
-  </script>
 </body>
 
 </html>
