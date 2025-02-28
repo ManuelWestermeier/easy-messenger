@@ -6,7 +6,7 @@ import useLocalStorage from "use-local-storage";
 import { decrypt, encrypt } from "./utils/crypto.jsx";
 
 function Main() {
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(null);
   const [data, setData] = useLocalStorage("enc-chat-data", null);
   const [isAuth, setIsAuth] = useState(false);
 
@@ -43,9 +43,14 @@ function Main() {
   // A wrapper to update the data and automatically encrypt the new value.
   const updateData = (newData) => {
     if (typeof newData === "function") {
-      setData((prevData) => encrypt(password, newData(prevData)));
+      setData((prevData) =>
+        encrypt(
+          password,
+          JSON.stringify(newData(JSON.parse(decrypt(password, prevData))))
+        )
+      );
     } else {
-      setData(encrypt(password, newData));
+      setData(encrypt(password, JSON.stringify(newData)));
     }
   };
 
@@ -113,13 +118,9 @@ function Main() {
     return loginHtml;
   }
 
+  const dataString = decrypt(password, data);
   // If authenticated, render the main app.
-  return (
-    <App
-      data={JSON.parse(decrypt(password, data))}
-      setData={updateData}
-    />
-  );
+  return <App data={JSON.parse(dataString)} setData={updateData} />;
 }
 
 createRoot(document.getElementById("root")).render(<Main />);
