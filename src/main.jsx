@@ -140,9 +140,7 @@ function Main() {
 
 createRoot(document.getElementById("root")).render(<Main />);
 
-//to create the server
 setTimeout(() => {
-  try {
-    fetch(serverURL);
-  } catch (error) {}
+  const ws = new WebSocket(serverURL);
+  ws.onopen = () => ws.close();
 }, 10);
