@@ -52,7 +52,9 @@ export function JoinChat({ client, setData, setCurrentChat }) {
         placeholder="Your name..."
         required
       />
+
       <button type="submit">Join Chat</button>
+      <button type="submit">Scan QR Code</button>
     </form>
   );
 }
