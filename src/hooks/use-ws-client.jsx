@@ -1,16 +1,13 @@
 import { useClient } from "wsnet-client-react";
 import Client from "wsnet-client";
 import { useEffect } from "react";
+import { serverURL } from "../config";
 
 // Custom hook to handle the WebSocket client connection and incoming messages
 export function useWsClient(data, setData) {
   const [client, state, reCreateClient, isClosed] = useClient(
     () => {
-      const client = new Client(
-        document.location.protocol == "http:"
-          ? "ws://localhost:8080"
-          : "wss://easy-messenger.onrender.com"
-      );
+      const client = new Client(serverURL);
 
       client.onSay("message", ({ id, message }) => {
         setData((old) => {

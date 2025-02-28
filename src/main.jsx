@@ -4,6 +4,7 @@ import App from "./App.jsx";
 import { useEffect, useState } from "react";
 import useLocalStorage from "use-local-storage";
 import { decrypt, encrypt } from "./utils/crypto.jsx";
+import { serverURL } from "./config.jsx";
 
 function Main() {
   useEffect(() => {
@@ -138,3 +139,10 @@ function Main() {
 }
 
 createRoot(document.getElementById("root")).render(<Main />);
+
+//to create the server
+setTimeout(() => {
+  try {
+    fetch(serverURL);
+  } catch (error) {}
+}, 10);
