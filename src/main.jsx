@@ -25,6 +25,10 @@ function Main() {
     e.preventDefault();
     const inputPassword = e.target.password.value;
     if (!inputPassword) return; // Optionally display an error
+    if (inputPassword != prompt("reinput the password")) {
+      e.target.reset();
+      return alert("wrong password");
+    }
     setPassword(inputPassword);
     // Encrypt an empty JSON string to start with
     const encryptedData = encrypt(inputPassword, "{}");
