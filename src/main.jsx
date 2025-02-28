@@ -8,9 +8,11 @@ import { decrypt, encrypt } from "./utils/crypto.jsx";
 function Main() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/service-worker.js").then(() => {
-        console.log("Service Worker Registered");
-      });
+      navigator.serviceWorker
+        .register("/easy-messenger/service-worker.js")
+        .then(() => {
+          console.log("Service Worker Active!");
+        });
     }
   }, []);
 
