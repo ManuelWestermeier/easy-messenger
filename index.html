@@ -7,11 +7,50 @@
   <title>QUATSCHER</title>
   <link rel="icon" type="image/png" href="/easy-messenger/img/logo-512.png">
   <link rel="manifest" href="/easy-messenger/manifest.json">
+  <style>
+    #installBtn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
   <div id="root"></div>
+  <button id="installBtn">Install App</button>
   <script type="module" src="/src/main.jsx"></script>
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', () => {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      });
+    });
+  </script>
 </body>
 
 </html>
