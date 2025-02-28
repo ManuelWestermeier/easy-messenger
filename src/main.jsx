@@ -1,11 +1,19 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useLocalStorage from "use-local-storage";
 import { decrypt, encrypt } from "./utils/crypto.jsx";
 
 function Main() {
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js").then(() => {
+        console.log("Service Worker Registered");
+      });
+    }
+  }, []);
+
   const [password, setPassword] = useState(null);
   const [data, setData] = useLocalStorage("enc-chat-data", null);
   const [isAuth, setIsAuth] = useState(false);
