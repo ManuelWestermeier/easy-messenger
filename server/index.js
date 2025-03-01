@@ -5,10 +5,8 @@ import { createServer } from "wsnet-server";
 const chats = {};
 
 createServer({ port: 8080 }, async (client) => {
-  console.log(chats);
-
   // Keep track of the chats this client has joined
-  const joinedChats = [];
+  let joinedChats = [];
 
   function send(type = "message", chatId, message) {
     chats[chatId].forEach((otherClient) => {
