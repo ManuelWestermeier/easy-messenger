@@ -2,6 +2,7 @@
 
 .messages {
     height: calc(100dvh - 110px + 2.5rem - 60px);
+    min-height: 200px;
     overflow-y: auto;
 }
 

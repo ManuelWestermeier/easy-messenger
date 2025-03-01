@@ -22,13 +22,20 @@ export default function App({ setData, data }) {
 
   return (
     <div className="app-container">
-      <NavigationBar
-        chats={data}
-        currentChat={currentChat}
-        setCurrentChat={setCurrentChat}
-        setChats={setData}
-        client={client}
-      />
+        <NavigationBar
+          chats={data}
+          currentChat={currentChat}
+          setCurrentChat={setCurrentChat}
+          setChats={setData}
+          client={client}
+        />
+        <aside>
+          <JoinChat
+            setCurrentChat={setCurrentChat}
+            client={client}
+            setData={setData}
+          />
+        </aside>
       <main>
         {currentChat && data[currentChat] ? (
           <ChatRoom
@@ -45,13 +52,6 @@ export default function App({ setData, data }) {
           </div>
         )}
       </main>
-      <aside>
-        <JoinChat
-          setCurrentChat={setCurrentChat}
-          client={client}
-          setData={setData}
-        />
-      </aside>
     </div>
   );
 }

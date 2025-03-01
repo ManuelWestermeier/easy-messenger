@@ -30,7 +30,23 @@ export function NavigationBar({
               client.get("exit", chatId);
             }}
           >
-            <button onClick={() => setCurrentChat(chatId)}>{chatId}</button>
+            <button
+              onClick={() => {
+                setCurrentChat(chatId);
+                const messageInput = document.querySelector(
+                  '.chat-room .message-form input[name="text"]'
+                );
+                messageInput.focus();
+
+                const chatElem = document.querySelector(".chat-room");
+                chatElem.scrollIntoView({
+                  block: "start",
+                  behavior: "smooth",
+                });
+              }}
+            >
+              {chatId}
+            </button>
           </li>
         ))}
       </ul>

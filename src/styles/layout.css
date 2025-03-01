@@ -1,17 +1,3 @@
-/* layout.css */
-
-.app-container {
-    display: grid;
-    grid-template-areas:
-        "nav"
-        "aside"
-        "main";
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr auto;
-    height: 100vh;
-    width: 100dvw;
-}
-
 /* Main content area */
 main {
     grid-area: main;
@@ -31,6 +17,9 @@ aside {
 /* Responsive layout for wider screens */
 @media (min-width: 768px) {
     .app-container {
+        display: grid;
+        height: 100vh;
+        width: 100dvw;
         grid-template-areas:
             "header header"
             "nav main"
@@ -44,4 +33,62 @@ aside {
         border-top: none;
         border-left: 1px solid #ddd;
     }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        height: calc(100dvh - 20px);
+        width: 200dvw;
+        position: relative;
+        overflow-y: hidden;
+    }
+
+    .nav-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100dvw;
+        height: calc(100dvh - 240px);
+    }
+
+    aside {
+        position: absolute;
+        top: calc(100dvh - 240px);
+        left: 0;
+        width: 100dvw;
+        height: 240px;
+    }
+
+    .chat-room {
+        position: absolute;
+        top: 0;
+        left: calc(100dvw + 10px);
+        width: calc(100dvw - 20px);
+        height: calc(100dvh - 20px);
+    }
+}
+
+/* For Webkit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(76, 175, 80);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(56, 142, 60);
+}
+
+/* For Firefox */
+* {
+    scrollbar-color: rgb(76, 175, 80) #f1f1f1;
+    scrollbar-width: thin;
 }
