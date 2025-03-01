@@ -2,6 +2,7 @@ import { useClient } from "wsnet-client-react";
 import Client from "wsnet-client";
 import { useEffect } from "react";
 import { serverURL } from "../config";
+import { decrypt } from "../utils/crypto";
 
 // Custom hook to handle the WebSocket client connection and incoming messages
 export function useWsClient(data, setData) {
@@ -28,7 +29,7 @@ export function useWsClient(data, setData) {
               }
             }
           } catch (error) {
-            messageData = { type: "error", data: "wrong key" };
+            messageData = { type: "error", data: "wrong key\n" + error };
           }
           return {
             ...old,

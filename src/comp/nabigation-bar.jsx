@@ -4,6 +4,7 @@ export function NavigationBar({
   currentChat,
   setCurrentChat,
   setChats,
+  client,
 }) {
   return (
     <nav className="nav-bar">
@@ -25,6 +26,8 @@ export function NavigationBar({
                 delete newChats[chatId];
                 return newChats;
               });
+
+              client.get("exit", chatId);
             }}
           >
             <button onClick={() => setCurrentChat(chatId)}>{chatId}</button>
