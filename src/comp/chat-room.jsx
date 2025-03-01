@@ -9,7 +9,12 @@ export function ChatRoom({ chatId, chatData, client, setData }) {
       <ChatRoomHeader chatData={chatData} chatId={chatId} setData={setData} />
       <div className="messages">
         {chatData.messages.map((msg, index) => (
-          <Message msg={msg} chatData={chatData} index={index} key={msg.id} />
+          <Message
+            msg={msg}
+            chatData={chatData}
+            index={index}
+            key={msg.id || index}
+          />
         ))}
       </div>
       <ChatRoomSendForm
