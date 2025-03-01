@@ -1,0 +1,47 @@
+/* layout.css */
+
+.app-container {
+    display: grid;
+    grid-template-areas:
+        "nav"
+        "aside"
+        "main";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    height: 100vh;
+    width: 100dvw;
+}
+
+/* Main content area */
+main {
+    grid-area: main;
+    padding: 0.25rem 1rem;
+    overflow-y: auto;
+}
+
+/* Aside area (e.g., for join chat form) */
+aside {
+    grid-area: aside;
+    background-color: #fff;
+    padding: 1rem;
+    border-top: 1px solid #ddd;
+    height: 225px;
+}
+
+/* Responsive layout for wider screens */
+@media (min-width: 768px) {
+    .app-container {
+        grid-template-areas:
+            "header header"
+            "nav main"
+            "aside main";
+        grid-template-columns: 220px 1fr;
+        grid-template-rows: auto 1fr auto;
+        width: 100dvw;
+    }
+
+    aside {
+        border-top: none;
+        border-left: 1px solid #ddd;
+    }
+}

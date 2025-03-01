@@ -1,0 +1,62 @@
+/* globals.css */
+
+/* Global resets and defaults */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    scroll-behavior: smooth;
+    background-color: #f2f2f2;
+    line-height: 1.6;
+}
+
+.none {
+    display: none !important;
+}
+
+/* Default typographic styles */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-bottom: 0.5rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+/* Default form elements styling */
+input,
+button,
+select,
+textarea {
+    font-family: inherit;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Default button styles */
+button {
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: #eee;
+    border: none;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+[alt="Info icon"] {
+    display: none;
+}

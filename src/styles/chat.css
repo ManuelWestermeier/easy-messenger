@@ -1,0 +1,58 @@
+/* chat.css */
+
+.chat-room {
+    background-color: #fff;
+    padding: 0.25rem 1rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-image: linear-gradient(#45a0493a, white, #45a0493a);
+}
+
+.chat-room header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Chat room header inputs and buttons */
+.chat-room header input,
+.chat-room header button {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Expanded/zoomed chat data form */
+.chat-room header #chat-data-form {
+    position: fixed;
+    z-index: 10000000000;
+    height: 80vmin;
+    width: 80vmin;
+    top: calc(100dvh / 2 - 80vmin / 2);
+    left: calc(100dvw / 2 - 80vmin / 2);
+    box-shadow: 0 0 200px 100px black;
+    outline: none;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: black;
+    gap: 5px;
+}
+
+.chat-room header svg {
+    transition: width, height 0.3s ease-in-out;
+    filter: blur(3px);
+    cursor: pointer;
+}
+
+.chat-room header svg:focus {
+    position: fixed;
+    z-index: 10000000000;
+    height: 80vmin;
+    width: 80vmin;
+    top: calc(100dvh / 2 - 80vmin / 2);
+    left: calc(100dvw / 2 - 80vmin / 2);
+    box-shadow: 0 0 200px 100px black;
+    outline: none;
+    filter: blur(0);
+}

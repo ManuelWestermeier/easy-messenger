@@ -1,0 +1,28 @@
+/* message-form.css */
+
+.message-form {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    gap: 0.5rem;
+    border-radius: 4px;
+    box-shadow: 0 0 20px 0px #fff;
+    padding: 10px;
+}
+
+.message-form input,
+.message-form select {
+    flex: 1;
+}
+
+.message-form button {
+    padding: 0.5rem 1rem;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.message-form button:hover {
+    background-color: #45a049;
+}

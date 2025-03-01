@@ -3,7 +3,6 @@ import { NavigationBar } from "./comp/nabigation-bar";
 import { ChatRoom } from "./comp/chat-room";
 import { JoinChat } from "./comp/join-chat";
 import { useWsClient } from "./hooks/use-ws-client";
-import "./pwa.jsx"
 
 // Main Application Component
 export default function App({ setData, data }) {

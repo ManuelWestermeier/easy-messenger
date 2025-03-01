@@ -1,0 +1,73 @@
+/* messages.css */
+
+.messages {
+    height: calc(100dvh - 110px + 2.5rem - 60px);
+    overflow-y: auto;
+}
+
+.message {
+    position: relative;
+    line-break: anywhere;
+    color: white;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+    border-radius: 5px;
+    margin: 5px 0;
+    width: 90%;
+    transition: float 0.3s ease-in-out;
+}
+
+.message.own-msg {
+    background-color: #45a049 !important;
+    float: right;
+}
+
+.message.other {
+    background-color: #333;
+    float: left;
+}
+
+.message:last-child {
+    margin-bottom: 10px;
+}
+
+/* Entry animations */
+.message.other:last-child {
+    animation: come-in-left 0.5s ease-in-out forwards;
+}
+
+.message.own-msg:last-child {
+    animation: come-in-right 0.5s ease-in-out forwards;
+}
+
+.message .meta {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.786);
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+}
+
+@keyframes come-in-left {
+    0% {
+        opacity: 0.5;
+        transform: scale(0) rotate(30deg) translate(-100px, -100px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes come-in-right {
+    0% {
+        opacity: 0.5;
+        transform: scale(0) rotate(-30deg) translate(100px, -100px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}

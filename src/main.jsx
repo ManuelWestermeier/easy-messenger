@@ -1,10 +1,10 @@
 import { createRoot } from "react-dom/client";
-import "./index.css";
 import App from "./App.jsx";
 import { useEffect, useState } from "react";
 import useLocalStorage from "use-local-storage";
 import { decrypt, encrypt } from "./utils/crypto.jsx";
-import { serverURL } from "./config.jsx";
+import "./styles/import.jsx";
+import "./pwa.jsx";
 
 function Main() {
   useEffect(() => {
@@ -139,8 +139,3 @@ function Main() {
 }
 
 createRoot(document.getElementById("root")).render(<Main />);
-
-setTimeout(() => {
-  const ws = new WebSocket(serverURL);
-  ws.onopen = () => ws.close();
-}, 10);
