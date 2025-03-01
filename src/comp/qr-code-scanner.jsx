@@ -5,6 +5,9 @@ const qrcodeRegionId = "html5qr-code-full-region";
 
 // Creates the configuration object for Html5QrcodeScanner.
 function createConfig(props) {
+  /**
+   * @type {import("html5-qrcode/esm/html5-qrcode-scanner").Html5QrcodeScannerConfig}
+   */
   let config = {};
   if (props.fps) {
     config.fps = props.fps;

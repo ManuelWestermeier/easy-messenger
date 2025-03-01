@@ -86,7 +86,7 @@ export function JoinChat({ client, setData, setCurrentChat }) {
       </button>
       <Html5QrcodePlugin
         fps={10}
-        qrbox={250}
+        qrbox={350}
         disableFlip={false}
         qrCodeSuccessCallback={(decodedText = "") => {
           const [chatId, password] = decodedText.split("\n") || ["", ""];

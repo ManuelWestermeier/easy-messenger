@@ -1,11 +1,11 @@
 const CACHE_NAME = "pwa-cache-v1";
 const ASSETS = [
-  "/easy-messenger/",
-  "/easy-messenger/style.css",
-  "/easy-messenger/script.js",
-  "/easy-messenger/manifest.json",
-  "/easy-messenger/img/logo-512.png",
-  "/easy-messenger/img/logo-128.png",
+  // "/easy-messenger/",
+  // "/easy-messenger/style.css",
+  // "/easy-messenger/script.js",
+  // "/easy-messenger/manifest.json",
+  // "/easy-messenger/img/logo-512.png",
+  // "/easy-messenger/img/logo-128.png",
 ];
 
 // Install event - Pre-caches assets
