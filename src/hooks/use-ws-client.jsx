@@ -17,7 +17,7 @@ export function useWsClient(data, setData) {
             messageData = JSON.parse(decrypt(old[id].password, message));
 
             const messagesDiv = document.querySelector(".messages");
-            if (messagesDiv) {
+            if (messagesDiv && messageData.type != "delete") {
               if (
                 messagesDiv.scrollTop == 0 ||
                 messagesDiv.scrollTop == messagesDiv.scrollHeight
@@ -30,6 +30,18 @@ export function useWsClient(data, setData) {
             }
           } catch (error) {
             messageData = { type: "error", data: "wrong key\n" + error };
+          }
+          if (messageData.type == "delete") {
+            let messages = old[id].messages.filter(
+              (m) => m.id !== messageData.id
+            );
+            return {
+              ...old,
+              [id]: {
+                ...old[id],
+                messages,
+              },
+            };
           }
           return {
             ...old,

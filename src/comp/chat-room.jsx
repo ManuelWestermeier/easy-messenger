@@ -14,6 +14,9 @@ export function ChatRoom({ chatId, chatData, client, setData }) {
             chatData={chatData}
             index={index}
             key={msg.id || index}
+            chatId={chatId}
+            client={client}
+            setData={setData}
           />
         ))}
       </div>
