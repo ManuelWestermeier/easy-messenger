@@ -29,7 +29,7 @@ createServer({ port: 8080 }, async (client) => {
   // Handle join requests
   client.onGet("exit", (chatId = "") => {
     if (typeof chatId != "string") return false;
-    if (joinedChats.includes(chatId)) return false;
+    if (!joinedChats.includes(chatId)) return false;
     joinedChats = joinedChats.filter((chat) => chat != chatId);
     chats[chatId] = chats[chatId].filter(
       (otherClient) => otherClient !== client
