@@ -26,6 +26,7 @@ export default function App({ setData, data }) {
         chats={data}
         currentChat={currentChat}
         setCurrentChat={setCurrentChat}
+        setChats={setData}
       />
       <main>
         {currentChat && data[currentChat] ? (
