@@ -38,33 +38,42 @@ aside {
 @media (max-width: 768px) {
     .app-container {
         height: calc(100dvh - 20px);
-        width: 200dvw;
-        position: relative;
-        overflow-y: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .navigation {
+        height: 50px;
+        padding: 0;
+        margin: 0;
+        width: 100dvw;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        background-color: #323232;
+    }
+
+    .navigation .active {
+        background-color: dodgerblue;
     }
 
     .nav-bar {
-        position: absolute;
-        top: 0;
-        left: 0;
         width: 100dvw;
-        height: calc(100dvh - 240px);
+        height: calc(100dvh - 265px);
     }
 
     aside {
-        position: absolute;
-        top: calc(100dvh - 240px);
-        left: 0;
         width: 100dvw;
-        height: 240px;
+        height: 230px;
     }
 
     .chat-room {
-        position: absolute;
-        top: 0;
-        left: calc(100dvw + 10px);
         width: calc(100dvw - 20px);
-        height: calc(100dvh - 20px);
+        height: calc(100dvh - 40px);
+    }
+
+    .messages {
+        height: calc(100dvh - 110px + 2.5rem - 120px) !important;
     }
 }
 

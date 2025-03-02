@@ -1,29 +1,20 @@
 import { useState } from "react";
-import { NavigationBar } from "./comp/nabigation-bar";
 import { ChatRoom } from "./comp/chat-room";
 import { JoinChat } from "./comp/join-chat";
-import { useWsClient } from "./hooks/use-ws-client";
-import Mobile from "./mobile";
+import { NavigationBar } from "./comp/nabigation-bar";
 
-// Main Application Component
-export default function App({ setData, data }) {
-  const { client, state, reCreateClient, isClosed } = useWsClient(
-    data,
-    setData
-  );
-  const [currentChat, setCurrentChat] = useState(
-    Object.keys(data || {})?.[0] ?? null
-  );
+export default function Mobile({
+  currentChat,
+  setCurrentChat,
+  client,
+  setData,
+  data,
+}) {
+  const [page, setPage] = useState(true);
 
-  if (state === "failed" || isClosed) {
-    return <button onClick={() => reCreateClient()}>Reconnect</button>;
-  }
-
-  if (client == null) return state;
-
-  if (innerWidth > 768)
-    return (
-      <div className="app-container">
+  return (
+    <div className="app-container mobile">
+      <div className="page" style={{ display: page ? "" : "none" }}>
         <NavigationBar
           chats={data}
           currentChat={currentChat}
@@ -38,6 +29,8 @@ export default function App({ setData, data }) {
             setData={setData}
           />
         </aside>
+      </div>
+      <div className="page" style={{ display: !page ? "" : "none" }}>
         <main>
           {currentChat && data[currentChat] ? (
             <ChatRoom
@@ -55,15 +48,17 @@ export default function App({ setData, data }) {
           )}
         </main>
       </div>
-    );
-  else
-    return (
-      <Mobile
-        client={client}
-        currentChat={currentChat}
-        data={data}
-        setCurrentChat={setCurrentChat}
-        setData={setData}
-      />
-    );
+      <div className="navigation">
+        <button className={page ? "active" : ""} onClick={() => setPage(true)}>
+          Chats
+        </button>
+        <button
+          className={!page ? "active" : ""}
+          onClick={() => setPage(false)}
+        >
+          Chat
+        </button>
+      </div>
+    </div>
+  );
 }
