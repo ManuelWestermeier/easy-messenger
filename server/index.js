@@ -1,6 +1,5 @@
 import { areSetAndTheSameType } from "are-set";
 import { createServer } from "wsnet-server";
-import { randomBytes } from "crypto";
 
 import CryptoJS from "crypto-js";
 export function basicHash(data) {
@@ -82,6 +81,13 @@ createServer({ port: 8080 }, async (client) => {
     }
 
     return unread;
+  });
+
+  client.onGet("users", (chatId) => {
+    if (typeof chatId != "string") return false;
+    if (!chats[chatId]) return false;
+    if (!joinedChats.includes(chatId)) return false;
+    return chats[chatId].clients.map(({ author }) => author);
   });
 
   client.onGet("messages", (chatId) => {
@@ -172,7 +178,7 @@ createServer({ port: 8080 }, async (client) => {
     if (!joinedChats.includes(chatId)) return false;
     if (!chats[chatId]) return false;
 
-    send("delete-message", chatId, 0, id);
+    send("message-deleted", chatId, 0, id);
 
     chats[chatId].messages = chats[chatId].messages.filter(
       ({ id: msgId }) => msgId != id

@@ -3,7 +3,7 @@ import { decrypt } from "../utils/crypto";
 
 import Client from "wsnet-client";
 
-export default function createClient(setData, selectedChat) {
+export default function createClient(setData, selectedChat, setSelectedChat) {
   return () => {
     const client = new Client(serverURL);
 
@@ -32,18 +32,6 @@ export default function createClient(setData, selectedChat) {
           messageData = { type: "error", data: "wrong key\n" + error };
         }
 
-        if (messageData.type == "delete") {
-          let messages = old[chatId].messages.filter(
-            (m) => m.id !== messageData.id
-          );
-          return {
-            ...old,
-            [chatId]: {
-              ...old[chatId],
-              messages,
-            },
-          };
-        }
         return {
           ...old,
           [chatId]: {
@@ -53,6 +41,30 @@ export default function createClient(setData, selectedChat) {
           },
         };
       });
+    });
+
+    client.onSay("message-deleted", ({ chatId, messageId }) => {
+      setData((old) => {
+        let messages = old[chatId].messages.filter(
+          (message) => message.id !== messageId
+        );
+        return {
+          ...old,
+          [chatId]: {
+            ...old[chatId],
+            messages,
+          },
+        };
+      });
+    });
+
+    client.onSay("chat-deleted", ({ chatId }) => {
+      setData((old) => {
+        const newData = { ...old };
+        delete newData[chatId];
+        return newData;
+      });
+      setSelectedChat(null);
     });
 
     return client;

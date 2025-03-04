@@ -12,7 +12,8 @@ export default function App({ setData, data }) {
   const { client, state, reCreateClient, isClosed } = useWsClient(
     data,
     setData,
-    currentChat
+    currentChat,
+    setCurrentChat
   );
 
   [currentChat, setCurrentChat] = useState(

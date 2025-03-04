@@ -29,13 +29,9 @@ export default function Message({
       onContextMenu={async (e) => {
         e.preventDefault();
         if (!confirm("Are you sure you want to delete this message")) return;
-        const deleteMessage = {
-          type: "delete",
+        const isSent = await client.get("delete-message", {
           id: msg.id,
-        };
-        const isSent = await client.get("send", {
-          id: chatId,
-          message: encrypt(chatData.password, JSON.stringify(deleteMessage)),
+          chatId,
         });
         if (!isSent) alert("error: message isn't deleted");
         setData((old) => {

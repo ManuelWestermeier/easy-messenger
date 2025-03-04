@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import initClient from "../utils/init-client";
 
 // Custom hook to handle the WebSocket client connection and incoming messages
-export function useWsClient(data, setData, selectedChat) {
+export function useWsClient(data, setData, selectedChat, setCurrentChat) {
   const [client, state, reCreateClient, isClosed] = useClient(
-    createClient(setData, selectedChat),
+    createClient(setData, selectedChat, setCurrentChat),
     true,
     true
   );
