@@ -21,6 +21,7 @@ export default function Mobile({
           setCurrentChat={setCurrentChat}
           setChats={setData}
           client={client}
+          setPage={setPage}
         />
         <aside>
           <JoinChat
@@ -48,7 +49,16 @@ export default function Mobile({
           )}
         </main>
       </div>
-      <div className="navigation">
+      <div
+        className="navigation"
+        onMouseMove={(e) => {
+          if (e.movementX > 0) {
+            setPage(false);
+          } else if (e.movementX < 0) {
+            setPage(true);
+          }
+        }}
+      >
         <button className={page ? "active" : ""} onClick={() => setPage(true)}>
           Chats
         </button>

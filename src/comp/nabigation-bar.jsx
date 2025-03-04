@@ -5,6 +5,7 @@ export function NavigationBar({
   setCurrentChat,
   setChats,
   client,
+  setPage,
 }) {
   return (
     <nav className="nav-bar">
@@ -33,6 +34,16 @@ export function NavigationBar({
             <button
               onClick={() => {
                 setCurrentChat(chatId);
+                setPage(false);
+                setChats((old) => {
+                  return {
+                    ...old,
+                    [chatId]: {
+                      ...old[chatId],
+                      unread: 0,
+                    },
+                  };
+                });
                 const messageInput = document.querySelector(
                   '.chat-room .message-form input[name="text"]'
                 );
@@ -45,7 +56,14 @@ export function NavigationBar({
                 });
               }}
             >
-              {chatId}
+              <span>{chatId}</span>
+              <span
+                className={
+                  "unread" + (chats[chatId].unread == 0 ? " hide" : "")
+                }
+              >
+                {chats[chatId].unread}
+              </span>
             </button>
           </li>
         ))}

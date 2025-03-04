@@ -12,9 +12,12 @@ export default function ChatRoomSendForm({
     const message = {
       type: fd.get("type"),
       data: fd.get("text"),
-      id: randomBytes(4).toString(),
-      author: chatData.author,
       date: new Date().toLocaleDateString(),
+      author: chatData.author,
+    };
+
+    const messagePublic = {
+      id: randomBytes(4).toString(),
     };
 
     // Update local state with the new message
@@ -22,15 +25,15 @@ export default function ChatRoomSendForm({
       ...old,
       [chatId]: {
         ...old[chatId],
-        messages: [...old[chatId].messages, message],
+        messages: [...old[chatId].messages, { ...message, ...messagePublic }],
       },
     }));
 
     const isSent = await client.get("send", {
-      id: chatId,
+      chatId,
       message: encrypt(chatData.password, JSON.stringify(message)),
+      ...messagePublic,
     });
-
     if (!isSent) {
       alert("A send error occurred");
     }

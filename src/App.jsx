@@ -7,11 +7,15 @@ import Mobile from "./mobile";
 
 // Main Application Component
 export default function App({ setData, data }) {
+  let currentChat, setCurrentChat;
+
   const { client, state, reCreateClient, isClosed } = useWsClient(
     data,
-    setData
+    setData,
+    currentChat
   );
-  const [currentChat, setCurrentChat] = useState(
+
+  [currentChat, setCurrentChat] = useState(
     Object.keys(data || {})?.[0] ?? null
   );
 

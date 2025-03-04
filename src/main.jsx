@@ -83,6 +83,7 @@ function Main() {
             autoComplete="off"
             autoCorrect="off"
             spellCheck="false"
+            autoFocus
             placeholder="Enter password..."
             name="password"
             className="input"
@@ -112,6 +113,7 @@ function Main() {
             spellCheck="false"
             placeholder="Enter password..."
             name="password"
+            autoFocus
             className="input"
           />
         </p>

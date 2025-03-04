@@ -44,13 +44,14 @@ aside {
 
     .navigation {
         height: 50px;
-        padding: 0;
+        padding: 1px;
         margin: 0;
         width: 100dvw;
         display: flex;
         align-items: center;
         justify-content: space-around;
         background-color: #323232;
+        outline: 2px solid #323232 !important;
     }
 
     .navigation .active {
@@ -68,8 +69,9 @@ aside {
     }
 
     .chat-room {
-        width: calc(100dvw - 20px);
-        height: calc(100dvh - 40px);
+        width: calc(100dvw - 40px);
+        height: calc(100dvh - 43px);
+        margin: auto;
     }
 
     .messages {

@@ -26,6 +26,24 @@
     text-align: left;
     padding: 0.5rem;
     border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-bar button .unread {
+    background-color: #4CAF50;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-bar button .unread.hide {
+    transform: scale(0) rotate(360deg);
 }
 
 .nav-bar li.active button,

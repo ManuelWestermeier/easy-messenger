@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Html5QrcodePlugin from "./qr-code-scanner";
+import { basicHash, decrypt } from "../utils/crypto";
 
 // Component for joining a new chat room
 export function JoinChat({ client, setData, setCurrentChat }) {
@@ -19,9 +20,17 @@ export function JoinChat({ client, setData, setCurrentChat }) {
         "Please Scan QR Code first or switch to input mode and input the group id and password."
       );
 
-    const error = await client.get("join", chatId);
-    if (error == false) {
-      alert(`You are in the chat: ${fd.get("id")}`);
+    const data = await client.get("join", {
+      chatId,
+      passwordHash: basicHash(basicHash(password)),
+      author,
+      messageIds: {},
+    });
+
+    if (data === false) {
+      alert(
+        `You are in the chat: ${fd.get("id")} or your password is incorrect`
+      );
       return;
     }
 
@@ -29,8 +38,18 @@ export function JoinChat({ client, setData, setCurrentChat }) {
       ...old,
       [chatId]: {
         password,
-        messages: [],
+        messages: data.map(({ id, message }) => {
+          try {
+            return { ...JSON.parse(decrypt(password, message)), id };
+          } catch (error) {
+            return {
+              type: "error",
+              data: "an error occurred (wrong password) (ignorable error)",
+            };
+          }
+        }),
         author,
+        unread: 0,
       },
     }));
 
