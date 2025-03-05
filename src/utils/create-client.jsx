@@ -78,7 +78,7 @@ export default function createClient(setData, selectedChat, setSelectedChat) {
               ...old[chatId].messages,
               {
                 type: "user-joined",
-                data: "user joined:" + message,
+                data: "user joined: " + message,
                 author: message,
                 id: randomBytes(4).toString(CryptoJS.enc.Hex),
               },
@@ -98,7 +98,7 @@ export default function createClient(setData, selectedChat, setSelectedChat) {
               ...old[chatId].messages,
               {
                 type: "user-exited",
-                data: "user exited:" + message,
+                data: "user exited: " + message,
                 author: message,
                 id: randomBytes(4).toString(CryptoJS.enc.Hex),
               },

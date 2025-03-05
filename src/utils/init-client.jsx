@@ -48,7 +48,7 @@ export default async function initClient(client, data, setData) {
               toDelete[id] = true;
             }
 
-            messages = messages.filter(({ id }) => toDelete[id]);
+            messages = messages.filter(({ id }) => !toDelete[id]);
 
             joinRes.splice(joinRes.length - 1, 1);
           }
@@ -80,8 +80,7 @@ export default async function initClient(client, data, setData) {
         });
       } else return alert("Maybe your password is incorct => group: " + chatId);
 
-      // const messages = await client.get("messages", { chatId });
-      // console.log(messages);
+      // const messages = await client.get("messages", chatId);
 
       // setData((old) => ({
       //   ...old,
@@ -103,7 +102,7 @@ export default async function initClient(client, data, setData) {
               ...old[chatId].messages,
               ...users.map((user) => ({
                 type: "user-joined",
-                data: "user joined:" + user,
+                data: "user joined: " + user,
                 author: user,
                 id: randomBytes(4).toString(CryptoJS.enc.Base64),
               })),
