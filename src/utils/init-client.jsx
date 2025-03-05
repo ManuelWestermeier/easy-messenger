@@ -46,13 +46,13 @@ export default async function initClient(client, data, setData) {
 
           if (joinRes?.[joinRes?.length - 1]?.deleted) {
             const toDelete = {};
-            for (const msg of joinRes[joinRes.length - 1].deletedMessages) {
-              toDelete[msg.id] = true;
-              messages = messages.filter((msg) => !toDelete[msg.id]);
+            for (const id of joinRes[joinRes.length - 1].deletedMessages) {
+              toDelete[id] = true;
             }
-          }
+            messages = messages.filter((msg) => !toDelete[msg.id]);
 
-          joinRes.splice(joinRes.length - 1, 1);
+            joinRes.splice(joinRes.length - 1, 1);
+          }
 
           return {
             ...old,
@@ -104,7 +104,7 @@ export default async function initClient(client, data, setData) {
               ...old[chatId].messages,
               ...users.map((user) => ({
                 type: "user-joined",
-                data: user,
+                data: "user joined:" + user,
                 author: user,
                 id: randomBytes(4).toString(CryptoJS.enc.Base64),
               })),
