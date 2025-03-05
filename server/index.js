@@ -57,7 +57,6 @@ export async function storeAllChatRoomsData() {
       console.error(`Failed to store chat room ${chatId}:`, error);
     }
   }
-  isStoring = false;
 }
 
 /**
