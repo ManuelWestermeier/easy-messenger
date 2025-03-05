@@ -4,7 +4,7 @@ import { decrypt, randomBytes } from "../utils/crypto";
 import CryptoJS from "crypto-js";
 import Client from "wsnet-client";
 
-export default function createClient(setData, selectedChat, setSelectedChat) {
+export default function createClient(setData, _, setSelectedChat) {
   return () => {
     const client = new Client(serverURL);
 
@@ -38,7 +38,7 @@ export default function createClient(setData, selectedChat, setSelectedChat) {
           [chatId]: {
             ...old[chatId],
             messages: [...old[chatId].messages, messageData],
-            unread: chatId == selectedChat ? 0 : old[chatId].unread + 1,
+            unread: chatId == window.selectedChat ? 0 : old[chatId].unread + 1,
           },
         };
       });

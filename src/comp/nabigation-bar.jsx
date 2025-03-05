@@ -47,10 +47,10 @@ export function NavigationBar({
                 const messageInput = document.querySelector(
                   '.chat-room .message-form input[name="text"]'
                 );
-                messageInput.focus();
+                messageInput?.focus?.();
 
                 const chatElem = document.querySelector(".chat-room");
-                chatElem.scrollIntoView({
+                chatElem?.scrollIntoView?.({
                   block: "start",
                   behavior: "smooth",
                 });

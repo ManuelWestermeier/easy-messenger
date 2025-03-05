@@ -6,17 +6,14 @@ import { useWsClient } from "./hooks/use-ws-client";
 import Mobile from "./mobile";
 
 export default function App({ setData, data }) {
-  let currentChat, setCurrentChat;
+  const [currentChat, setCurrentChat] = useState(null);
+  window.selectedChat = currentChat;
 
   const { client, state, reCreateClient, isClosed } = useWsClient(
     data,
     setData,
-    currentChat,
+    () => currentChat,
     setCurrentChat
-  );
-
-  [currentChat, setCurrentChat] = useState(
-    (false && Object.keys(data || {})?.[0]) ?? null
   );
 
   if (state === "failed" || isClosed) {

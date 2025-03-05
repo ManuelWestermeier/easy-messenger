@@ -16,7 +16,7 @@ const githubFS = new GitHubFS({
   encryptionKey: process.env.ENC_PASSWORD, // Use a strong, secure key
 });
 
-const storeInterval = 60_000; // 60 seconds
+const storeInterval = process.env?.DEBUG ? 2_000 : 60_000; // 60 seconds
 
 /*
 Server Data:
@@ -36,6 +36,7 @@ export const chats = {};
  */
 let lastStored = 0;
 export async function storeAllChatRoomsData() {
+  if (process.env?.DEBUG) return;
   if (Date.now() - lastStored < storeInterval) return;
   lastStored = Date.now();
   for (const chatId in chats) {
@@ -63,6 +64,8 @@ export async function storeAllChatRoomsData() {
  * If the directory is missing or no files exist, a default chat room is created.
  */
 async function fetchAllChatRoomsData() {
+  if (process.env?.DEBUG) return;
+
   try {
     let filesResponse;
     try {
