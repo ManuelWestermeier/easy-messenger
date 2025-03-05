@@ -3,7 +3,7 @@ import Html5QrcodePlugin from "./qr-code-scanner";
 import { basicHash, decrypt } from "../utils/crypto";
 
 // Component for joining a new chat room
-export function JoinChat({ client, setData, setCurrentChat }) {
+export function JoinChat({ client, setData, setCurrentChat, setPage }) {
   const [scanQrCode, setScanQrCode] = useState(false);
   const [[chatId, password], setChatData] = useState(["", ""]);
 
@@ -57,6 +57,8 @@ export function JoinChat({ client, setData, setCurrentChat }) {
     e.target.reset();
     setScanQrCode(false);
     setChatData(["", ""]);
+
+    if (setPage) setPage(false);
   };
 
   return !scanQrCode ? (

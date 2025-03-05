@@ -28,6 +28,7 @@ export default function Mobile({
             setCurrentChat={setCurrentChat}
             client={client}
             setData={setData}
+            setPage={setPage}
           />
         </aside>
       </div>
@@ -39,6 +40,7 @@ export default function Mobile({
               chatData={data[currentChat]}
               client={client}
               setData={setData}
+              page={page}
             />
           ) : (
             <div className="no-chat-selected">
@@ -49,16 +51,7 @@ export default function Mobile({
           )}
         </main>
       </div>
-      <div
-        className="navigation"
-        onMouseMove={(e) => {
-          if (e.movementX > 0) {
-            setPage(false);
-          } else if (e.movementX < 0) {
-            setPage(true);
-          }
-        }}
-      >
+      <div className="navigation">
         <button className={page ? "active" : ""} onClick={() => setPage(true)}>
           Chats
         </button>

@@ -34,7 +34,7 @@ export function NavigationBar({
             <button
               onClick={() => {
                 setCurrentChat(chatId);
-                setPage(false);
+                if (setPage) setPage(false);
                 setChats((old) => {
                   return {
                     ...old,

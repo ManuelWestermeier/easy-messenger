@@ -1,6 +1,8 @@
-import { encrypt } from "../utils/crypto";
+import MessageConetent from "./message-content";
 
 const userColors = {};
+
+export const userMessageTypes = ["text"];
 
 export default function Message({
   chatData,
@@ -19,15 +21,24 @@ export default function Message({
     )})`;
   }
 
+  const isMenagementMessage = !userMessageTypes.includes(msg.type);
+
+  const className = !isMenagementMessage
+    ? msg.author == chatData.author
+      ? "own-msg"
+      : "other"
+    : "menagement-msg";
+
   return (
     <div
+      id={msg.id}
       key={index}
       style={{ backgroundColor: userColors[msg.author] }}
-      className={
-        "message" + (msg.author == chatData.author ? " own-msg" : " other")
-      }
+      className={"message " + className}
       onContextMenu={async (e) => {
         e.preventDefault();
+        if (isMenagementMessage)
+          return alert("menagement message ... you cant delete this message");
         if (!confirm("Are you sure you want to delete this message")) return;
         const isSent = await client.get("delete-message", {
           id: msg.id,
@@ -46,10 +57,7 @@ export default function Message({
         });
       }}
     >
-      <p>{msg.data}</p>
-      <p className="meta">
-        {msg.date} | {msg.author}
-      </p>
+      <MessageConetent {...msg} />
     </div>
   );
 }

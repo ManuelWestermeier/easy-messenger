@@ -5,7 +5,6 @@ import { JoinChat } from "./comp/join-chat";
 import { useWsClient } from "./hooks/use-ws-client";
 import Mobile from "./mobile";
 
-// Main Application Component
 export default function App({ setData, data }) {
   let currentChat, setCurrentChat;
 

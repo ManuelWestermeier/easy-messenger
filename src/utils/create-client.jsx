@@ -1,6 +1,7 @@
 import { serverURL } from "../config";
-import { decrypt } from "../utils/crypto";
+import { decrypt, randomBytes } from "../utils/crypto";
 
+import CryptoJS from "crypto-js";
 import Client from "wsnet-client";
 
 export default function createClient(setData, selectedChat, setSelectedChat) {
@@ -20,7 +21,7 @@ export default function createClient(setData, selectedChat, setSelectedChat) {
           if (messagesDiv) {
             if (
               messagesDiv.scrollTop == 0 ||
-              messagesDiv.scrollTop == messagesDiv.scrollHeight
+              messagesDiv.scrollHeight - messagesDiv.scrollTop < innerHeight
             ) {
               messagesDiv.lastChild?.scrollIntoView?.({
                 behavior: "smooth",
@@ -29,7 +30,7 @@ export default function createClient(setData, selectedChat, setSelectedChat) {
             }
           }
         } catch (error) {
-          messageData = { type: "error", data: "wrong key\n" + error };
+          messageData = { type: "error", data: "wrong key\n" + error.message };
         }
 
         return {
@@ -65,6 +66,46 @@ export default function createClient(setData, selectedChat, setSelectedChat) {
         return newData;
       });
       setSelectedChat(null);
+    });
+
+    client.onSay("user-joined", ({ chatId, message }) => {
+      setData((old) => {
+        return {
+          ...old,
+          [chatId]: {
+            ...old[chatId],
+            messages: [
+              ...old[chatId].messages,
+              {
+                type: "user-joined",
+                data: message,
+                author: message,
+                id: randomBytes(4).toString(CryptoJS.enc.Hex),
+              },
+            ],
+          },
+        };
+      });
+    });
+
+    client.onSay("user-exited", ({ chatId, message }) => {
+      setData((old) => {
+        return {
+          ...old,
+          [chatId]: {
+            ...old[chatId],
+            messages: [
+              ...old[chatId].messages,
+              {
+                type: "user-exited",
+                data: message,
+                author: message,
+                id: randomBytes(4).toString(CryptoJS.enc.Hex),
+              },
+            ],
+          },
+        };
+      });
     });
 
     return client;

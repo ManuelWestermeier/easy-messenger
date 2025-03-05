@@ -77,7 +77,21 @@ createServer({ port: 8080 }, async (client) => {
     const unread = [];
 
     for (const msg of chats[chatId].messages) {
-      if (!messageIds[msg.id]) unread.push(msg);
+      if (!messageIds[msg.id]) {
+        unread.push(msg);
+      } else {
+        delete messageIds[msg.id];
+      }
+    }
+
+    const deletedMessages = Object.keys(messageIds);
+    if (deletedMessages.length > 0) {
+      unread.push({
+        id: 0,
+        message: "",
+        deleted: true,
+        deletedMessages,
+      });
     }
 
     return unread;
@@ -87,7 +101,7 @@ createServer({ port: 8080 }, async (client) => {
     if (typeof chatId != "string") return false;
     if (!chats[chatId]) return false;
     if (!joinedChats.includes(chatId)) return false;
-    return chats[chatId].clients.map(({ author }) => author);
+    console.log("users", chats[chatId].clients);
   });
 
   client.onGet("messages", (chatId) => {
@@ -100,18 +114,20 @@ createServer({ port: 8080 }, async (client) => {
     return chats[chatId].messages;
   });
 
-  // Handle join requests
+  // Handle exit requests
   client.onGet("exit", (chatId = "") => {
     if (typeof chatId != "string") return false;
     if (!joinedChats.includes(chatId)) return false;
 
     let author;
+    // Hier: Entferne den aktuellen Client aus der Liste
     chats[chatId].clients = chats[chatId].clients.filter(
       ({ client: otherClient, author: auth }) => {
-        if (otherClient == client) {
+        if (otherClient === client) {
           author = auth;
-          return true;
-        } else return false;
+          return false; // Client entfernen
+        }
+        return true;
       }
     );
 
@@ -193,15 +209,16 @@ createServer({ port: 8080 }, async (client) => {
       let author;
       chats[chatId].clients = chats[chatId].clients.filter(
         ({ client: otherClient, author: auth }) => {
-          if (otherClient == client) {
+          if (otherClient === client) {
             author = auth;
-            return true;
-          } else return false;
+            return false; // Client entfernen
+          }
+          return true;
         }
       );
-      if (!author) return false;
-
-      send("user-exited", chatId, author, 0);
+      if (author) {
+        send("user-exited", chatId, author, 0);
+      }
     });
   };
 });
