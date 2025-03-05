@@ -38,7 +38,6 @@ let lastStored = 0;
 export async function storeAllChatRoomsData() {
   if (Date.now() - lastStored < storeInterval) return;
   lastStored = Date.now();
-  isStoring = true;
   for (const chatId in chats) {
     const { messages, passwordHashHash } = chats[chatId];
     const chatRoomData = { messages, passwordHashHash };
