@@ -339,12 +339,6 @@ button {
   background-color: #45a049;
 }
 
-/* No Chat Selected Message */
-.no-chat-selected {
-  text-align: center;
-  color: #777;
-}
-
 /* Media Query for Mobile Phones */
 @media (min-width: 768px) {
   .app-container {

@@ -4,6 +4,7 @@ import { ChatRoom } from "./comp/chat-room";
 import { JoinChat } from "./comp/join-chat";
 import { useWsClient } from "./hooks/use-ws-client";
 import Mobile from "./mobile";
+import NoChat from "./comp/nochat";
 
 export default function App({ setData, data }) {
   const [currentChat, setCurrentChat] = useState(null);
@@ -48,11 +49,7 @@ export default function App({ setData, data }) {
               setData={setData}
             />
           ) : (
-            <div className="no-chat-selected">
-              <p>
-                Please select a chat from the navigation bar or join a new chat.
-              </p>
-            </div>
+            <NoChat />
           )}
         </main>
       </div>

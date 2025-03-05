@@ -33,6 +33,12 @@ aside {
         border-top: none;
         border-left: 1px solid #ddd;
     }
+
+    /* No Chat Selected Message */
+    .no-chat-selected {
+        text-align: center;
+        color: #777;
+    }
 }
 
 @media (max-width: 768px) {
@@ -76,6 +82,14 @@ aside {
 
     .messages {
         height: calc(100dvh - 110px + 2.5rem - 120px) !important;
+    }
+
+    /* No Chat Selected Message */
+    .no-chat-selected {
+        width: calc(100dvw - 40px);
+        height: calc(100dvh - 43px);
+        text-align: center;
+        color: #777;
     }
 }
 

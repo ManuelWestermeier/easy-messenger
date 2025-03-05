@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChatRoom } from "./comp/chat-room";
 import { JoinChat } from "./comp/join-chat";
 import { NavigationBar } from "./comp/nabigation-bar";
+import NoChat from "./comp/nochat";
 
 export default function Mobile({
   currentChat,
@@ -43,11 +44,7 @@ export default function Mobile({
               page={page}
             />
           ) : (
-            <div className="no-chat-selected">
-              <p>
-                Please select a chat from the navigation bar or join a new chat.
-              </p>
-            </div>
+            <NoChat />
           )}
         </main>
       </div>
