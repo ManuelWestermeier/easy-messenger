@@ -1,231 +1,156 @@
-import { areSetAndTheSameType } from "are-set";
-import { createServer } from "wsnet-server";
+import GitHubFS from "gh-fs";
+import initMessengerServer from "./create-server.js";
+import { config } from "dotenv";
+config();
 
-import CryptoJS from "crypto-js";
-export function basicHash(data) {
-  return CryptoJS.SHA512(data).toString(CryptoJS.enc.Hex);
-}
+// Initialize GitHubFS instance with an explicit branch (e.g. "main")
+const githubFS = new GitHubFS({
+  authToken: process.env.GITHUB_API_TOKEN,
+  owner: "manuelwestermeier",
+  repo: "easy-messenger-data",
+  branch: "main", // Ensure this branch exists in your repository
+  defaultCommitter: {
+    email: "westermeier111@gmail.com",
+    name: "Manuel Westermeier",
+  },
+  encryptionKey: process.env.ENC_PASSWORD, // Use a strong, secure key
+});
+
+const storeInterval = 60_000; // 60 seconds
 
 /*
 Server Data:
 chats[chatId] = {
   clients: [{ client, author }],
-  messages: [{id, message}],
+  messages: [{ id, message }],
   passwordHashHash: basicHash(passwordHash),
 };
 */
-const chats = {};
+export const chats = {};
 
-/*
-Client Function:
-"user-exited" => { chatId, message: author, messageId: 0 }
-"user-joined" => { chatId, message: author, messageId: 0 }
-"message" => { chatId, message, messageId }
-"message-deleted" => { chatId, message, messageId }
-"chat-deleted" => { chatId, message: 0 , messageId: 0 }
-*/
+/**
+ * Store each chat room’s data to GitHubFS.
+ * The stored file will be located in the "chats" directory and will
+ * contain only the messages and password hash (the clients are excluded).
+ * The chatId is encoded to ensure a valid filename.
+ */
+let lastStored = 0;
+export async function storeAllChatRoomsData() {
+  if (Date.now() - lastStored < storeInterval) return;
+  lastStored = Date.now();
+  isStoring = true;
+  for (const chatId in chats) {
+    const { messages, passwordHashHash } = chats[chatId];
+    const chatRoomData = { messages, passwordHashHash };
 
-createServer({ port: 8080 }, async (client) => {
-  // Keep track of the chats this client has joined
-  let joinedChats = [];
-
-  client.removeChat = (chatId) => {
-    joinedChats = joinedChats.filter((chat) => chat != chatId);
-  };
-
-  function send(type = "message", chatId, message, messageId) {
-    for (const { client: otherClient } of chats[chatId].clients) {
-      if (otherClient != client) {
-        otherClient.say(type, { chatId, message, messageId });
-      }
+    // Encode chatId to ensure a valid file name.
+    const fileName = `chats/${encodeURIComponent(chatId)}.json`;
+    try {
+      await githubFS.writeFile(
+        fileName,
+        JSON.stringify(chatRoomData),
+        new Date().toString(), // commit message as a string
+        { branch: "main" } // explicitly specify the branch
+      );
+      console.log(`Chat room ${chatId} stored successfully at ${fileName}.`);
+    } catch (error) {
+      console.error(`Failed to store chat room ${chatId}:`, error);
     }
   }
+  isStoring = false;
+}
 
-  // Handle join requests
-  client.onGet("join", (data) => {
-    if (
-      !areSetAndTheSameType(data, [
-        ["chatId", "string"],
-        ["author", "string"],
-        ["passwordHash", "string"],
-        ["messageIds", "object"],
-      ])
-    )
-      return false;
-    const { chatId, author, passwordHash, messageIds } = data;
+/**
+ * Fetch all existing chat room data from the "chats" directory.
+ * If the directory is missing or no files exist, a default chat room is created.
+ */
+async function fetchAllChatRoomsData() {
+  try {
+    let filesResponse;
+    try {
+      filesResponse = await githubFS.readDir("chats");
+    } catch (readError) {
+      // If the chats directory doesn't exist, create it.
+      console.warn("Chats directory not found, creating directory...");
+      await githubFS.createDir("chats", "Initial creation of chats directory");
+      filesResponse = [];
+    }
 
-    if (joinedChats.includes(chatId)) return false;
+    // Default to an empty array if no response is returned.
+    if (!filesResponse) {
+      filesResponse = [];
+    }
 
-    const chat = chats[chatId];
+    const files = Array.isArray(filesResponse)
+      ? filesResponse
+      : Object.values(filesResponse);
 
-    if (chat) {
-      if (chat.passwordHashHash != basicHash(passwordHash)) return false;
-
-      chat.clients.push({ client, author });
-
-      send("user-joined", chatId, author, 0);
-    } else {
-      chats[chatId] = {
-        clients: [{ client, author }],
+    // If no chat files exist, create a default chat room.
+    if (files.length === 0) {
+      console.log("No chat files found, creating default chat room...");
+      const defaultChatId = "default";
+      chats[defaultChatId] = {
         messages: [],
-        passwordHashHash: basicHash(passwordHash),
+        passwordHashHash: "",
+        clients: [],
       };
+      // Store the default chat room
+      await storeAllChatRoomsData();
+      return;
     }
 
-    joinedChats.push(chatId);
+    for (const file of files) {
+      if (file.type === "file" && file.name.endsWith(".json")) {
+        // Remove the ".json" extension and decode the chatId.
+        const chatIdEncoded = file.name.slice(0, -5);
+        const chatId = decodeURIComponent(chatIdEncoded);
+        const filePath = `chats/${file.name}`;
+        const content = await githubFS.readFile(filePath);
+        const data = JSON.parse(content);
 
-    const unread = [];
-
-    for (const msg of chats[chatId].messages) {
-      if (!messageIds[msg.id]) {
-        unread.push(msg);
-      } else {
-        delete messageIds[msg.id];
+        // Initialize the chat room in memory (clients array remains empty).
+        chats[chatId] = {
+          messages: data.messages || [],
+          passwordHashHash: data.passwordHashHash,
+          clients: [],
+        };
       }
     }
+    console.log("Fetched all chat room data");
+  } catch (error) {
+    console.error("Error fetching chat room data:", error);
+  }
+}
 
-    const deletedMessages = Object.keys(messageIds);
-    if (deletedMessages.length > 0) {
-      unread.push({
-        id: 0,
-        message: "",
-        deleted: true,
-        deletedMessages,
-      });
+/**
+ * Initialize the application:
+ * 1. Fetch the stored chat data (or create a default chat room on first run).
+ * 2. Start the messenger server.
+ * 3. Set up a periodic task (every 10 seconds) to store all chat rooms.
+ */
+async function initialize() {
+  // First, fetch existing chat data.
+  await fetchAllChatRoomsData();
+
+  // Second, start the messenger server.
+  initMessengerServer();
+
+  // Third, start the periodic interval to store chats.
+  setTimeout(async function update() {
+    try {
+      await storeAllChatRoomsData();
+      console.log("Current chats:", chats);
+    } catch (error) {
+      console.error("Error during periodic store:", error);
     }
+    setTimeout(update, storeInterval);
+  }, storeInterval);
+}
 
-    return unread;
-  });
+// Start the application.
+initialize();
 
-  client.onGet("users", (chatId) => {
-    if (typeof chatId != "string") return false;
-    if (!chats[chatId]) return false;
-    if (!joinedChats.includes(chatId)) return false;
-    return chats[chatId].clients.map(({ author }) => author);
-  });
-
-  client.onGet("messages", (chatId) => {
-    if (typeof chatId != "string") return false;
-
-    if (!joinedChats.includes(chatId)) return false;
-
-    if (!chats[chatId]) return false;
-
-    return chats[chatId].messages;
-  });
-
-  // Handle exit requests
-  client.onGet("exit", (chatId = "") => {
-    if (typeof chatId != "string") return false;
-    if (!joinedChats.includes(chatId)) return false;
-
-    let author;
-    // Hier: Entferne den aktuellen Client aus der Liste
-    chats[chatId].clients = chats[chatId].clients.filter(
-      ({ client: otherClient, author: auth }) => {
-        if (otherClient === client) {
-          author = auth;
-          return false; // Client entfernen
-        }
-        return true;
-      }
-    );
-
-    joinedChats = joinedChats.filter((chat) => chat != chatId);
-
-    if (!author) return false;
-
-    send("user-exited", chatId, author, 0);
-
-    return true;
-  });
-
-  // Handle sending messages
-  client.onGet("delete-chat", (data) => {
-    if (!areSetAndTheSameType(data, [["chatId", "string"]])) return false;
-    const { chatId } = data;
-    if (!joinedChats.includes(chatId)) return false;
-    if (!chats[chatId]) return false;
-
-    send("chat-deleted", chatId, 0, 0);
-
-    joinedChats = joinedChats.filter((chat) => chat != chatId);
-
-    chats[chatId].clients.forEach(({ client }) => {
-      client.removeChat(chatId);
-    });
-
-    delete chats[chatId];
-
-    return true;
-  });
-
-  // Handle sending messages
-  client.onGet("send", (data) => {
-    if (
-      !areSetAndTheSameType(data, [
-        ["chatId", "string"],
-        ["message", "string"],
-        ["id", "string"],
-      ])
-    )
-      return false;
-    const { chatId, message, id } = data;
-    if (!joinedChats.includes(chatId)) return false;
-    if (!chats[chatId]) return false;
-
-    send("message", chatId, message, id);
-
-    chats[chatId].messages.push({ id, message });
-
-    return true;
-  });
-
-  // Handle sending messages
-  client.onGet("delete-message", (data) => {
-    if (
-      !areSetAndTheSameType(data, [
-        ["chatId", "string"],
-        ["id", "string"],
-      ])
-    )
-      return false;
-    const { chatId, id } = data;
-    if (!joinedChats.includes(chatId)) return false;
-    if (!chats[chatId]) return false;
-
-    send("message-deleted", chatId, 0, id);
-
-    chats[chatId].messages = chats[chatId].messages.filter(
-      ({ id: msgId }) => msgId != id
-    );
-
-    return true;
-  });
-
-  // Clean up when a client disconnects
-  client.onclose = () => {
-    joinedChats.forEach((chatId) => {
-      let author;
-      chats[chatId].clients = chats[chatId].clients.filter(
-        ({ client: otherClient, author: auth }) => {
-          if (otherClient === client) {
-            author = auth;
-            return false; // Client entfernen
-          }
-          return true;
-        }
-      );
-      if (author) {
-        send("user-exited", chatId, author, 0);
-      }
-    });
-  };
+// Ensure data is stored when the process exits.
+process.on("exit", () => {
+  storeAllChatRoomsData().catch(console.error);
 });
-
-const time = 2000; // 10 seconds
-setTimeout(function updata() {
-  console.log(chats);
-
-  setTimeout(updata, time);
-}, time);

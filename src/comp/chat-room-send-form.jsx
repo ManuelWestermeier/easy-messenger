@@ -12,8 +12,9 @@ export default function ChatRoomSendForm({
     const message = {
       type: fd.get("type"),
       data: fd.get("text"),
-      date: new Date().toLocaleDateString(),
+      date: new Date().toLocaleString(),
       author: chatData.author,
+      comments: [],
     };
 
     const messagePublic = {
