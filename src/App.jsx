@@ -16,7 +16,7 @@ export default function App({ setData, data }) {
   );
 
   [currentChat, setCurrentChat] = useState(
-    Object.keys(data || {})?.[0] ?? null
+    (true && Object.keys(data || {})?.[0]) ?? null
   );
 
   if (state === "failed" || isClosed) {

@@ -13,8 +13,8 @@ export default async function initClient(client, data, setData) {
     Object.keys(oldData).reduce((acc, chatId) => {
       acc[chatId] = {
         ...oldData[chatId],
-        messages: oldData[chatId].messages.filter(
-          ({ type }) => !userMessageTypes.includes(type)
+        messages: oldData[chatId].messages.filter(({ type }) =>
+          userMessageTypes.includes(type)
         ),
       };
       return acc;
@@ -38,18 +38,17 @@ export default async function initClient(client, data, setData) {
         messageIds,
       });
 
-      console.log(joinRes);
-
       if (joinRes) {
         setData((old) => {
           let messages = old[chatId].messages;
 
-          if (joinRes?.[joinRes?.length - 1]?.deleted) {
+          if (joinRes[joinRes.length - 1]?.deleted) {
             const toDelete = {};
             for (const id of joinRes[joinRes.length - 1].deletedMessages) {
               toDelete[id] = true;
             }
-            messages = messages.filter((msg) => !toDelete[msg.id]);
+
+            messages = messages.filter(({ id }) => toDelete[id]);
 
             joinRes.splice(joinRes.length - 1, 1);
           }
@@ -79,7 +78,7 @@ export default async function initClient(client, data, setData) {
             },
           };
         });
-      }
+      } else return alert("Maybe your password is incorct => group: " + chatId);
 
       // const messages = await client.get("messages", { chatId });
       // console.log(messages);

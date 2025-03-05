@@ -101,7 +101,7 @@ createServer({ port: 8080 }, async (client) => {
     if (typeof chatId != "string") return false;
     if (!chats[chatId]) return false;
     if (!joinedChats.includes(chatId)) return false;
-    console.log("users", chats[chatId].clients);
+    return chats[chatId].clients.map(({ author }) => author);
   });
 
   client.onGet("messages", (chatId) => {
