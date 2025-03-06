@@ -5,6 +5,7 @@ import useLocalStorage from "use-local-storage";
 import { decrypt, encrypt } from "./utils/crypto.jsx";
 import "./styles/import.jsx";
 import "./pwa.jsx";
+import CreateAccount from "./comp/create-account.jsx";
 
 function Main() {
   useEffect(() => {
@@ -98,32 +99,7 @@ function Main() {
   );
 
   // Define a reusable create account form.
-  const createAccountHtml = (
-    <fieldset className="login">
-      <legend>
-        <h1>Create Account</h1>
-      </legend>
-      <form onSubmit={handleCreateAccount} className="form">
-        <p>
-          Password:
-          <input
-            type="password"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck="false"
-            placeholder="Enter password..."
-            name="password"
-            autoFocus
-            className="input"
-          />
-        </p>
-        <p id="error" className="error"></p>
-        <button type="submit" className="button">
-          Create Account
-        </button>
-      </form>
-    </fieldset>
-  );
+  const createAccountHtml = <CreateAccount />;
 
   // If no account exists, show the create account form.
   if (data === null) {

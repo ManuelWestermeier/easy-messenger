@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Html5QrcodePlugin from "./qr-code-scanner";
-import { basicHash, decrypt, encrypt } from "../utils/crypto";
+import { basicHash, decrypt, encrypt, randomBytes } from "../utils/crypto";
+
+import CryptoJS from "crypto-js";
 
 // Component for joining a new chat room
 export function JoinChat({ client, setData, setCurrentChat, setPage }) {
@@ -54,6 +56,32 @@ export function JoinChat({ client, setData, setCurrentChat, setPage }) {
         chatName,
       },
     }));
+
+    // Fetch and add user data.
+    const users = await client.get("users", chatId);
+
+    if (users) {
+      setData((old) => {
+        return {
+          ...old,
+          [chatId]: {
+            ...old[chatId],
+            messages: [
+              ...old[chatId].messages,
+              ...users.map((user) => {
+                const author = decrypt(old[chatId].password, user);
+                return {
+                  type: "user-joined",
+                  data: "user joined: " + author,
+                  author,
+                  id: randomBytes(4).toString(CryptoJS.enc.Base64),
+                };
+              }),
+            ],
+          },
+        };
+      });
+    }
 
     setCurrentChat(chatId);
     e.target.reset();
