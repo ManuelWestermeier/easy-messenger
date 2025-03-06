@@ -27,8 +27,9 @@ function Main() {
   const handleCreateAccount = (e) => {
     e.preventDefault();
     const inputPassword = e.target.password.value;
-    if (!inputPassword) return; // Optionally display an error
-    if (inputPassword != prompt("reinput the password")) {
+    const inputPassword2 = e.target.password2.value;
+    if (!inputPassword || !inputPassword2) return; // Optionally display an error
+    if (inputPassword != inputPassword2) {
       e.target.reset();
       return alert("wrong password");
     }

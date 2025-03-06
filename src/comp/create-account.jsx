@@ -18,6 +18,20 @@ export default function CreateAccount({ handleCreateAccount }) {
               name="password"
               autoFocus
               className="input"
+              required
+            />
+          </p>
+          <p>
+            Reinput Password:
+            <input
+              type="password"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+              placeholder="Enter password..."
+              name="password2"
+              required
+              className="input"
             />
           </p>
           <p id="error" className="error"></p>
