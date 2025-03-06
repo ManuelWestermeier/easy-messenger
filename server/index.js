@@ -140,7 +140,7 @@ async function initialize() {
   setTimeout(async function update() {
     try {
       await storeAllChatRoomsData();
-      console.log("Current chats:", chats);
+      if (process.env.DEBUG) console.log("Current chats:", chats);
     } catch (error) {
       console.error("Error during periodic store:", error);
     }
