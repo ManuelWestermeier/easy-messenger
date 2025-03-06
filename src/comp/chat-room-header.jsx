@@ -45,18 +45,7 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
         >
           Close
         </button>
-        <input
-          name="author"
-          type="text"
-          placeholder="name..."
-          defaultValue={chatData.author}
-        />
-        <input
-          name="password"
-          type="text"
-          defaultValue={chatData.rawPassword}
-        />
-        <button type="submit">change data</button>
+        <hr />
         <button
           type="button"
           onClick={async (e) => {
@@ -78,6 +67,19 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
         >
           Delete All Messages
         </button>
+        <hr />
+        <input
+          name="author"
+          type="text"
+          placeholder="name..."
+          defaultValue={chatData.author}
+        />
+        <input
+          name="password"
+          type="text"
+          defaultValue={chatData.rawPassword}
+        />
+        <button type="submit">change data</button>
       </form>
       <QRCode
         className="qr-code"
