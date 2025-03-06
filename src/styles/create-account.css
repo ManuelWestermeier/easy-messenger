@@ -1,0 +1,38 @@
+.opensource-info {
+    margin-top: 30px;
+    padding: 20px;
+    border: 2px solid #4caf50;
+    border-radius: 8px;
+    background-color: #f0fff0;
+    max-width: 600px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin: 30px auto;
+}
+
+.opensource-info img {
+    width: 20vmin;
+    border-radius: 10vmin;
+}
+
+.opensource-info h2 {
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    color: #4caf50;
+}
+
+.opensource-info p {
+    font-size: 1em;
+    line-height: 1.5;
+    color: #333;
+}
+
+.opensource-info a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.opensource-info a:hover {
+    text-decoration: underline;
+}
