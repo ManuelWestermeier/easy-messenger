@@ -20,7 +20,7 @@ export function ChatRoomHeader({ chatId, chatData, setData }) {
           const fd = new FormData(e.target);
           if (
             !confirm(
-              "Are you sure you want to change your public chat password or username?"
+              "Are you sure you want to change your public chat username?"
             )
           )
             return;
@@ -29,7 +29,6 @@ export function ChatRoomHeader({ chatId, chatData, setData }) {
               ...old,
               [chatId]: {
                 ...old[chatId],
-                password: fd.get("password"),
                 author: fd.get("author"),
               },
             };
@@ -54,14 +53,14 @@ export function ChatRoomHeader({ chatId, chatData, setData }) {
         />
         <input
           name="password"
-          type="password"
-          defaultValue={chatData.password}
+          type="text"
+          defaultValue={chatData.rawPassword}
         />
         <button type="submit">change data</button>
       </form>
       <QRCode
         className="qr-code"
-        value={`${chatId}\n${chatData.password}`}
+        value={`${chatId}\n${chatData.rawPassword}`}
         size={60}
         tabIndex={-1}
       />

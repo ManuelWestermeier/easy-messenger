@@ -15,7 +15,8 @@ export function JoinChat({ client, setData, setCurrentChat, setPage }) {
     const fd = new FormData(e.target);
     const chatName = fd.get("id");
     const chatId = basicHash(chatName);
-    const password = basicHash(fd.get("password"));
+    const rawPassword = fd.get("password");
+    const password = basicHash(rawPassword);
     const author = fd.get("author");
 
     if (!chatId || !password)
@@ -54,6 +55,7 @@ export function JoinChat({ client, setData, setCurrentChat, setPage }) {
         author,
         unread: 0,
         chatName,
+        rawPassword,
       },
     }));
 
