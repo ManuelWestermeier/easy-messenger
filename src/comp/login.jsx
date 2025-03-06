@@ -3,6 +3,7 @@ import React from "react";
 export default function Login({ handleLogin }) {
   return (
     <>
+      <h1>QUATSCHER Messenger</h1>
       <fieldset className="login">
         <legend>
           <h1>Login</h1>
