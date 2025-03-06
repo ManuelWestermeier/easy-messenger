@@ -34,17 +34,17 @@
     ],
     "screenshots": [
         {
+            "src": "/easy-messenger/img/screenshot3.png",
+            "sizes": "518x1120",
+            "type": "image/png"
+        },
+        {
             "src": "/easy-messenger/img/screenshot1.png",
             "sizes": "1755x847",
             "type": "image/png"
         },
         {
             "src": "/easy-messenger/img/screenshot2.png",
-            "sizes": "518x1120",
-            "type": "image/png"
-        },
-        {
-            "src": "/easy-messenger/img/screenshot3.png",
             "sizes": "518x1120",
             "type": "image/png"
         }

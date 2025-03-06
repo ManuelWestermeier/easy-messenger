@@ -14,21 +14,21 @@ export function NavigationBar({
           <li
             key={chatId}
             className={chatId === currentChat ? "active" : ""}
-            onContextMenu={(e) => {
+            onContextMenu={async (e) => {
               e.preventDefault();
               if (
                 !confirm(
-                  `Are you sure you want to delte the chat "${chats[chatId]?.chatName}" with all messages?`
+                  `Are you sure you want to delte the chat "${chats[chatId]?.chatName}" for all users in the chat with all messages?`
                 )
               )
                 return;
+              if (!(await client.get("delete-chat", chatId)))
+                return alert("chat cant be deleted");
               setChats((old) => {
                 const newChats = { ...old };
                 delete newChats[chatId];
                 return newChats;
               });
-
-              client.get("exit", chatId);
             }}
           >
             <button

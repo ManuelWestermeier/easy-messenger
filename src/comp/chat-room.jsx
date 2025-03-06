@@ -20,7 +20,12 @@ export function ChatRoom({ chatId, chatData, client, setData, page }) {
 
   return (
     <div className="chat-room">
-      <ChatRoomHeader chatData={chatData} chatId={chatId} setData={setData} />
+      <ChatRoomHeader
+        client={client}
+        chatData={chatData}
+        chatId={chatId}
+        setData={setData}
+      />
       <div className="messages">
         {chatData.messages.map((msg, index) => (
           <Message

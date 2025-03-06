@@ -1,6 +1,6 @@
 import QRCode from "react-qr-code";
 
-export function ChatRoomHeader({ chatId, chatData, setData }) {
+export function ChatRoomHeader({ chatId, chatData, setData, client }) {
   return (
     <header>
       <h3>{chatData?.chatName}</h3>
@@ -57,6 +57,27 @@ export function ChatRoomHeader({ chatId, chatData, setData }) {
           defaultValue={chatData.rawPassword}
         />
         <button type="submit">change data</button>
+        <button
+          type="button"
+          onClick={async (e) => {
+            e.preventDefault();
+            await client.get("delete-all-messages", chatId);
+            setData((old) => {
+              return {
+                ...old,
+                [chatId]: {
+                  ...old[chatId],
+                  messages: [
+                    { type: "deleted-messages", data: "all messages deleted" },
+                  ],
+                },
+              };
+            });
+            e.target.parentElement.classList.add("none");
+          }}
+        >
+          Delete All Messages
+        </button>
       </form>
       <QRCode
         className="qr-code"

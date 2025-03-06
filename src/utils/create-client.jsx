@@ -60,12 +60,17 @@ export default function createClient(setData) {
     });
 
     client.onSay("chat-deleted", ({ chatId }) => {
+      window.setSelectedChat(
+        window.selectedChat == chatId ? null : window.selectedChat
+      );
       setData((old) => {
+        alert(
+          `chat "${old[chatId].chatName}" is deleted by an user. it get deleted from your device too`
+        );
         const newData = { ...old };
         delete newData[chatId];
         return newData;
       });
-      window.setSelectedChat(null);
     });
 
     client.onSay("user-joined", ({ chatId, message }) => {
@@ -104,6 +109,20 @@ export default function createClient(setData) {
                 author,
                 id: randomBytes(4).toString(CryptoJS.enc.Hex),
               },
+            ],
+          },
+        };
+      });
+    });
+
+    client.onSay("all-messages-deleted", ({ chatId }) => {
+      setData((old) => {
+        return {
+          ...old,
+          [chatId]: {
+            ...old[chatId],
+            messages: [
+              { type: "deleted-messages", data: "all messages deleted" },
             ],
           },
         };

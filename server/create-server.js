@@ -1,6 +1,6 @@
 import { areSetAndTheSameType } from "are-set";
 import { createServer } from "wsnet-server";
-import { chats, storeAllChatRoomsData } from "./index.js";
+import { chats, githubFS, storeAllChatRoomsData } from "./index.js";
 
 import CryptoJS from "crypto-js";
 
@@ -142,9 +142,8 @@ export default function initMessengerServer() {
     });
 
     // Handle sending messages
-    client.onGet("delete-chat", (data) => {
-      if (!areSetAndTheSameType(data, [["chatId", "string"]])) return false;
-      const { chatId } = data;
+    client.onGet("delete-chat", (chatId) => {
+      if (typeof chatId !== "string") return false;
       if (!joinedChats.includes(chatId)) return false;
       if (!chats[chatId]) return false;
 
@@ -157,6 +156,25 @@ export default function initMessengerServer() {
       });
 
       delete chats[chatId];
+      if (!process.env.DEBUG) {
+        try {
+          const fileName = `chats/${encodeURIComponent(chatId)}.json`;
+          githubFS.deleteFile(fileName);
+        } catch (error) {}
+      }
+
+      return true;
+    });
+
+    // Handle sending messages
+    client.onGet("delete-all-messages", (chatId) => {
+      if (typeof chatId !== "string") return false;
+      if (!joinedChats.includes(chatId)) return false;
+      if (!chats[chatId]) return false;
+
+      chats[chatId].messages = [];
+
+      send("all-messages-deleted", chatId, 0, 0);
 
       return true;
     });

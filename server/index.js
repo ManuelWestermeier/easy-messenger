@@ -4,7 +4,7 @@ import { config } from "dotenv";
 config();
 
 // Initialize GitHubFS instance with an explicit branch (e.g. "main")
-const githubFS = new GitHubFS({
+export const githubFS = new GitHubFS({
   authToken: process.env.GITHUB_API_TOKEN,
   owner: "manuelwestermeier",
   repo: "easy-messenger-data",
