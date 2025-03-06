@@ -6,6 +6,7 @@ import { decrypt, encrypt } from "./utils/crypto.jsx";
 import "./styles/import.jsx";
 import "./pwa.jsx";
 import CreateAccount from "./comp/create-account.jsx";
+import Login from "./comp/login.jsx";
 
 function Main() {
   useEffect(() => {
@@ -71,35 +72,12 @@ function Main() {
   };
 
   // Define a reusable login form.
-  const loginHtml = (
-    <fieldset className="login">
-      <legend>
-        <h1>Login</h1>
-      </legend>
-      <form onSubmit={handleLogin} className="form">
-        <p>
-          Password:
-          <input
-            type="password"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck="false"
-            autoFocus
-            placeholder="Enter password..."
-            name="password"
-            className="input"
-          />
-        </p>
-        <p id="error" className="error"></p>
-        <button type="submit" className="button">
-          Login
-        </button>
-      </form>
-    </fieldset>
-  );
+  const loginHtml = <Login handleLogin={handleLogin} />;
 
   // Define a reusable create account form.
-  const createAccountHtml = <CreateAccount />;
+  const createAccountHtml = (
+    <CreateAccount handleCreateAccount={handleCreateAccount} />
+  );
 
   // If no account exists, show the create account form.
   if (data === null) {
