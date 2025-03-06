@@ -56,7 +56,7 @@ export function NavigationBar({
                 });
               }}
             >
-              <span>{chatId}</span>
+              <span>{chats[chatId]?.chatName}</span>
               <span
                 className={
                   "unread" + (chats[chatId].unread == 0 ? " hide" : "")

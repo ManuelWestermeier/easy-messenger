@@ -9,12 +9,11 @@ import NoChat from "./comp/nochat";
 export default function App({ setData, data }) {
   const [currentChat, setCurrentChat] = useState(null);
   window.selectedChat = currentChat;
+  window.setSelectedChat = setCurrentChat;
 
   const { client, state, reCreateClient, isClosed } = useWsClient(
     data,
-    setData,
-    () => currentChat,
-    setCurrentChat
+    setData
   );
 
   if (state === "failed" || isClosed) {

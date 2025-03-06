@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Html5QrcodePlugin from "./qr-code-scanner";
-import { basicHash, decrypt } from "../utils/crypto";
+import { basicHash, decrypt, encrypt } from "../utils/crypto";
 
 // Component for joining a new chat room
 export function JoinChat({ client, setData, setCurrentChat, setPage }) {
@@ -11,8 +11,9 @@ export function JoinChat({ client, setData, setCurrentChat, setPage }) {
     e.preventDefault();
 
     const fd = new FormData(e.target);
-    const chatId = fd.get("id");
-    const password = fd.get("password");
+    const chatName = fd.get("id");
+    const chatId = basicHash(chatName);
+    const password = basicHash(fd.get("password"));
     const author = fd.get("author");
 
     if (!chatId || !password)
@@ -23,7 +24,7 @@ export function JoinChat({ client, setData, setCurrentChat, setPage }) {
     const data = await client.get("join", {
       chatId,
       passwordHash: basicHash(basicHash(password)),
-      author,
+      author: encrypt(password, author),
       messageIds: {},
     });
 
@@ -50,6 +51,7 @@ export function JoinChat({ client, setData, setCurrentChat, setPage }) {
         }),
         author,
         unread: 0,
+        chatName,
       },
     }));
 

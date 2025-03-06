@@ -4,7 +4,7 @@ import { decrypt, randomBytes } from "../utils/crypto";
 import CryptoJS from "crypto-js";
 import Client from "wsnet-client";
 
-export default function createClient(setData, _, setSelectedChat) {
+export default function createClient(setData) {
   return () => {
     const client = new Client(serverURL);
 
@@ -65,11 +65,12 @@ export default function createClient(setData, _, setSelectedChat) {
         delete newData[chatId];
         return newData;
       });
-      setSelectedChat(null);
+      window.setSelectedChat(null);
     });
 
     client.onSay("user-joined", ({ chatId, message }) => {
       setData((old) => {
+        const author = decrypt(old[chatId].password, message);
         return {
           ...old,
           [chatId]: {
@@ -78,8 +79,8 @@ export default function createClient(setData, _, setSelectedChat) {
               ...old[chatId].messages,
               {
                 type: "user-joined",
-                data: "user joined: " + message,
-                author: message,
+                data: "user joined: " + author,
+                author,
                 id: randomBytes(4).toString(CryptoJS.enc.Hex),
               },
             ],
@@ -90,6 +91,7 @@ export default function createClient(setData, _, setSelectedChat) {
 
     client.onSay("user-exited", ({ chatId, message }) => {
       setData((old) => {
+        const author = decrypt(old[chatId].password, message);
         return {
           ...old,
           [chatId]: {
@@ -98,8 +100,8 @@ export default function createClient(setData, _, setSelectedChat) {
               ...old[chatId].messages,
               {
                 type: "user-exited",
-                data: "user exited: " + message,
-                author: message,
+                data: "user exited: " + author,
+                author,
                 id: randomBytes(4).toString(CryptoJS.enc.Hex),
               },
             ],

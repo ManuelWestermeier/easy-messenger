@@ -57,8 +57,10 @@ export default function initMessengerServer() {
 
       const chat = chats[chatId];
 
+      const passwordHashHash = basicHash(passwordHash).slice(0, 12);
+
       if (chat) {
-        if (chat.passwordHashHash != basicHash(passwordHash)) return false;
+        if (chat.passwordHashHash != passwordHashHash) return false;
 
         chat.clients.push({ client, author });
 
@@ -67,7 +69,7 @@ export default function initMessengerServer() {
         chats[chatId] = {
           clients: [{ client, author }],
           messages: [],
-          passwordHashHash: basicHash(passwordHash),
+          passwordHashHash: passwordHashHash,
         };
       }
 

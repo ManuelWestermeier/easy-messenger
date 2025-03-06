@@ -1,5 +1,5 @@
 import Client from "wsnet-client";
-import { basicHash, decrypt, randomBytes } from "./crypto";
+import { basicHash, decrypt, encrypt, randomBytes } from "./crypto";
 
 import CryptoJS from "crypto-js";
 import { userMessageTypes } from "../comp/message";
@@ -33,7 +33,7 @@ export default async function initClient(client, data, setData) {
       // Attempt to join the chat and fetch new messages.
       let joinRes = await client.get("join", {
         chatId,
-        author: chatInfo.author,
+        author: encrypt(chatInfo.password, chatInfo.author),
         passwordHash: basicHash(basicHash(chatInfo.password)),
         messageIds,
       });
@@ -80,35 +80,30 @@ export default async function initClient(client, data, setData) {
         });
       } else return alert("Maybe your password is incorct => group: " + chatId);
 
-      // const messages = await client.get("messages", chatId);
-
-      // setData((old) => ({
-      //   ...old,
-      //   [chatId]: {
-      //     ...old[chatId],
-      //     messages,
-      //   },
-      // }));
-
       // Fetch and add user data.
       const users = await client.get("users", chatId);
 
       if (users) {
-        setData((old) => ({
-          ...old,
-          [chatId]: {
-            ...old[chatId],
-            messages: [
-              ...old[chatId].messages,
-              ...users.map((user) => ({
-                type: "user-joined",
-                data: "user joined: " + user,
-                author: user,
-                id: randomBytes(4).toString(CryptoJS.enc.Base64),
-              })),
-            ],
-          },
-        }));
+        setData((old) => {
+          return {
+            ...old,
+            [chatId]: {
+              ...old[chatId],
+              messages: [
+                ...old[chatId].messages,
+                ...users.map((user) => {
+                  const author = decrypt(old[chatId].password, user);
+                  return {
+                    type: "user-joined",
+                    data: "user joined: " + author,
+                    author,
+                    id: randomBytes(4).toString(CryptoJS.enc.Base64),
+                  };
+                }),
+              ],
+            },
+          };
+        });
       }
     })
   );
