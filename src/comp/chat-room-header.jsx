@@ -83,7 +83,7 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
       </form>
       <QRCode
         className="qr-code"
-        value={`${chatId}\n${chatData.rawPassword}`}
+        value={`${chatData.chatName}\n${chatData.rawPassword}`}
         size={60}
         tabIndex={-1}
       />
