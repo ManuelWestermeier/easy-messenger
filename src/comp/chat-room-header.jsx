@@ -2,7 +2,7 @@ import QRCode from "react-qr-code";
 
 export function ChatRoomHeader({ chatId, chatData, setData, client }) {
   return (
-    <header>
+    <header key={chatId}>
       <h3>{chatData?.chatName}</h3>
       <button
         type="button"
