@@ -18,7 +18,7 @@ export function NavigationBar({
               e.preventDefault();
               if (
                 !confirm(
-                  `Are you sure you want to delte the chat "${chatId}" with all messages?`
+                  `Are you sure you want to delte the chat "${chats[chatId]?.chatName}" with all messages?`
                 )
               )
                 return;
