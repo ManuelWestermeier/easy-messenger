@@ -1,20 +1,56 @@
 {
-    "name": "QUATSCHER",
+    "name": "QUATSCHER - Secure Messenger",
     "short_name": "QUATSCHER",
+    "description": "QUATSCHER is an open-source, ultra-secure messenger with end-to-end encryption.",
     "start_url": "/easy-messenger/",
     "display": "standalone",
-    "background_color": "rgb(242, 242, 242)",
-    "theme_color": "rgb(242, 242, 242)",
+    "background_color": "#F2F2F2",
+    "theme_color": "#F2F2F2",
+    "orientation": "portrait-primary",
+    "scope": "/easy-messenger/",
+    "categories": [
+        "communication",
+        "social",
+        "productivity"
+    ],
     "icons": [
         {
             "src": "/easy-messenger/img/logo-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/easy-messenger/img/logo-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "/easy-messenger/img/logo-128.png",
             "sizes": "128x128",
             "type": "image/png"
         }
-    ]
+    ],
+    "screenshots": [
+        {
+            "src": "/easy-messenger/img/screenshot1.png",
+            "sizes": "1755x847",
+            "type": "image/png"
+        },
+        {
+            "src": "/easy-messenger/img/screenshot2.png",
+            "sizes": "518x1120",
+            "type": "image/png"
+        },
+        {
+            "src": "/easy-messenger/img/screenshot3.png",
+            "sizes": "518x1120",
+            "type": "image/png"
+        }
+    ],
+    "dir": "ltr",
+    "lang": "en-US",
+    "related_applications": [],
+    "prefer_related_applications": false
 }

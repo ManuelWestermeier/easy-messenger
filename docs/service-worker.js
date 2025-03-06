@@ -6,6 +6,7 @@ const ASSETS = [
   // "/easy-messenger/manifest.json",
   "/easy-messenger/img/logo-512.png",
   "/easy-messenger/img/logo-128.png",
+  "/easy-messenger/img/logo-192.png",
 ];
 
 // Install event - Pre-caches assets
