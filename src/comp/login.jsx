@@ -13,9 +13,6 @@ export default function Login({ handleLogin }) {
             Password:
             <input
               type="password"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck="false"
               autoFocus
               placeholder="Enter password..."
               name="password"

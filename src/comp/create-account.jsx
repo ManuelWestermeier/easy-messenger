@@ -11,9 +11,6 @@ export default function CreateAccount({ handleCreateAccount }) {
             Password:
             <input
               type="password"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck="false"
               placeholder="Enter password..."
               name="password"
               autoFocus
@@ -25,9 +22,6 @@ export default function CreateAccount({ handleCreateAccount }) {
             Reinput Password:
             <input
               type="password"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck="false"
               placeholder="Enter password..."
               name="password2"
               required
