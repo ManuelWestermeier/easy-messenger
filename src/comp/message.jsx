@@ -44,10 +44,9 @@ export default function Message({
 
     const messages = chatData.messages;
 
-    for (const msg of messages) {
-      if (msg.type == "update") {
-        const [reactId] = msg.data;
-        console.log(reactId, msg.id);
+    for (const _msg of messages) {
+      if (_msg.type == "update") {
+        const [reactId] = _msg.data;
 
         if (reactId == msg.id) {
           client.get("delete-message", { chatId, id: reactId });
@@ -90,7 +89,7 @@ export default function Message({
 
     setData((old) => {
       const editMsgIndex = old[chatId].messages.findIndex(
-        ({ id }) => id == msg.id
+        ({ id }) => id == message.data[0]
       );
 
       if (editMsgIndex != -1)

@@ -53,6 +53,23 @@ export default async function initClient(client, data, setData) {
             joinRes.splice(joinRes.length - 1, 1);
           }
 
+          joinRes = joinRes.map(({ id, message }) => {
+            try {
+              return {
+                ...JSON.parse(decrypt(chatInfo.password, message)),
+                id,
+              };
+            } catch (error) {
+              return {
+                type: "error",
+                data: "an error occurred (wrong password) (ignorable error)",
+                id,
+              };
+            }
+          });
+
+          messages = [...messages, ...joinRes];
+
           for (const msg of joinRes) {
             if (msg.type == "update") {
               const [editMsgId, type, value] = msg.data;
@@ -71,22 +88,7 @@ export default async function initClient(client, data, setData) {
             [chatId]: {
               ...old[chatId],
               unread: joinRes.length,
-              messages: [
-                ...messages,
-                ...joinRes.map(({ id, message }) => {
-                  try {
-                    return {
-                      ...JSON.parse(decrypt(chatInfo.password, message)),
-                      id,
-                    };
-                  } catch (error) {
-                    return {
-                      type: "error",
-                      data: "an error occurred (wrong password) (ignorable error)",
-                    };
-                  }
-                }),
-              ],
+              messages,
             },
           };
         });
