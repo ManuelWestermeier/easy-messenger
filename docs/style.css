@@ -52,7 +52,6 @@ textarea {
 button {
     cursor: pointer;
     background-color: #2979ff;
-    /* Saturated blue */
     color: #fff;
     border: none;
     transition: background-color 0.3s;
@@ -71,7 +70,7 @@ a {
     display: none;
 }
 
-/* Login / Form Containers */
+/* Login Styles */
 .login {
     padding: 20px;
     background-color: #1e1e1e;
@@ -143,7 +142,7 @@ aside {
     height: 225px;
 }
 
-/* Grid Layout for Larger Screens */
+/* Desktop Layout */
 @media (min-width: 768px) {
     .app-container {
         display: grid;
@@ -356,13 +355,14 @@ aside {
     filter: blur(0);
 }
 
-/* Messages */
+/* Messages Container */
 .messages {
     height: calc(100dvh - 170px + 2.5rem);
     min-height: 200px;
     overflow-y: auto;
 }
 
+/* Message Styling (Simplified for Stability) */
 .message {
     position: relative;
     line-break: anywhere;
@@ -372,7 +372,6 @@ aside {
     border-radius: 5px;
     margin: 5px 0;
     width: 90%;
-    transition: float 0.3s ease-in-out;
 }
 
 .message.own-msg {
@@ -381,7 +380,7 @@ aside {
 }
 
 .message.other {
-    background-color: #1e88e5 !important;
+    background-color: #1e90ff !important;
     float: left;
 }
 
@@ -395,18 +394,7 @@ aside {
     color: #bbb !important;
 }
 
-.message:last-child {
-    margin-bottom: 10px;
-}
-
-.message.other:last-child {
-    animation: come-in-left 0.5s ease-in-out forwards;
-}
-
-.message.own-msg:last-child {
-    animation: come-in-right 0.5s ease-in-out forwards;
-}
-
+/* Message Meta, Comments, and Menu */
 .message .meta {
     font-size: 0.8rem;
     color: #ffffffc8;
@@ -447,31 +435,6 @@ aside {
 
 .message .menu button:first-child {
     background-color: red;
-}
-
-/* Animations */
-@keyframes come-in-left {
-    0% {
-        opacity: 0.5;
-        transform: scale(0) rotate(30deg) translate(-100px, -100px);
-    }
-
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-@keyframes come-in-right {
-    0% {
-        opacity: 0.5;
-        transform: scale(0) rotate(-30deg) translate(100px, -100px);
-    }
-
-    to {
-        opacity: 1;
-        transform: none;
-    }
 }
 
 /* Message Form */
