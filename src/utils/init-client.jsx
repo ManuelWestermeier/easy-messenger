@@ -12,8 +12,8 @@ export default async function initClient(client, data, setData) {
     Object.keys(oldData).reduce((acc, chatId) => {
       acc[chatId] = {
         ...oldData[chatId],
-        messages: oldData[chatId].messages.filter(({ type }) =>
-          ["user-joined", "user-exited"].includes(type)
+        messages: oldData[chatId].messages.filter(
+          ({ type }) => !["user-joined", "user-exited"].includes(type)
         ),
       };
       return acc;

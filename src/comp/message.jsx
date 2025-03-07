@@ -51,8 +51,9 @@ export default function Message({
         if (reactId == msg.id) {
           const isSent = await client.get("delete-message", {
             chatId,
-            id: reactId,
+            id: _msg.id,
           });
+
           if (!isSent) alert("error: message isn't deleted");
         }
       }
