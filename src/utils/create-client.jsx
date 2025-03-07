@@ -28,27 +28,18 @@ export default function createClient(setData) {
             if (type == "comment") {
               old[chatId].messages[editMsgIndex].comments.push(value);
             }
-            return {
-              ...old,
-              [chatId]: {
-                ...old[chatId],
-                messages: [...old[chatId].messages, messageData],
-                unread:
-                  chatId == window.selectedChat ? 0 : old[chatId].unread + 1,
-              },
-            };
-          }
-
-          const messagesDiv = document.querySelector(".messages");
-          if (messagesDiv) {
-            if (
-              messagesDiv.scrollTop == 0 ||
-              messagesDiv.scrollHeight - messagesDiv.scrollTop < innerHeight
-            ) {
-              messagesDiv.lastChild?.scrollIntoView?.({
-                behavior: "smooth",
-                block: "center",
-              });
+          } else {
+            const messagesDiv = document.querySelector(".messages");
+            if (messagesDiv) {
+              if (
+                messagesDiv.scrollTop == 0 ||
+                messagesDiv.scrollHeight - messagesDiv.scrollTop < innerHeight
+              ) {
+                messagesDiv.lastChild?.scrollIntoView?.({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }
             }
           }
         } catch (error) {

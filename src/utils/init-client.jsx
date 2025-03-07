@@ -2,7 +2,6 @@ import Client from "wsnet-client";
 import { basicHash, decrypt, encrypt, randomBytes } from "./crypto";
 
 import CryptoJS from "crypto-js";
-import { userMessageTypes } from "../comp/message";
 
 /**
  * @param {Client} client
@@ -14,7 +13,7 @@ export default async function initClient(client, data, setData) {
       acc[chatId] = {
         ...oldData[chatId],
         messages: oldData[chatId].messages.filter(({ type }) =>
-          userMessageTypes.includes(type)
+          ["user-joined", "user-exited"].includes(type)
         ),
       };
       return acc;
