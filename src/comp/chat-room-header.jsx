@@ -74,12 +74,14 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
           placeholder="name..."
           defaultValue={chatData.author}
         />
+        <button type="submit">change data</button>
+        <hr />
         <input
           name="password"
           type="text"
-          defaultValue={chatData.rawPassword}
+          readOnly
+          value={chatData.rawPassword}
         />
-        <button type="submit">change data</button>
       </form>
       <QRCode
         className="qr-code"

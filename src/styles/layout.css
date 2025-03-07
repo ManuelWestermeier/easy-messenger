@@ -91,6 +91,10 @@ aside {
         text-align: center;
         color: #777;
     }
+
+    .messages form {
+        margin-bottom: 30px;
+    }
 }
 
 /* For Webkit browsers (Chrome, Edge, Safari) */

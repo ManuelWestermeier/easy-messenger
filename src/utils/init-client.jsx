@@ -53,6 +53,19 @@ export default async function initClient(client, data, setData) {
             joinRes.splice(joinRes.length - 1, 1);
           }
 
+          for (const msg of joinRes) {
+            if (msg.type == "update") {
+              const [editMsgId, type, value] = msg.data;
+              const editMsgIndex = messages.findIndex(
+                ({ id }) => id == editMsgId
+              );
+              if (editMsgIndex == -1) continue;
+              if (type == "comment") {
+                messages[editMsgIndex]?.comments?.push?.(value);
+              }
+            }
+          }
+
           return {
             ...old,
             [chatId]: {
@@ -62,7 +75,6 @@ export default async function initClient(client, data, setData) {
                 ...messages,
                 ...joinRes.map(({ id, message }) => {
                   try {
-                    // Use chatInfo.password for decryption.
                     return {
                       ...JSON.parse(decrypt(chatInfo.password, message)),
                       id,
@@ -78,33 +90,37 @@ export default async function initClient(client, data, setData) {
             },
           };
         });
-      } else return alert("Maybe your password is incorct => group: " + chatId);
 
-      // Fetch and add user data.
-      const users = await client.get("users", chatId);
+        // Fetch and add user data.
+        const users = await client.get("users", chatId);
 
-      if (users) {
-        setData((old) => {
-          return {
-            ...old,
-            [chatId]: {
-              ...old[chatId],
-              messages: [
-                ...old[chatId].messages,
-                ...users.map((user) => {
-                  const author = decrypt(old[chatId].password, user);
-                  return {
-                    type: "user-joined",
-                    data: "user joined: " + author,
-                    author,
-                    id: randomBytes(4).toString(CryptoJS.enc.Base64),
-                  };
-                }),
-              ],
-            },
-          };
-        });
-      }
+        if (users) {
+          setData((old) => {
+            return {
+              ...old,
+              [chatId]: {
+                ...old[chatId],
+                messages: [
+                  ...old[chatId].messages,
+                  ...users.map((user) => {
+                    const author = decrypt(old[chatId].password, user);
+                    return {
+                      type: "user-joined",
+                      data: "user joined: " + author,
+                      author,
+                      id: randomBytes(4).toString(CryptoJS.enc.Base64),
+                    };
+                  }),
+                ],
+              },
+            };
+          });
+        }
+      } else
+        return alert(
+          "Maybe your password is incorct (remove the group from your chats) => group: " +
+            chatId
+        );
     })
   );
 }

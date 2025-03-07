@@ -1,3 +1,6 @@
+import CryptoJS from "crypto-js";
+
+import { encrypt, randomBytes } from "../utils/crypto";
 import MessageConetent from "./message-content";
 
 const userColors = {};
@@ -29,35 +32,97 @@ export default function Message({
       : "other"
     : "menagement-msg";
 
+  const deleteMessage = async (e) => {
+    e.preventDefault();
+
+    const isSent = await client.get("delete-message", {
+      id: msg.id,
+      chatId,
+    });
+
+    if (!isSent) alert("error: message isn't deleted");
+
+    const messages = chatData.messages;
+
+    for (const msg of messages) {
+      if (msg.type == "update") {
+        const [reactId] = msg.data;
+        console.log(reactId, msg.id);
+
+        if (reactId == msg.id) {
+          client.get("delete-message", { chatId, id: reactId });
+        }
+      }
+    }
+
+    setData((old) => {
+      let messages = old[chatId].messages.filter((m) => m.id !== msg.id);
+      return {
+        ...old,
+        [chatId]: {
+          ...old[chatId],
+          messages,
+        },
+      };
+    });
+  };
+
+  const addComment = async (comment) => {
+    const message = {
+      data: [
+        msg.id,
+        "comment",
+        {
+          author: chatData.author,
+          data: comment,
+          date: new Date().toLocaleString(),
+          id: randomBytes(2).toString(CryptoJS.enc.Hex),
+        },
+      ],
+      type: "update",
+    };
+    const messageId = randomBytes(4).toString(CryptoJS.enc.Hex);
+    const isSent = await client.get("send", {
+      chatId,
+      message: encrypt(chatData.password, JSON.stringify(message)),
+      id: messageId,
+    });
+
+    setData((old) => {
+      const editMsgIndex = old[chatId].messages.findIndex(
+        ({ id }) => id == msg.id
+      );
+
+      if (editMsgIndex != -1)
+        old[chatId].messages[editMsgIndex].comments.push(message.data[2]);
+
+      return {
+        ...old,
+        [chatId]: {
+          ...old[chatId],
+          messages: [...old[chatId].messages, { ...message, id: messageId }],
+        },
+      };
+    });
+
+    if (!isSent) {
+      alert("A send error occurred");
+    }
+  };
+
   return (
     <div
       id={msg.id}
       key={index}
       style={{ backgroundColor: userColors[msg.author] }}
       className={"message " + className}
-      onContextMenu={async (e) => {
-        e.preventDefault();
-        if (isMenagementMessage)
-          return alert("menagement message ... you cant delete this message");
-        if (!confirm("Are you sure you want to delete this message")) return;
-        const isSent = await client.get("delete-message", {
-          id: msg.id,
-          chatId,
-        });
-        if (!isSent) alert("error: message isn't deleted");
-        setData((old) => {
-          let messages = old[chatId].messages.filter((m) => m.id !== msg.id);
-          return {
-            ...old,
-            [chatId]: {
-              ...old[chatId],
-              messages,
-            },
-          };
-        });
-      }}
+      // onContextMenu={}
     >
-      <MessageConetent {...msg} />
+      <MessageConetent
+        {...msg}
+        deleteMessage={deleteMessage}
+        addComment={addComment}
+      />
     </div>
   );
 }

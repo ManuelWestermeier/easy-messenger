@@ -27,17 +27,19 @@ export function ChatRoom({ chatId, chatData, client, setData, page }) {
         setData={setData}
       />
       <div className="messages">
-        {chatData.messages.map((msg, index) => (
-          <Message
-            msg={msg}
-            chatData={chatData}
-            index={index}
-            key={msg.id || index}
-            chatId={chatId}
-            client={client}
-            setData={setData}
-          />
-        ))}
+        {chatData.messages
+          .filter(({ type }) => type != "update")
+          .map((msg, index) => (
+            <Message
+              msg={msg}
+              chatData={chatData}
+              index={index}
+              key={msg.id || index}
+              chatId={chatId}
+              client={client}
+              setData={setData}
+            />
+          ))}
       </div>
       <ChatRoomSendForm
         chatData={chatData}

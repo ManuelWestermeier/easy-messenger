@@ -17,6 +17,28 @@ export default function createClient(setData) {
             id: messageId,
           };
 
+          if (messageData.type == "update") {
+            const [editMsgId, type, value] = messageData.data;
+            const editMsgIndex = old[chatId].messages.findIndex(
+              ({ id }) => id == editMsgId
+            );
+
+            if (editMsgIndex == -1) return old;
+
+            if (type == "comment") {
+              old[chatId].messages[editMsgIndex].comments.push(value);
+            }
+            return {
+              ...old,
+              [chatId]: {
+                ...old[chatId],
+                messages: [...old[chatId].messages, messageData],
+                unread:
+                  chatId == window.selectedChat ? 0 : old[chatId].unread + 1,
+              },
+            };
+          }
+
           const messagesDiv = document.querySelector(".messages");
           if (messagesDiv) {
             if (
