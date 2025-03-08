@@ -100,8 +100,8 @@ export default function initMessengerServer() {
 
         chat.clients.push({ client, author });
 
-        if (subscription && chat.subscriptions[subscription.endpoint]) {
-          chat.subscriptions[subscription.endpoint];
+        if (subscription && !chat.subscriptions[subscription.endpoint]) {
+          chat.subscriptions[subscription.endpoint] = subscription;
         }
 
         send("user-joined", chatId, author, 0);
