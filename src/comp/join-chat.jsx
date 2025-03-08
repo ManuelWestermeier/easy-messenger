@@ -29,6 +29,7 @@ export function JoinChat({ client, setData, setCurrentChat, setPage }) {
       passwordHash: basicHash(basicHash(password)),
       author: encrypt(password, author),
       messageIds: {},
+      subscription: window.notificationSubscription,
     });
 
     if (data === false) {
