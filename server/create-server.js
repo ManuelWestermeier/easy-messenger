@@ -86,7 +86,7 @@ export default function initMessengerServer() {
 
       const passwordHashHash = basicHash(passwordHash).slice(0, 12);
 
-      let subscription = data?.subscription?.endpoint || false;
+      let subscription = data?.subscription?.endpoint ? data?.subscription : false;
       if (subscription) {
         try {
           new URL(subscription.endpoint);
@@ -94,6 +94,7 @@ export default function initMessengerServer() {
           subscription = false;
         }
       }
+
 
       if (chat) {
         if (chat.passwordHashHash != passwordHashHash) return false;
@@ -163,7 +164,7 @@ export default function initMessengerServer() {
       const { chatId } = data;
       if (!joinedChats.includes(chatId)) return false;
 
-      const subscription = data?.subscription?.endpoint || false;
+      let subscription = data?.subscription?.endpoint ? data?.subscription : false;
 
       let author;
       // Hier: Entferne den aktuellen Client aus der Liste

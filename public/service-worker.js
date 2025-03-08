@@ -69,22 +69,17 @@ self.addEventListener("fetch", (event) => {
 });
 
 
-// notify
+// Push notification event
 self.addEventListener("push", function (event) {
-  console.log("push notification", event);
+  console.log("Push notification received:", event);
 
-  const data = event.data.text();
+  const data = event.data ? event.data.text() : "New notification";
   let message = "'_'";
 
-  if (data == "send") {
-    message = "A user has send a message (click to see)!";
-  } else if (data == "delete-all-messages") {
-
-  } else if (data == "message-deleted") {
-
-  }
-  else if (data == "chat-deleted") {
-
+  if (data === "send") {
+    message = "A user has sent a message (click to see)!";
+  } else if (["delete-all-messages", "message-deleted", "chat-deleted"].includes(data)) {
+    message = "A chat update has occurred.";
   } else {
     message = data;
   }
@@ -99,9 +94,17 @@ self.addEventListener("push", function (event) {
   );
 });
 
+// Handle notification clicks
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
   event.waitUntil(
-    clients.openWindow("https://manuelwestermeier.github.io/easy-messenger/")
+    clients.matchAll({ type: "window" }).then((clientList) => {
+      for (let client of clientList) {
+        if (client.url.includes("/easy-messenger/") && "focus" in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow("https://manuelwestermeier.github.io/easy-messenger/");
+    })
   );
 });
