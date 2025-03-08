@@ -6,7 +6,7 @@
     display: flex;
     gap: 0.5rem;
     border-radius: 4px;
-    box-shadow: 0 0 20px 0px #fff;
+    box-shadow: 0 0 20px 0px var(--bg);
     padding: 10px;
 }
 
@@ -17,12 +17,12 @@
 
 .message-form button {
     padding: 0.5rem 1rem;
-    background-color: #4CAF50;
+    background-color: var(--primary);
     border: none;
-    color: #fff;
+    color: var(--text);
     border-radius: 4px;
 }
 
 .message-form button:hover {
-    background-color: #45a049;
+    background-color: var(--primary-hover);
 }

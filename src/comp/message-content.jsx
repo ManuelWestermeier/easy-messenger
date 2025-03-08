@@ -46,7 +46,7 @@ export default function MessageConetent({
       )}
       {seeMenu && isUserMessage && (
         <div className="menu">
-          <button title="delete message" onClick={deleteMessage}>
+          <button title="delete message" className="danger" onClick={deleteMessage}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="24px"

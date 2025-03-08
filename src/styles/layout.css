@@ -8,10 +8,9 @@ main {
 /* Aside area (e.g., for join chat form) */
 aside {
     grid-area: aside;
-    background-color: #fff;
+    background-color: var(--bg);
     padding: 1rem;
-    border-top: 1px solid #ddd;
-    height: 225px;
+    height: 235px;
 }
 
 /* Responsive layout for wider screens */
@@ -29,15 +28,10 @@ aside {
         width: 100dvw;
     }
 
-    aside {
-        border-top: none;
-        border-left: 1px solid #ddd;
-    }
-
     /* No Chat Selected Message */
     .no-chat-selected {
         text-align: center;
-        color: #777;
+        color: var(--text);
     }
 }
 
@@ -56,8 +50,8 @@ aside {
         display: flex;
         align-items: center;
         justify-content: space-around;
-        background-color: #323232;
-        outline: 2px solid #323232 !important;
+        background-color: var(--bg-transparent);
+        outline: 2px solid var(--bg) !important;
     }
 
     .navigation .active {
@@ -89,35 +83,10 @@ aside {
         width: calc(100dvw - 40px);
         height: calc(100dvh - 43px);
         text-align: center;
-        color: #777;
+        color: var(--text);
     }
 
     .messages form {
         margin-bottom: 30px;
     }
-}
-
-/* For Webkit browsers (Chrome, Edge, Safari) */
-::-webkit-scrollbar {
-    width: 12px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgb(76, 175, 80);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgb(56, 142, 60);
-}
-
-/* For Firefox */
-* {
-    scrollbar-color: rgb(76, 175, 80) #f1f1f1;
-    scrollbar-width: thin;
 }

@@ -1,12 +1,11 @@
 .opensource-info {
     margin-top: 30px;
     padding: 20px;
-    border: 2px solid #4caf50;
+    border: 2px solid var(--primary);
     border-radius: 8px;
-    background-color: #f0fff0;
+    background-color: var(--bg);
     max-width: 600px;
     text-align: center;
-    font-family: Arial, sans-serif;
     margin: 30px auto;
 }
 
@@ -18,17 +17,17 @@
 .opensource-info h2 {
     margin-bottom: 10px;
     font-size: 1.5em;
-    color: #4caf50;
+    color: var(--primary);
 }
 
 .opensource-info p {
     font-size: 1em;
     line-height: 1.5;
-    color: #333;
+    color: var(--text);
 }
 
 .opensource-info a {
-    color: #1a73e8;
+    color: var(--primary);
     text-decoration: none;
     font-weight: bold;
 }

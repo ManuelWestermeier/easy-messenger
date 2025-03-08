@@ -1,6 +1,6 @@
 .nav-bar {
     grid-area: nav;
-    background-color: #333;
+    background-color: var(--bg);
     padding: 1rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     max-height: calc(100dvh - 165px);
@@ -22,17 +22,18 @@
     width: 100%;
     background: none;
     border: none;
-    color: white;
+    color: var(--text);
     text-align: left;
-    padding: 0.5rem;
+    padding: 10px;
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: all 0.3s ease-in-out;
 }
 
 .nav-bar .chat-select-button .unread {
-    background-color: #4CAF50;
+    background-color: var(--primary);
     width: 20px;
     height: 20px;
     border-radius: 10px;
@@ -48,7 +49,13 @@
 
 .nav-bar li.active .chat-select-button,
 .nav-bar .chat-select-button:hover {
-    background-color: #575757;
+    box-shadow: 0 0 100px 0px var(--select-chat-bg);
+    background-color: var(--select-chat-bg);
+}
+
+.nav-bar li.active .chat-select-button {
+    box-shadow: 0 0 100px 0px var(--select-chat-bg);
+    transform: scale(1.05);
 }
 
 .nav-bar button.danger {

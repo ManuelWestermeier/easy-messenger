@@ -1,11 +1,12 @@
 /* chat.css */
 
 .chat-room {
-    background-color: #fff;
-    padding: 0.25rem 1rem;
+    overflow: hidden;
+    padding: 0.5rem;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    background-image: linear-gradient(#45a0493a, white, #45a0493a);
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+    /* fixed box-shadow rgba syntax */
+    background: linear-gradient(135deg, var(--primary) 20%, var(--bg) 100%);
 }
 
 .chat-room header {
@@ -14,44 +15,48 @@
     justify-content: space-between;
 }
 
-/* Chat room header inputs and buttons */
-.chat-room header input,
-.chat-room header button {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
 /* Expanded/zoomed chat data form */
 .chat-room header #chat-data-form {
     position: fixed;
     z-index: 10000000000;
-    height: 80vmin;
-    width: 80vmin;
-    top: calc(100dvh / 2 - 80vmin / 2);
-    left: calc(100dvw / 2 - 80vmin / 2);
-    border: 2px solid white;
-    outline: none;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.592);
-    backdrop-filter: blur(20px);
-    border-radius: 10px;
+    height: 100vh;
+    /* Adjust to use viewport height in a better way */
+    width: 100vw;
+    /* Adjust to use viewport width in a better way */
+    left: 0;
+    top: 0;
+    background-color: var(--text-light);
+    backdrop-filter: blur(30px);
     gap: 5px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
+    overflow: auto;
+    /* Allows scrolling */
 }
 
+/* Ensure the fieldset width is controlled */
+.chat-room header #chat-data-form fieldset {
+    min-width: 60vmin;
+    overflow: auto;
+    /* Prevents overflow inside fieldset */
+}
+
+/* Full width for input and button elements */
+.chat-room header #chat-data-form fieldset input,
+.chat-room header #chat-data-form fieldset button {
+    width: 100%;
+}
+
+/* Button positioning */
 .chat-room header #chat-data-form button:first-child {
     position: absolute;
     top: 10px;
     right: 10px;
 }
 
+/* QR code behavior */
 .chat-room header .qr-code {
     cursor: pointer;
     width: 100px;
@@ -60,11 +65,13 @@
 
 .chat-room header .qr-code:focus {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: calc(50vh - 50vmin);
+    /* Center the QR code in the viewport */
+    left: calc(50vw - 50vmin);
+    /* Center the QR code in the viewport */
     z-index: 10000000001;
-    height: calc(80vmin - 20px);
-    width: calc(80vmin - 20px);
+    height: 100vmin;
+    width: 100vmin;
     outline: none;
-    filter: blur(0);
+    box-shadow: 10px 10px 100px 10px var(--bg);
 }

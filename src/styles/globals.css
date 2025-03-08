@@ -1,7 +1,34 @@
+:root {
+    /* Main Colors */
+    --primary: #2979ff;
+    --primary-hover: #0056b3;
+    --error: red;
+
+    /* Backgrounds */
+    --bg: #121212;
+    --select-chat-bg: #575757;
+    --bg-light: #1e1e1e;
+    --input-bg: #222;
+    --bg-transparent: rgba(18, 18, 18, 0.4);
+
+    /* Text & Borders */
+    --text: #fff;
+    --text-ni: #eee;
+    --border: #444;
+
+    --text-light: rgba(238, 238, 238, 0.5);
+
+    --own-msg-bg: dodgerblue;
+    --menagement-msg-bg: rgb(4, 21, 37);
+}
+
+
 /* globals.css */
 
 /* Global resets and defaults */
 * {
+    scrollbar-color: var(--primary) var(--bg);
+    scrollbar-width: thin;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -10,7 +37,8 @@
 body {
     font-family: Arial, sans-serif;
     scroll-behavior: smooth;
-    background-color: #f2f2f2;
+    background-color: var(--bg);
+    color: var(--text);
     line-height: 1.6;
 }
 
@@ -39,16 +67,20 @@ select,
 textarea {
     font-family: inherit;
     padding: 0.5rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     border-radius: 4px;
     /* font-size: 16px; */
+}
+
+::placeholder {
+    color: var(--bg-light);
 }
 
 /* Default button styles */
 button {
     cursor: pointer;
-    background-color: #4CAF50;
-    color: #eee;
+    background-color: var(--primary);
+    color: var(--text);
     border: none;
     display: flex;
     align-items: center;
@@ -56,7 +88,7 @@ button {
 }
 
 .danger {
-    background-color: red;
+    background-color: var(--error);
 }
 
 /* Links */
@@ -65,6 +97,36 @@ a {
     color: inherit;
 }
 
+
 [alt="Info icon"] {
     display: none;
+}
+
+fieldset {
+    padding: 10px;
+    border: 2px solid var(--text);
+    border-radius: 5px;
+}
+
+svg {
+    fill: var(--text) !important;
+}
+
+/* For Webkit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
 }

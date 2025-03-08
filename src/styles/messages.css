@@ -9,33 +9,32 @@
 .message {
     position: relative;
     line-break: anywhere;
-    color: white;
+    color: var(--text);
     padding: 0.5rem;
-    border-bottom: 1px solid #eee;
     border-radius: 5px;
     margin: 5px 0;
     width: 90%;
     transition: float 0.3s ease-in-out;
+    float: right;
 }
 
 .message.own-msg {
-    background-color: #45a049 !important;
+    background-color: var(--own-msg-bg) !important;
     float: right;
 }
 
 .message.other {
-    background-color: dodgerblue !important;
     float: left;
 }
 
 .message.menagement-msg {
     float: left;
-    background-color: rgb(4, 21, 37) !important;
-    color: #bbb;
+    background-color: var(--menagement-msg-bg) !important;
+    color: var(--text-ni);
 }
 
 .message.menagement-msg * {
-    color: #bbb !important;
+    color: var(--text-ni) !important;
 }
 
 .message:last-child {
@@ -53,16 +52,16 @@
 
 .message .meta {
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.786);
+    color: var(--text-ni);
     position: absolute;
     right: 10px;
     bottom: -6px;
     background-color: inherit;
-    box-shadow: 0 0 10px -2px rgba(255, 255, 255, 0.786);
+    box-shadow: 0 0 10px -2px var(--text-ni);
     border-radius: 5px;
     display: flex;
     align-items: center;
-    outline: 2px solid rgba(255, 255, 255, 0.786);
+    outline: 2px solid var(--text-ni);
     padding: 2px;
 }
 
@@ -72,14 +71,14 @@
     padding: 0;
     transform: translateY(3px);
     border-radius: 10px;
-    background-color: black;
+    background-color: var(--bg);
 }
 
 .message .comments {
     padding: 5px;
     border-radius: 5px;
     padding-bottom: 10px;
-    border: 2px solid rgba(255, 255, 255, 0.786);
+    border: 2px solid var(--text-ni);
 }
 
 .messages .menu {
@@ -88,10 +87,6 @@
     justify-content: left;
     margin-top: 5px;
     gap: 5px;
-}
-
-.message .menu button:first-child {
-    background-color: red;
 }
 
 @keyframes come-in-left {
