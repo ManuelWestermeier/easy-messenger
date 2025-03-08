@@ -50,6 +50,13 @@ button {
     background-color: #4CAF50;
     color: #eee;
     border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.danger {
+    background-color: red;
 }
 
 /* Links */

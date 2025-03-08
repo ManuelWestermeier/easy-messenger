@@ -30,29 +30,41 @@
     width: 80vmin;
     top: calc(100dvh / 2 - 80vmin / 2);
     left: calc(100dvw / 2 - 80vmin / 2);
-    box-shadow: 0 0 200px 100px black;
+    border: 2px solid white;
     outline: none;
     display: flex;
     flex-direction: column;
     padding: 20px;
-    background-color: black;
+    background-color: rgba(255, 255, 255, 0.592);
+    backdrop-filter: blur(20px);
+    border-radius: 10px;
     gap: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
 }
 
-.chat-room header svg {
-    transition: width, height 0.3s ease-in-out;
-    filter: blur(3px);
+.chat-room header #chat-data-form button:first-child {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.chat-room header .qr-code {
     cursor: pointer;
+    width: 100px;
+    height: 100px;
 }
 
-.chat-room header svg:focus {
-    position: fixed;
-    z-index: 10000000000;
-    height: 80vmin;
-    width: 80vmin;
-    top: calc(100dvh / 2 - 80vmin / 2);
-    left: calc(100dvw / 2 - 80vmin / 2);
-    box-shadow: 0 0 200px 100px black;
+.chat-room header .qr-code:focus {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10000000001;
+    height: calc(80vmin - 20px);
+    width: calc(80vmin - 20px);
     outline: none;
     filter: blur(0);
 }

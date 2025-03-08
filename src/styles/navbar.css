@@ -18,7 +18,7 @@
     margin-bottom: 0.5rem;
 }
 
-.nav-bar button {
+.nav-bar .chat-select-button {
     width: 100%;
     background: none;
     border: none;
@@ -31,7 +31,7 @@
     justify-content: space-between;
 }
 
-.nav-bar button .unread {
+.nav-bar .chat-select-button .unread {
     background-color: #4CAF50;
     width: 20px;
     height: 20px;
@@ -42,11 +42,21 @@
     transition: all 0.3s ease-in-out;
 }
 
-.nav-bar button .unread.hide {
+.nav-bar .chat-select-button .unread.hide {
     transform: scale(0) rotate(360deg);
 }
 
-.nav-bar li.active button,
-.nav-bar button:hover {
+.nav-bar li.active .chat-select-button,
+.nav-bar .chat-select-button:hover {
     background-color: #575757;
+}
+
+.nav-bar button.danger {
+    width: 20px;
+    height: 20px;
+    transform: scale(1.5);
+}
+
+.nav-bar button.danger svg {
+    transform: scale(4);
 }
