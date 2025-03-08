@@ -55,7 +55,6 @@
 
 .nav-bar li.active .chat-select-button {
     box-shadow: 0 0 100px 0px var(--select-chat-bg);
-    transform: scale(1.05);
 }
 
 .nav-bar button.danger {

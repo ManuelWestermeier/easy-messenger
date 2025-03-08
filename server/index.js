@@ -42,8 +42,8 @@ export async function storeAllChatRoomsData() {
   if (Date.now() - lastStored < storeInterval) return;
   lastStored = Date.now();
   for (const chatId in chats) {
-    const { messages, passwordHashHash } = chats[chatId];
-    const chatRoomData = { messages, passwordHashHash };
+    const { messages, passwordHashHash, subscriptions } = chats[chatId];
+    const chatRoomData = { messages, passwordHashHash, subscriptions };
 
     // Encode chatId to ensure a valid file name.
     const fileName = `chats/${encodeURIComponent(chatId)}.json`;

@@ -204,7 +204,7 @@ export default function initMessengerServer() {
 
       joinedChats = joinedChats.filter((chat) => chat != chatId);
 
-      for (const subscription of chats[chatId].subscriptions) {
+      for (const subscription of (chats[chatId].subscriptions || {})) {
         sendPushNotification(subscription, "chat-deleted");
       }
 
@@ -233,7 +233,7 @@ export default function initMessengerServer() {
 
       send("all-messages-deleted", chatId, 0, 0);
 
-      for (const subscription of chats[chatId].subscriptions) {
+      for (const subscription of (chats[chatId].subscriptions || {})) {
         sendPushNotification(subscription, "delete-all-messages");
       }
 
@@ -256,7 +256,7 @@ export default function initMessengerServer() {
 
       send("message", chatId, message, id);
 
-      for (const subscription of chats[chatId].subscriptions) {
+      for (const subscription of (chats[chatId].subscriptions || {})) {
         sendPushNotification(subscription, "send");
       }
 
@@ -280,7 +280,7 @@ export default function initMessengerServer() {
 
       send("message-deleted", chatId, 0, id);
 
-      for (const subscription of chats[chatId].subscriptions) {
+      for (const subscription of (chats[chatId].subscriptions || {})) {
         sendPushNotification(subscription, "message-deleted");
       }
 
