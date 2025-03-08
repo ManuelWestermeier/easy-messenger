@@ -95,7 +95,6 @@ export default function initMessengerServer() {
         }
       }
 
-
       if (chat) {
         if (chat.passwordHashHash != passwordHashHash) return false;
 

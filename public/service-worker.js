@@ -70,7 +70,7 @@ self.addEventListener("fetch", (event) => {
 
 
 // Push notification event
-self.addEventListener("push", function (event) {
+self.addEventListener("push", async function (event) {
   console.log("Push notification received:", event);
 
   const data = event.data ? event.data.text() : "New notification";
@@ -84,15 +84,22 @@ self.addEventListener("push", function (event) {
     message = data;
   }
 
-  const options = {
-    body: message,
-    icon: "https://manuelwestermeier.github.io/easy-messenger/img/logo-512.png",
-  };
+  // Check if the website is currently open and focused
+  const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+  const isClientFocused = clients.some(client => client.focused);
 
-  event.waitUntil(
-    self.registration.showNotification("Push Notification", options)
-  );
+  if (!isClientFocused) {
+    const options = {
+      body: message,
+      icon: "https://manuelwestermeier.github.io/easy-messenger/img/logo-512.png",
+    };
+
+    event.waitUntil(
+      self.registration.showNotification("Push Notification", options)
+    );
+  }
 });
+
 
 // Handle notification clicks
 self.addEventListener("notificationclick", function (event) {

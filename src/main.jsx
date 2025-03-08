@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import useLocalStorage from "use-local-storage";
 import { decrypt, encrypt } from "./utils/crypto.jsx";
 import "./styles/import.jsx";
-import "./pwa.jsx";
+import "./utils/pwa.jsx";
 import CreateAccount from "./comp/create-account.jsx";
 import Login from "./comp/login.jsx";
-import { getSubscription } from "./notify.jsx";
+import { getSubscription } from "./utils/notify.jsx";
 
 window.notificationSubscription = false;
 

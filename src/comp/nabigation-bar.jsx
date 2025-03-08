@@ -1,4 +1,4 @@
-import { getSubscription } from "../notify";
+import { getSubscription } from "../utils/notify";
 
 // Navigation bar to switch between chat groups
 export function NavigationBar({

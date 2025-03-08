@@ -1,4 +1,4 @@
-import WEB_PUSH_PUBLIC_KEY from "../web-push-public-key.js";
+import WEB_PUSH_PUBLIC_KEY from "../../web-push-public-key.js";
 
 export async function getSubscription() {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
