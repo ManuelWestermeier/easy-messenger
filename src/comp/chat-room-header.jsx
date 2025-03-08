@@ -32,6 +32,12 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
     formElement.classList.toggle("none");
   }
 
+  function handleCloseForm(e) {
+    e.preventDefault();
+    const formElement = document.getElementById("chat-data-form");
+    formElement.classList.add("none");
+  }
+
   function handleFormSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -45,13 +51,7 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
       },
     }));
 
-    e.target.classList.add("none");
-  }
-
-  function handleCloseForm(e) {
-    e.preventDefault();
-    const formElement = document.getElementById("chat-data-form");
-    formElement.classList.add("none");
+    handleCloseForm(e);
   }
 
   async function handleDeleteAllMessages(e) {
@@ -65,8 +65,7 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
       },
     }));
 
-    const parentForm = e.target.parentElement;
-    parentForm.classList.add("none");
+    handleCloseForm(e);
   }
 
   function renderForm() {

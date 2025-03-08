@@ -4,7 +4,6 @@
     overflow: hidden;
     padding: 0.5rem;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
     /* fixed box-shadow rgba syntax */
     background: linear-gradient(135deg, var(--primary) 20%, var(--bg) 100%);
 }

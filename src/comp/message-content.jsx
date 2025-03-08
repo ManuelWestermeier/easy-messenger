@@ -18,7 +18,7 @@ export default function MessageConetent({
   const isUserMessage = userMessageTypes.includes(type);
 
   return (
-    <>
+    <div onClick={() => setSeeMenu(true)}>
       <p>{data}</p>
       {seeComments && isUserMessage && (
         <fieldset className="comments">
@@ -74,12 +74,10 @@ export default function MessageConetent({
         </div>
       )}
       <p className="meta">
-        <i>
-          <b>
-            <span>{date}</span> <span>{author}</span><span>[{type}]</span>
-          </b>
-        </i>
+        <b>
+          <span>{date}</span> <span>{author}</span> <span>[{type}]</span>
+        </b>
       </p>
-    </>
+    </div>
   );
 }
