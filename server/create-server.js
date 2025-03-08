@@ -110,8 +110,9 @@ export default function initMessengerServer() {
           clients: [{ client, author }],
           messages: [],
           passwordHashHash,
-          subscriptions: subscription ? { [subscription.endpoint]: subscription } : [],
+          subscriptions: subscription ? { [subscription.endpoint]: subscription } : {},
         };
+        return [];
       }
 
       joinedChats.push(chatId);
@@ -255,6 +256,8 @@ export default function initMessengerServer() {
       if (!chats[chatId]) return false;
 
       send("message", chatId, message, id);
+
+      console.log("chats[chatId].subscriptions", chats[chatId].subscriptions);
 
       for (const subscription of (chats[chatId].subscriptions || {})) {
         sendPushNotification(subscription, "send");

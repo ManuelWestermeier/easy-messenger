@@ -4,8 +4,8 @@
     "description": "QUATSCHER is an open-source, ultra-secure messenger with end-to-end encryption.",
     "start_url": "/easy-messenger/",
     "display": "standalone",
-    "background_color": "#F2F2F2",
-    "theme_color": "#F2F2F2",
+    "background_color": "#121212",
+    "theme_color": "#121212",
     "orientation": "portrait-primary",
     "scope": "/easy-messenger/",
     "categories": [

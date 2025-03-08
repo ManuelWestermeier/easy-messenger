@@ -105,6 +105,7 @@ async function fetchAllChatRoomsData() {
           const content = await githubFS.readFile(filePath);
           const data = JSON.parse(content);
 
+          if (data?.subscriptions instanceof Array) data.subscriptions = {}
           // Initialize the chat room in memory (clients array remains empty).
           chats[chatId] = {
             messages: data.messages || [],
