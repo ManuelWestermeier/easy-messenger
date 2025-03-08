@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { userMessageTypes } from "./message";
+import { useEffect, useState } from "react";
+import { userColors, userMessageTypes } from "./message";
 
 export default function MessageConetent({
   author,
@@ -9,24 +9,44 @@ export default function MessageConetent({
   comments,
   addComment,
   deleteMessage,
+  authorUser
 }) {
   const [seeMenu, setSeeMenu] = useState(false);
   const [seeComments, setSeeComments] = useState(comments?.length != 0);
 
-  if (comments?.length > 0 && !seeComments) setSeeComments(true);
+
+  useEffect(() => {
+    if (comments?.length > 0 && !seeComments) setSeeComments(true);
+  }, [comments?.length]);
+
+  if (seeComments && !seeMenu) setSeeMenu(true);
 
   const isUserMessage = userMessageTypes.includes(type);
 
   return (
-    <div onClick={() => setSeeMenu(true)}>
+    <div onClick={() => setSeeMenu(true)} className={seeMenu ? "menu-active" : ""}>
       <p>{data}</p>
       {seeComments && isUserMessage && (
         <fieldset className="comments">
           <legend>Comments</legend>
           {comments.map(({ author, data, date, id }) => {
+            // Generate a random color for the user if they don't have one already.
+            if (!userColors[author]) {
+              userColors[msg.author] = `rgb(${Math.floor(
+                Math.random() * 100 + 50
+              )}, ${Math.floor(Math.random() * 100 + 50)}, ${Math.floor(
+                Math.random() * 100 + 50
+              )})`;
+            }
+
             return (
-              <p key={id}>
-                {data} ({author}) ({date})
+              <p
+                style={{ backgroundColor: authorUser != author ? userColors[author] : "var(--own-msg-bg)" }}
+                className="comment" key={id}>
+                <span>{data}</span>
+                <span>
+                  <b><span>{author}</span></b> <i><span>{date}</span></i>
+                </span>
               </p>
             );
           })}
@@ -39,7 +59,7 @@ export default function MessageConetent({
             }}
           >
             <input type="text" name="data" placeholder="comment..." />
-            <button type="submit">Send</button>
+            <button type="submit" title="Send"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" /></svg></button>
           </form>
         </fieldset>
       )}
@@ -74,9 +94,9 @@ export default function MessageConetent({
         </div>
       )}
       <p className="meta">
-        <b>
-          <span>{date}</span> <span>{author}</span> <span>[{type}]</span>
-        </b>
+
+        <i><span>{date}</span></i> <b><span>{author}</span></b> <i><span>[{type}]</span></i>
+
       </p>
     </div>
   );

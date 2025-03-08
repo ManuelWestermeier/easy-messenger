@@ -3,7 +3,7 @@ import CryptoJS from "crypto-js";
 import { encrypt, randomBytes } from "../utils/crypto";
 import MessageConetent from "./message-content";
 
-const userColors = {};
+export const userColors = {};
 
 export const userMessageTypes = ["text"];
 
@@ -126,6 +126,7 @@ export default function Message({
         {...msg}
         deleteMessage={deleteMessage}
         addComment={addComment}
+        authorUser={chatData.author}
       />
     </div>
   );

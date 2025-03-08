@@ -75,7 +75,7 @@ aside {
     }
 
     .messages {
-        height: calc(100dvh - 110px + 2.5rem - 120px) !important;
+        height: calc(100dvh - 110px + 2.5rem - 90px) !important;
     }
 
     /* No Chat Selected Message */
