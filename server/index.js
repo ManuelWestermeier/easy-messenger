@@ -1,7 +1,8 @@
-import GitHubFS from "gh-fs";
-import initMessengerServer from "./create-server.js";
 import { config } from "dotenv";
 config();
+
+import GitHubFS from "gh-fs";
+import initMessengerServer from "./create-server.js";
 
 // Initialize GitHubFS instance with an explicit branch (e.g. "main")
 export const githubFS = new GitHubFS({
@@ -23,6 +24,7 @@ Server Data:
 chats[chatId] = {
   clients: [{ client, author }],
   messages: [{ id, message }],
+  subscriptions: {},
   passwordHashHash: basicHash(passwordHash),
 };
 */
@@ -88,13 +90,6 @@ async function fetchAllChatRoomsData() {
 
     // If no chat files exist, create a default chat room.
     if (files.length === 0) {
-      console.log("No chat files found, creating default chat room...");
-      const defaultChatId = "default";
-      chats[defaultChatId] = {
-        messages: [],
-        passwordHashHash: "",
-        clients: [],
-      };
       // Store the default chat room
       await storeAllChatRoomsData();
       return;
@@ -102,19 +97,24 @@ async function fetchAllChatRoomsData() {
 
     for (const file of files) {
       if (file.type === "file" && file.name.endsWith(".json")) {
-        // Remove the ".json" extension and decode the chatId.
-        const chatIdEncoded = file.name.slice(0, -5);
-        const chatId = decodeURIComponent(chatIdEncoded);
-        const filePath = `chats/${file.name}`;
-        const content = await githubFS.readFile(filePath);
-        const data = JSON.parse(content);
+        try {
+          // Remove the ".json" extension and decode the chatId.
+          const chatIdEncoded = file.name.slice(0, -5);
+          const chatId = decodeURIComponent(chatIdEncoded);
+          const filePath = `chats/${file.name}`;
+          const content = await githubFS.readFile(filePath);
+          const data = JSON.parse(content);
 
-        // Initialize the chat room in memory (clients array remains empty).
-        chats[chatId] = {
-          messages: data.messages || [],
-          passwordHashHash: data.passwordHashHash,
-          clients: [],
-        };
+          // Initialize the chat room in memory (clients array remains empty).
+          chats[chatId] = {
+            messages: data.messages || [],
+            passwordHashHash: data.passwordHashHash,
+            clients: [],
+            subscriptions: data?.subscriptions || {},
+          };
+        } catch (error) {
+
+        }
       }
     }
     console.log("Fetched all chat room data");

@@ -12,10 +12,10 @@ function Main() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register("/easy-messenger/service-worker.js")
+        .register("/easy-messenger/service-worker.js", { scope: "/easy-messenger/" })
         .then(() => {
           console.log("Service Worker Active!");
-        });
+        }).catch(error => console.error(error));
     }
   }, []);
 

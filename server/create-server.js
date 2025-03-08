@@ -1,3 +1,30 @@
+import dotenv from "dotenv";
+dotenv.config(); // Load environment variables
+
+import webpush from "web-push";
+import WEB_PUSH_PUBLIC_KEY from "../web-push-public-key.js";
+
+
+const publicVapidKey = WEB_PUSH_PUBLIC_KEY;
+const privateVapidKey = process.env.WEB_PUSH_PRIVATE_KEY;
+const email = process.env.EMAIL;
+
+if (!privateVapidKey) {
+  console.error("Private Vapid Key is missing!");
+  process.exit(1);
+}
+
+webpush.setVapidDetails(`mailto:${email}`, publicVapidKey, privateVapidKey);
+
+async function sendPushNotification(subscription, data = "send") {
+  try {
+    return await webpush.sendNotification(subscription, data);
+  } catch (error) {
+    return error;
+  }
+}
+
+
 import { areSetAndTheSameType } from "are-set";
 import { createServer } from "wsnet-server";
 import { chats, githubFS, storeAllChatRoomsData } from "./index.js";
@@ -59,17 +86,31 @@ export default function initMessengerServer() {
 
       const passwordHashHash = basicHash(passwordHash).slice(0, 12);
 
+      let subscription = data?.subscription?.endpoint || false;
+      if (subscription) {
+        try {
+          new URL(subscription.endpoint);
+        } catch (error) {
+          subscription = false;
+        }
+      }
+
       if (chat) {
         if (chat.passwordHashHash != passwordHashHash) return false;
 
         chat.clients.push({ client, author });
+
+        if (subscription && chat.subscriptions[subscription.endpoint]) {
+          chat.subscriptions[subscription.endpoint];
+        }
 
         send("user-joined", chatId, author, 0);
       } else {
         chats[chatId] = {
           clients: [{ client, author }],
           messages: [],
-          passwordHashHash: passwordHashHash,
+          passwordHashHash,
+          subscriptions: subscription ? { [subscription.endpoint]: subscription } : [],
         };
       }
 
@@ -116,9 +157,12 @@ export default function initMessengerServer() {
     });
 
     // Handle exit requests
-    client.onGet("exit", (chatId = "") => {
-      if (typeof chatId != "string") return false;
+    client.onGet("exit", (data) => {
+      if (!areSetAndTheSameType(data, [["chatId", "string"]])) return false;
+      const { chatId } = data;
       if (!joinedChats.includes(chatId)) return false;
+
+      const subscription = data?.subscription?.endpoint || false;
 
       let author;
       // Hier: Entferne den aktuellen Client aus der Liste
@@ -131,6 +175,15 @@ export default function initMessengerServer() {
           return true;
         }
       );
+
+      if (subscription) {
+        try {
+          new URL(subscription.endpoint);
+          delete chats[chatId].subscriptions[subscription.endpoint];
+        } catch (error) {
+          subscription = false;
+        }
+      }
 
       joinedChats = joinedChats.filter((chat) => chat != chatId);
 
@@ -151,6 +204,10 @@ export default function initMessengerServer() {
 
       joinedChats = joinedChats.filter((chat) => chat != chatId);
 
+      for (const subscription of chats[chatId].subscriptions) {
+        sendPushNotification(subscription, "chat-deleted");
+      }
+
       chats[chatId].clients.forEach(({ client }) => {
         client.removeChat(chatId);
       });
@@ -160,7 +217,7 @@ export default function initMessengerServer() {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}.json`;
           githubFS.deleteFile(fileName);
-        } catch (error) {}
+        } catch (error) { }
       }
 
       return true;
@@ -175,6 +232,10 @@ export default function initMessengerServer() {
       chats[chatId].messages = [];
 
       send("all-messages-deleted", chatId, 0, 0);
+
+      for (const subscription of chats[chatId].subscriptions) {
+        sendPushNotification(subscription, "delete-all-messages");
+      }
 
       return true;
     });
@@ -195,6 +256,10 @@ export default function initMessengerServer() {
 
       send("message", chatId, message, id);
 
+      for (const subscription of chats[chatId].subscriptions) {
+        sendPushNotification(subscription, "send");
+      }
+
       chats[chatId].messages.push({ id, message });
 
       return true;
@@ -214,6 +279,10 @@ export default function initMessengerServer() {
       if (!chats[chatId]) return false;
 
       send("message-deleted", chatId, 0, id);
+
+      for (const subscription of chats[chatId].subscriptions) {
+        sendPushNotification(subscription, "message-deleted");
+      }
 
       chats[chatId].messages = chats[chatId].messages.filter(
         ({ id: msgId }) => msgId != id

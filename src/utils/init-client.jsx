@@ -2,6 +2,7 @@ import Client from "wsnet-client";
 import { basicHash, decrypt, encrypt, randomBytes } from "./crypto";
 
 import CryptoJS from "crypto-js";
+import { getSubscription } from "../notify";
 
 /**
  * @param {Client} client
@@ -35,6 +36,7 @@ export default async function initClient(client, data, setData) {
         author: encrypt(chatInfo.password, chatInfo.author),
         passwordHash: basicHash(basicHash(chatInfo.password)),
         messageIds,
+        subscription: await getSubscription(),
       });
 
       if (joinRes) {
@@ -120,7 +122,7 @@ export default async function initClient(client, data, setData) {
       } else
         return alert(
           "Maybe your password is incorct (remove the group from your chats) => group: " +
-            chatId
+          chatId
         );
     })
   );
