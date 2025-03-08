@@ -9,6 +9,8 @@ import CreateAccount from "./comp/create-account.jsx";
 import Login from "./comp/login.jsx";
 import { getSubscription } from "./notify.jsx";
 
+window.notificationSubscription = false;
+
 function Main() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -17,7 +19,6 @@ function Main() {
         .then(() => {
           console.log("Service Worker Active!");
         }).catch(error => console.error(error));
-      window.notificationSubscription = false;
       getSubscription().then(s => {
         window.notificationSubscription = s;
       });
