@@ -45,8 +45,6 @@ export async function storeAllChatRoomsData() {
     const { messages, passwordHashHash, subscriptions } = chats[chatId];
     const chatRoomData = { messages, passwordHashHash, subscriptions };
 
-    console.log("chatRoomData: ", chatRoomData);
-
     // Encode chatId to ensure a valid file name.
     const fileName = `chats/${encodeURIComponent(chatId)}.json`;
     try {
@@ -106,8 +104,6 @@ async function fetchAllChatRoomsData() {
           const filePath = `chats/${file.name}`;
           const content = await githubFS.readFile(filePath);
           const data = JSON.parse(content);
-
-          console.log("data: ", data);
 
           // Initialize the chat room in memory (clients array remains empty).
           chats[chatId] = {
