@@ -69,7 +69,14 @@ textarea {
     padding: 0.5rem;
     border: 1px solid var(--border);
     border-radius: 4px;
-    /* font-size: 16px; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+input:focus,
+textarea:focus {
+    outline: 2px solid var(--text);
 }
 
 ::placeholder {
@@ -82,9 +89,6 @@ button {
     background-color: var(--primary);
     color: var(--text);
     border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .danger {
