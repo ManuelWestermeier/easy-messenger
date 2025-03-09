@@ -56,6 +56,17 @@ export default function Message({
 
           if (!isSent) alert("error: message isn't deleted");
         }
+      } else if (_msg.react) {
+        const [reactId] = msg.react;
+
+        if (reactId == msg.id) {
+          const isSent = await client.get("delete-message", {
+            chatId,
+            id: _msg.id,
+          });
+
+          if (!isSent) alert("error: message isn't deleted");
+        }
       }
     }
 

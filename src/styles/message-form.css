@@ -7,7 +7,7 @@
     gap: 0.5rem;
     border-radius: 4px;
     box-shadow: 0 0 20px 0px var(--bg);
-    padding: 10px;
+    padding: 9px 10px;
 }
 
 .message-form textarea,
@@ -17,7 +17,7 @@
     resize: none;
 }
 
-.message-form button {
+.message-form .send-button {
     padding: 0.5rem 1rem;
     background-color: var(--primary);
     border: none;
@@ -25,6 +25,29 @@
     border-radius: 4px;
 }
 
-.message-form button:hover {
+.message-form .send-button:hover {
     background-color: var(--primary-hover);
+}
+
+.message-form .react-elem {
+    position: absolute;
+    background-color: var(--primary);
+    color: var(--text);
+    height: 60px;
+    width: 100%;
+    top: -55px;
+    left: 0;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.reaction-text {
+    overflow: hidden;
+    height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
