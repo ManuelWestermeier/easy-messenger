@@ -92,7 +92,7 @@ export default function MarkdownWithLinks({ text = "" }) {
             // Facebook
             if (origin.includes("facebook.com") && !href.includes("messenger.com") && !href.includes("fb.me")) {
                 return renderLinkAndEmbed(href, children, (
-                    <FacebookEmbed url={href} width={"100%"} />
+                    <FacebookEmbed url={href} width={"100%"} style={{ minHeight: "200px", maxHeight: "50dvh" }} />
                 ));
             }
 
@@ -101,7 +101,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                 return renderLinkAndEmbed(href, children, (
                     <InstagramEmbed
                         url={href}
-                        width={"100%"}
+                        style={{ minHeight: "200px", maxHeight: "50dvh" }}
                         hideCaption={false}
                         containerTagName="div"
                         protocol=""
@@ -113,49 +113,49 @@ export default function MarkdownWithLinks({ text = "" }) {
             // LinkedIn
             if (origin.includes("linkedin.com")) {
                 return renderLinkAndEmbed(href, children, (
-                    <LinkedInEmbed url={href} postUrl={href} width={"100%"} height={570} />
+                    <LinkedInEmbed url={href} postUrl={href} width={"100%"} style={{ minHeight: "200px", maxHeight: "50dvh" }} />
                 ));
             }
 
             // Pinterest
             if (origin.includes("pinterest.com")) {
                 return renderLinkAndEmbed(href, children, (
-                    <PinterestEmbed url={href} width={"100%"} height={467} />
+                    <PinterestEmbed url={href} width={"100%"} style={{ minHeight: "200px", maxHeight: "50dvh" }} />
                 ));
             }
 
             // TikTok
             if (origin.includes("tiktok.com")) {
                 return renderLinkAndEmbed(href, children, (
-                    <TikTokEmbed url={href} width={"100%"} />
+                    <TikTokEmbed url={href} width={"100%"} style={{ minHeight: "200px", maxHeight: "50dvh" }} />
                 ));
             }
 
             // X (Twitter)
             if (origin.includes("twitter.com") || origin.includes("x.com")) {
                 return renderLinkAndEmbed(href, children, (
-                    <XEmbed url={href} width={"100%"} />
+                    <XEmbed url={href} width={"100%"} style={{ minHeight: "200px", maxHeight: "50dvh" }} />
                 ));
             }
 
             // YouTube
             if (origin.includes("youtube.com") || origin.includes("youtu.be")) {
                 return renderLinkAndEmbed(href, children, (
-                    <YouTubeEmbed url={href} width={"100%"} height={220} />
+                    <YouTubeEmbed url={href} width={"100%"} style={{ minHeight: "200px", maxHeight: "50dvh", aspectRatio: "16/9" }} />
                 ));
             }
 
             // Telegram
             if (origin.includes("t.me")) {
                 return renderLinkAndEmbed(href, children, (
-                    <TelegramEmbed src={href} width={"100%"} />
+                    <TelegramEmbed src={href} width={"100%"} style={{ minHeight: "200px", maxHeight: "50dvh" }} />
                 ));
             }
 
             // Reddit
             if (origin.includes("reddit.com")) {
                 return renderLinkAndEmbed(href, children, (
-                    <iframe src={href} width="100%" height="400" frameBorder="0" scrolling="no"></iframe>
+                    <iframe src={href} width="100%" height="400" frameBorder="0" scrolling="no" ></iframe>
                 ));
             }
 
