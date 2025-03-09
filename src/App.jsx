@@ -1,17 +1,13 @@
-import { useEffect, useState } from "react";
-import { NavigationBar } from "./comp/nabigation-bar";
-import { ChatRoom } from "./comp/chat-room";
-import { JoinChat } from "./comp/join-chat";
+import { useState } from "react";
 import { useWsClient } from "./hooks/use-ws-client";
 import Mobile from "./mobile";
-import NoChat from "./comp/nochat";
 import getShareQueryParams from "./utils/share-traget";
+import LoadingState from "./comp/loading-state";
+import ShareData from "./comp/share-data";
+import Desktop from "./desktop";
 
 export default function App({ setData, data }) {
-  useEffect(() => {
-    const share = getShareQueryParams();
-    if (share) alert(JSON.stringify(share));
-  }, []);
+  const [shareData, setShareData] = useState(getShareQueryParams());
 
   const [currentChat, setCurrentChat] = useState(null);
   window.selectedChat = currentChat;
@@ -23,42 +19,31 @@ export default function App({ setData, data }) {
   );
 
   if (state === "failed" || isClosed) {
-    return <button onClick={() => reCreateClient()}>Reconnect</button>;
+    return <div style={{ margin: "20px" }}>
+      <button onClick={() => reCreateClient()}>Reconnect</button>
+    </div>;
   }
 
-  if (client == null) return state;
+  if (client == null) return <LoadingState state={state} />;
+
+  if (shareData) {
+    return <ShareData
+      client={client}
+      shareData={setData}
+      setShareData={setShareData}
+      setChats={setData}
+      chats={data}
+    />;
+  }
 
   if (innerWidth > 768)
-    return (
-      <div className="app-container">
-        <NavigationBar
-          chats={data}
-          currentChat={currentChat}
-          setCurrentChat={setCurrentChat}
-          setChats={setData}
-          client={client}
-        />
-        <aside>
-          <JoinChat
-            setCurrentChat={setCurrentChat}
-            client={client}
-            setData={setData}
-          />
-        </aside>
-        <main>
-          {currentChat && data[currentChat] ? (
-            <ChatRoom
-              chatId={currentChat}
-              chatData={data[currentChat]}
-              client={client}
-              setData={setData}
-            />
-          ) : (
-            <NoChat />
-          )}
-        </main>
-      </div>
-    );
+    return <Desktop
+      client={client}
+      currentChat={currentChat}
+      data={data}
+      setCurrentChat={setCurrentChat}
+      setData={setData}
+    />
   else
     return (
       <Mobile

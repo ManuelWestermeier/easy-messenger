@@ -2,15 +2,18 @@ export default function getShareQueryParams() {
     // Check if the URL hash is "#share"
     if (window.location.hash !== "#share") return false;
 
+    // Extract query parameters using URLSearchParams
+    const url = new URL(window.location);
+    const params = url.searchParams;
+
+    const data = {
+        title: params.get("title"),
+        text: params.get("text"),
+        url: params.get("url")
+    };
+
     // Replace only the hash, not the entire URL
     window.history.replaceState("", "", window.location.pathname);
 
-    // Extract query parameters using URLSearchParams
-    const params = new URLSearchParams(window.location.search);
-
-    return {
-        title: params.get("title") || "No title",
-        text: params.get("text") || "No text",
-        url: params.get("url") || "No URL"
-    };
+    return data;
 }

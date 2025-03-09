@@ -9,4 +9,5 @@ import "./messages.css";
 import "./message-form.css";
 import "./join-form.css";
 import "./install-button.css";
-import "./create-account.css"
+import "./create-account.css";
+import "./share-data.css";

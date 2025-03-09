@@ -6,7 +6,7 @@ export default function Login({ handleLogin }) {
       <h1 className="opensource-info">QUATSCHER Messenger</h1>
       <fieldset className="login">
         <legend>
-          <h1>Login</h1>
+          <h1>Login {document.location.hash == "#share" ? "=> Share" : ""}</h1>
         </legend>
         <form onSubmit={handleLogin} className="form">
           <p>
