@@ -2,6 +2,23 @@ import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
 
+const RedditEmbedComponent = ({ url, width, height }) => {
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://embed.redditmedia.com/widgets/platform.js";
+        script.async = true;
+        document.body.appendChild(script);
+    }, []);
+
+    return (
+        <div style={{ width, height }}>
+            <blockquote className="reddit-card" data-card-created="1553892582">
+                <a href={url}>View Reddit Post</a>
+            </blockquote>
+        </div>
+    );
+};
+
 // Custom image component that falls back to an alternative if the image fails to load.
 function TryImg({ src, alt, alternative, style, ...data }) {
     const [render, setRender] = useState(true);
@@ -273,35 +290,17 @@ export default function MarkdownWithLinks({ text = "" }) {
                 );
             }
 
-            // // Reddit
-            // if (origin.includes("reddit.com")) {
-            //     return <div className="link-view">
-            //         <a
-            //             style={{
-            //                 display: "flex",
-            //                 alignItems: "center",
-            //                 justifyContent: "center",
-            //                 gap: "5px"
-            //             }}
-            //             href={href}
-            //             target="_blank"
-            //             rel="noopener noreferrer"
-            //         >
-            //             <TryImg
-            //                 alt="Logo"
-            //                 style={{
-            //                     width: "32px",
-            //                     height: "32px",
-            //                     objectFit: "contain",
-            //                     backgroundColor: "transparent"
-            //                 }}
-            //                 src={origin + "/favicon.ico"}
-            //             />
-            //             {linkTitles[href] && <span>{linkTitles[href]}</span>}
-            //             <span>{children}</span>
-            //         </a>
-            //     </div>
-            // }
+            // Reddit
+            if (origin.includes("reddit.com")) {
+                return <LinkEmbed
+                    origin={origin}
+                    href={href}
+                    linkTitles={linkTitles}
+                    embedContent={<RedditEmbedComponent height="auto" width="100%" url={href} />}
+                >
+                    {children}
+                </LinkEmbed>
+            }
 
             // Default: just render a regular link with the favicon and title if available.
             return (
