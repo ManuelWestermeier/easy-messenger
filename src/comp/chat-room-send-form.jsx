@@ -47,6 +47,7 @@ export default function ChatRoomSendForm({
       },
     }));
 
+    e.target.reset();
     const isSent = await client.get("send", {
       chatId,
       message: encrypt(chatData.password, JSON.stringify(message)),
@@ -55,7 +56,6 @@ export default function ChatRoomSendForm({
     if (!isSent) {
       alert("A send error occurred. Your message isnt send!");
     }
-    e.target.reset();
     setReactId(false);
 
     const messagesDiv = document.querySelector(".messages");

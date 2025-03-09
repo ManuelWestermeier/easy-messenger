@@ -38,10 +38,11 @@ export default function MessageConetent({
           });
         }}
         style={{
-          backgroundColor: userColors[react[1].author],
+          backgroundColor: react[1].author != authorUser ? userColors[react[1].author] : "var(--own-msg-bg)",
           padding: "5px",
           borderRadius: "5px",
-          height: "30px"
+          height: "30px",
+          cursor: "pointer",
         }}
       >
         <b>
