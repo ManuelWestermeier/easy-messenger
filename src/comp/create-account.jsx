@@ -16,12 +16,14 @@ export default function CreateAccount({ handleCreateAccount }) {
               autoFocus
               className="input"
               required
+              autoComplete="new-password"
             />
           </p>
           <p>
             Reinput Password:
             <input
               type="password"
+              autoComplete="new-password"
               placeholder="Enter password..."
               name="password2"
               required

@@ -17,6 +17,7 @@ export default function Login({ handleLogin }) {
               placeholder="Enter password..."
               name="password"
               className="input"
+              autoComplete="current-password"
             />
           </p>
           <p id="error" className="error"></p>
