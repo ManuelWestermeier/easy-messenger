@@ -17,7 +17,7 @@ export const githubFS = new GitHubFS({
   encryptionKey: process.env.ENC_PASSWORD, // Use a strong, secure key
 });
 
-const storeInterval = process.env?.DEBUG ? 2_000 : 60_000; // 60 seconds
+const storeInterval = process.env?.DEBUG ? 2_000 : 40_000; // 40 seconds
 
 /*
 Server Data:
