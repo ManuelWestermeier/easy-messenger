@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { encrypt, randomBytes } from "../utils/crypto";
 import MarkdownWithLinks from "./markdown-with-links";
 import CryptoJS from "crypto-js"
@@ -13,10 +13,6 @@ export default function ShareData({
     const initialText = `Title: ${shareData.title}\nMessage: ${shareData.text}\nURL: ${shareData.url}`;
     const [messageText, setMessageText] = useState(initialText);
     const [selectedChats, setSelectedChats] = useState([]);
-
-    useEffect(() => {
-        setMessageText(`Title: ${shareData.title}\nMessage: ${shareData.text}\nURL: ${shareData.url}`);
-    }, [shareData]);
 
     const toggleChatSelection = (chatId) => {
         setSelectedChats((prev) =>
@@ -70,7 +66,10 @@ export default function ShareData({
             }
         }
 
-        setShareData(null);
+        // Replace only the hash, not the entire URL
+        window.history.replaceState("", "", "https://manuelwestermeier.github.io/easy-messenger/");
+        // set the data do no share data => false
+        setShareData(false);
     };
 
     return (
