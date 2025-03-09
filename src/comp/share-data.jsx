@@ -10,8 +10,7 @@ export default function ShareData({
     chats,
     setChats,
 }) {
-    const initialText = `Title: ${shareData.title}\nMessage: ${shareData.text}\nURL: ${shareData.url}`;
-    const [messageText, setMessageText] = useState(initialText);
+    const [messageText, setMessageText] = useState(shareData);
     const [selectedChats, setSelectedChats] = useState([]);
 
     const toggleChatSelection = (chatId) => {

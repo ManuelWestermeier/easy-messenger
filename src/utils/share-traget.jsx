@@ -4,10 +4,17 @@ export default function getShareQueryParams() {
 
     const url = new URL(window.location);
 
-    // Extract query parameters using URLSearchParams
-    return {
-        title: url.searchParams.get("title"),
-        text: url.searchParams.get("text"),
-        url: url.searchParams.get("url")
-    };
+    let out = "";
+
+    if (url.searchParams.get("title") != "") {
+        out += `Title: ${url.searchParams.get("title")}`;
+    }
+    if (url.searchParams.get("text") != "") {
+        out += `Text: ${url.searchParams.get("text")}`;
+    }
+    if (url.searchParams.get("url") != "") {
+        out += `URL: ${url.searchParams.get("url")}`;
+    }
+
+    return out || false;
 }
