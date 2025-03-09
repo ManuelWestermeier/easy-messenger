@@ -69,3 +69,5 @@ node ./server/
 5. On some points in the code you have to change the frontent location
 
 Enjoy using QUATSCHER – the secure and open source encrypted messenger!
+
+### 3486 lines usercode

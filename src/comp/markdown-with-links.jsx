@@ -12,6 +12,7 @@ import {
     XEmbed,
     YouTubeEmbed,
 } from "react-social-media-embed";
+import { TelegramEmbed } from "react-telegram-embed";
 
 // Function to extract title from a URL (used only for non-media links)
 async function fetchTitle(url) {
@@ -32,21 +33,16 @@ const preprocessText = (text) => {
 };
 
 export default function MarkdownWithLinks({ text = "" }) {
-    // Replace newlines so that Markdown parses correctly
     text = text.replaceAll("\n", "\n\n");
     const [linkTitles, setLinkTitles] = useState({});
-
-    // Process the text once so that plain URLs become Markdown links.
     const processedText = preprocessText(text);
 
     useEffect(() => {
         const getTitles = async () => {
-            // Exclude media files as these are rendered separately.
             const mediaExtensions = [
                 ".jpg", ".jpeg", ".png", ".gif",
                 ".mp4", ".webm", ".ogg", ".mp3", ".wav"
             ];
-            // Match URLs in the processed text.
             const links = (processedText.match(/https?:\/\/[^\s>]+/g) || []).filter(
                 (link) =>
                     !mediaExtensions.some((ext) => link.toLowerCase().endsWith(ext))
@@ -66,7 +62,6 @@ export default function MarkdownWithLinks({ text = "" }) {
         getTitles();
     }, [processedText]);
 
-    // Helper: Render a container with a clickable link on top and optional embed content below.
     const renderLinkAndEmbed = (href, children, embedContent) => (
         <div className="link-view">
             <div>
@@ -78,7 +73,6 @@ export default function MarkdownWithLinks({ text = "" }) {
         </div>
     );
 
-    // Custom renderer for links used by ReactMarkdown.
     const components = {
         a: ({ href, children }) => {
             if (!href) return <>{children}</>;
@@ -95,12 +89,10 @@ export default function MarkdownWithLinks({ text = "" }) {
                 );
             }
 
-            // --- Social Media Embeds using react-social-media-embed ---
-
             // Facebook
             if (origin.includes("facebook.com") && !href.includes("messenger.com") && !href.includes("fb.me")) {
                 return renderLinkAndEmbed(href, children, (
-                    <FacebookEmbed url={href} width={550} />
+                    <FacebookEmbed url={href} width={"100%"} />
                 ));
             }
 
@@ -109,7 +101,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                 return renderLinkAndEmbed(href, children, (
                     <InstagramEmbed
                         url={href}
-                        width={400}
+                        width={"100%"}
                         hideCaption={false}
                         containerTagName="div"
                         protocol=""
@@ -120,66 +112,53 @@ export default function MarkdownWithLinks({ text = "" }) {
 
             // LinkedIn
             if (origin.includes("linkedin.com")) {
-                // Using the same URL as both embed and postUrl (adjust if needed)
                 return renderLinkAndEmbed(href, children, (
-                    <LinkedInEmbed url={href} postUrl={href} width={325} height={570} />
+                    <LinkedInEmbed url={href} postUrl={href} width={"100%"} height={570} />
                 ));
             }
 
             // Pinterest
             if (origin.includes("pinterest.com")) {
                 return renderLinkAndEmbed(href, children, (
-                    <PinterestEmbed url={href} width={345} height={467} />
+                    <PinterestEmbed url={href} width={"100%"} height={467} />
                 ));
             }
 
             // TikTok
             if (origin.includes("tiktok.com")) {
                 return renderLinkAndEmbed(href, children, (
-                    <TikTokEmbed url={href} width={325} />
+                    <TikTokEmbed url={href} width={"100%"} />
                 ));
             }
 
-            // X (Twitter) – also covers twitter.com and x.com
+            // X (Twitter)
             if (origin.includes("twitter.com") || origin.includes("x.com")) {
                 return renderLinkAndEmbed(href, children, (
-                    <XEmbed url={href} width={325} />
+                    <XEmbed url={href} width={"100%"} />
                 ));
             }
 
             // YouTube
             if (origin.includes("youtube.com") || origin.includes("youtu.be")) {
                 return renderLinkAndEmbed(href, children, (
-                    <YouTubeEmbed url={href} width={325} height={220} />
+                    <YouTubeEmbed url={href} width={"100%"} height={220} />
                 ));
             }
 
-            // --- Media Files: Images, Video, Audio ---
-
-            if (href.match(/\.(jpeg|jpg|gif|png)$/i)) {
-                const imgContent = <img src={href} alt={children} />;
-                return renderLinkAndEmbed(href, children, imgContent);
-            }
-            if (href.match(/\.(mp4|webm|ogg)$/i)) {
-                const videoContent = (
-                    <video controls>
-                        <source src={href} type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
-                );
-                return renderLinkAndEmbed(href, children, videoContent);
-            }
-            if (href.match(/\.(mp3|wav|ogg)$/i)) {
-                const audioContent = (
-                    <audio controls>
-                        <source src={href} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                    </audio>
-                );
-                return renderLinkAndEmbed(href, children, audioContent);
+            // Telegram
+            if (origin.includes("t.me")) {
+                return renderLinkAndEmbed(href, children, (
+                    <TelegramEmbed src={href} width={"100%"} />
+                ));
             }
 
-            // --- Default: Render clickable link with fetched title (if available) ---
+            // Reddit
+            if (origin.includes("reddit.com")) {
+                return renderLinkAndEmbed(href, children, (
+                    <iframe src={href} width="100%" height="400" frameBorder="0" scrolling="no"></iframe>
+                ));
+            }
+
             const titleText = linkTitles[href] && <p>{linkTitles[href]}</p>;
             return (
                 <div className="link-view">
