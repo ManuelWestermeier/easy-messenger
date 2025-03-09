@@ -50,6 +50,36 @@
     border-radius: 10px;
 }
 
+.message .link-view {
+    background-color: rgba(255, 255, 255, 0.5);
+    color: var(--menagement-msg-bg);
+    padding: 5px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message .link-view * {
+    width: 100%;
+    height: auto;
+}
+
+.message .link-view iframe.yt,
+.message .link-view video {
+    aspect-ratio: 16/9;
+    background-color: black;
+}
+
+.message .link-view img {
+    background-color: black;
+    max-height: 300px;
+    object-fit: contain;
+}
+
+.message .link-view a {
+    text-decoration: underline;
+}
+
 .message .menu-active {
     padding-bottom: 10px;
 }

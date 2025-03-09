@@ -8,6 +8,7 @@ import "./utils/pwa.jsx";
 import CreateAccount from "./comp/create-account.jsx";
 import Login from "./comp/login.jsx";
 import installApp from "./utils/pwa.jsx";
+import MarkdownWithLinks from "./comp/markdown-with-links.jsx";
 
 function Main() {
   useEffect(installApp, []);

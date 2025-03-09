@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { userColors, userMessageTypes } from "./message";
+import MarkdownWithLinks from "./markdown-with-links";
 
 export default function MessageConetent({
   author,
@@ -25,7 +26,7 @@ export default function MessageConetent({
 
   return (
     <div onClick={() => setSeeMenu(true)} className={seeMenu ? "menu-active" : ""}>
-      <p>{data}</p>
+      <p><MarkdownWithLinks text={data} /></p>
       {seeComments && isUserMessage && (
         <fieldset className="comments">
           <legend>Comments</legend>
@@ -43,7 +44,9 @@ export default function MessageConetent({
               <p
                 style={{ backgroundColor: authorUser != author ? userColors[author] : "var(--own-msg-bg)" }}
                 className="comment" key={id}>
-                <span>{data}</span>
+                <span>
+                  <MarkdownWithLinks text={data} />
+                </span>
                 <span>
                   <b><span>{author}</span></b> <i><span>{date}</span></i>
                 </span>
