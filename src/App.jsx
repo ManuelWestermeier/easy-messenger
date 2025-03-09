@@ -11,7 +11,7 @@ export default function App({ setData, data }) {
   useEffect(() => {
     const share = getShareQueryParams();
     if (share) alert(JSON.parse(share))
-  }, [])
+  }, []);
 
   const [currentChat, setCurrentChat] = useState(null);
   window.selectedChat = currentChat;

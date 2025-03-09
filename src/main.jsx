@@ -7,8 +7,7 @@ import "./styles/import.jsx";
 import "./utils/pwa.jsx";
 import CreateAccount from "./comp/create-account.jsx";
 import Login from "./comp/login.jsx";
-
-window.notificationSubscription = false;
+import installApp from "./utils/pwa.jsx";
 
 function Main() {
   useEffect(installApp, []);

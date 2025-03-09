@@ -2,6 +2,8 @@ import { getSubscription } from "./notify.jsx";
 let deferredPrompt;
 const installBtn = document.getElementById("installBtn");
 
+window.notificationSubscription = false;
+
 window.addEventListener("beforeinstallprompt", (e) => {
   // Prevent the default prompt from being shown
   e.preventDefault();
