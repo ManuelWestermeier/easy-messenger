@@ -131,6 +131,16 @@ export default function MessageConetent({
             >
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M760-200v-160q0-50-35-85t-85-35H273l144 144-57 56-240-240 240-240 57 56-144 144h367q83 0 141.5 58.5T840-360v160h-80Z" /></svg>
             </button>
+            <button title="share with other groups" onClick={e => {
+              e.preventDefault();
+              window.setShareData?.({
+                title: `*${author}:*`,
+                text: data + "\n\ncomments:\n" + comments.map(data => `*${data.author}*: ${data.data}`).join("\n"),
+                url: "",
+              });
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M320-280 80-520l240-240 57 56-184 184 184 184-57 56Zm480 80v-160q0-50-35-85t-85-35H433l144 144-57 56-240-240 240-240 57 56-144 144h247q83 0 141.5 58.5T880-360v160h-80Z" /></svg>
+            </button>
           </div>
         )
       }

@@ -8,6 +8,7 @@ import Desktop from "./desktop";
 
 export default function App({ setData, data }) {
   const [shareData, setShareData] = useState(getShareQueryParams());
+  window.setShareData = setShareData;
 
   const [currentChat, setCurrentChat] = useState(null);
   window.selectedChat = currentChat;
@@ -29,7 +30,7 @@ export default function App({ setData, data }) {
   if (shareData) {
     return <ShareData
       client={client}
-      shareData={setData}
+      shareData={shareData}
       setShareData={setShareData}
       setChats={setData}
       chats={data}
