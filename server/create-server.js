@@ -225,7 +225,7 @@ export default function initMessengerServer() {
     });
 
     // Handle sending messages
-    client.onGet("delete-all-messages", (chatId) => {
+    client.onGet("delete-all-messages", async (chatId) => {
       if (typeof chatId !== "string") return false;
       if (!joinedChats.includes(chatId)) return false;
       if (!chats[chatId]) return false;
@@ -236,14 +236,17 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in (chats[chatId].subscriptions)) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        sendPushNotification(subscription, "delete-all-messages");
+        const isSend = await sendPushNotification(subscription, "delete-all-messages");
+        if (isSend instanceof Error) {
+          delete chats[chatId].subscriptions[subscriptionId];
+        }
       }
 
       return true;
     });
 
     // Handle sending messages
-    client.onGet("send", (data) => {
+    client.onGet("send", async (data) => {
       if (
         !areSetAndTheSameType(data, [
           ["chatId", "string"],
@@ -260,7 +263,10 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in (chats[chatId].subscriptions)) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        sendPushNotification(subscription, "send");
+        const isSend = await sendPushNotification(subscription, "send");
+        if (isSend instanceof Error) {
+          delete chats[chatId].subscriptions[subscriptionId];
+        }
       }
 
       chats[chatId].messages.push({ id, message });
@@ -269,7 +275,7 @@ export default function initMessengerServer() {
     });
 
     // Handle sending messages
-    client.onGet("delete-message", (data) => {
+    client.onGet("delete-message", async (data) => {
       if (
         !areSetAndTheSameType(data, [
           ["chatId", "string"],
@@ -285,7 +291,10 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in (chats[chatId].subscriptions)) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        sendPushNotification(subscription, "message-deleted");
+        const isSend = await sendPushNotification(subscription, "message-deleted");
+        if (isSend instanceof Error) {
+          delete chats[chatId].subscriptions[subscriptionId];
+        }
       }
 
       chats[chatId].messages = chats[chatId].messages.filter(

@@ -1,9 +1,10 @@
 const CACHE_NAME = "pwa-cache-v1";
 const ASSETS = [
-  // "/easy-messenger/",
-  // "/easy-messenger/style.css",
-  // "/easy-messenger/script.js",
-  // "/easy-messenger/manifest.json",
+  "/easy-messenger/",
+  "/easy-messenger/style.css",
+  "/easy-messenger/script.js",
+  "/easy-messenger/manifest.json",
+  "/easy-messenger/service-worker.json",
   "/easy-messenger/img/logo-512.png",
   "/easy-messenger/img/logo-128.png",
   "/easy-messenger/img/logo-192.png",
@@ -21,7 +22,6 @@ self.addEventListener("install", (event) => {
 // Activate event - Deletes old caches if they exist
 self.addEventListener("activate", (event) => {
   console.log("Service Worker Activated!");
-  event.waitUntil(self.clients.claim()); // Take control immediately
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -31,40 +31,20 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
+  return self.clients.claim(); // Take control immediately
 });
 
-// Check if the user has a good connection (Wi-Fi, 4G, 5G)
-function hasGoodConnection() {
-  if ("connection" in navigator) {
-    const connection =
-      navigator.connection ||
-      navigator.mozConnection ||
-      navigator.webkitConnection;
-    return (
-      connection.effectiveType === "4g" || connection.effectiveType === "wifi"
-    );
-  }
-  return true; // Assume good connection if API isn't available
-}
-
-// Fetch event - Use cache if slow, update cache if fast
+// Fetch event - Update cache when online, use cache when offline
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((cacheResponse) => {
-      if (!hasGoodConnection()) {
-        return cacheResponse || fetch(event.request); // Use cache first if slow connection
-      }
-
-      // Good connection: Try network first, then update cache
-      return fetch(event.request)
-        .then((networkResponse) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone()); // Update cache
-            return networkResponse;
-          });
-        })
-        .catch(() => cacheResponse || fetch(event.request)); // Fallback to cache if network fails
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, networkResponse.clone()); // Update cache
+          return networkResponse;
+        });
+      })
+      .catch(() => caches.match(event.request)) // Use cache if offline
   );
 });
 
@@ -73,16 +53,21 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("push", async function (event) {
   console.log("Push notification received:", event);
 
-  const data = event.data ? event.data.text() : "New notification";
+  const data = event.data ? event.data.text() : "send";
   let message = "'_'";
 
   if (data === "send") {
-    message = "A user has sent a message (click to see)!";
-  } else if (["delete-all-messages", "message-deleted", "chat-deleted"].includes(data)) {
-    message = "A chat update has occurred.";
+    message = "A user has sent a message (click to view)!";
+  } else if (data === "delete-all-messages") {
+    message = "All chat messages have been deleted.";
+  } else if (data === "message-deleted") {
+    message = "A message has been deleted.";
+  } else if (data === "chat-deleted") {
+    message = "A chat has been deleted.";
   } else {
     message = data;
   }
+
 
   // Check if the website is currently open and focused
   const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
@@ -92,11 +77,19 @@ self.addEventListener("push", async function (event) {
     const options = {
       body: message,
       icon: "https://manuelwestermeier.github.io/easy-messenger/img/logo-512.png",
+      title: "New Message",
+      tag: "message-notification",
+      vibration: [200, 100, 200],
+      sound: "https://manuelwestermeier.github.io/easy-messenger/sounds/messager-ringtone.mp3",
+      renotify: true,
+      silent: false,
+      timestamp: Date.now(),
     };
 
     event.waitUntil(
-      self.registration.showNotification("Push Notification", options)
+      self.registration.showNotification(options.title, options)
     );
+
   }
 });
 
