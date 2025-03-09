@@ -4,6 +4,9 @@ chats[chatId] = {
   clients: [{ client, author }],
   messages: [{id, message}],
   passwordHashHash: basicHash(passwordHash),
+  subscriptions: {
+    [endpoint]: Subscription
+  }
 };
 */
 
