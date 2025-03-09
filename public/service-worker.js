@@ -1,10 +1,10 @@
 const CACHE_NAME = "pwa-cache-v1";
 const ASSETS = [
-  "/easy-messenger/",
-  "/easy-messenger/style.css",
-  "/easy-messenger/script.js",
-  "/easy-messenger/manifest.json",
-  "/easy-messenger/service-worker.json",
+  // "/easy-messenger/",
+  // "/easy-messenger/style.css",
+  // "/easy-messenger/script.js",
+  // "/easy-messenger/manifest.json",
+  // "/easy-messenger/service-worker.json",
   "/easy-messenger/img/logo-512.png",
   "/easy-messenger/img/logo-128.png",
   "/easy-messenger/img/logo-192.png",

@@ -36,7 +36,7 @@ export default function ChatRoomSendForm({
       ...messagePublic,
     });
     if (!isSent) {
-      alert("A send error occurred");
+      alert("A send error occurred. Your message isnt send!");
     }
     e.target.reset();
 
