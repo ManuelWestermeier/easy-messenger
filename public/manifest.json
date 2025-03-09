@@ -2,6 +2,7 @@
     "name": "QUATSCHER - Secure Messenger",
     "short_name": "QUATSCHER",
     "description": "QUATSCHER is an open-source, ultra-secure messenger with end-to-end encryption.",
+    "version": "2.0.0",
     "start_url": "/easy-messenger/",
     "display": "standalone",
     "background_color": "#121212",

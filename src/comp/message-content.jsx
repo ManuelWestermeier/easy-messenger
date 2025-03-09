@@ -67,7 +67,7 @@ export default function MessageConetent({
               }
 
               return (
-                <p
+                <div
                   style={{ backgroundColor: authorUser != author ? userColors[author] : "var(--own-msg-bg)" }}
                   className="comment" key={id}>
                   <div>
@@ -76,7 +76,7 @@ export default function MessageConetent({
                   <div>
                     <b><span>{author}</span></b> <i><span>{date}</span></i>
                   </div>
-                </p>
+                </div>
               );
             })}
             <form
