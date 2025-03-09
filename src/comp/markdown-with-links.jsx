@@ -106,7 +106,12 @@ export default function MarkdownWithLinks({ text = "" }) {
                 let videoId;
                 try {
                     if (origin.includes("youtube.com")) {
-                        videoId = new URL(href).searchParams.get("v");
+                        if (href.includes("shorts")) {
+                            videoId = href.split("/").pop()
+                        }
+                        else {
+                            videoId = new URL(href).searchParams.get("v");
+                        }
                     } else {
                         videoId = href.split("/").pop();
                     }
