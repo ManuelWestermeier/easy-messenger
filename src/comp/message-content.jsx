@@ -26,7 +26,7 @@ export default function MessageConetent({
 
   return (
     <div onClick={() => setSeeMenu(true)} className={seeMenu ? "menu-active" : ""}>
-      <p><MarkdownWithLinks text={data} /></p>
+      <div><MarkdownWithLinks text={data} /></div>
       {seeComments && isUserMessage && (
         <fieldset className="comments">
           <legend>Comments</legend>
@@ -44,12 +44,12 @@ export default function MessageConetent({
               <p
                 style={{ backgroundColor: authorUser != author ? userColors[author] : "var(--own-msg-bg)" }}
                 className="comment" key={id}>
-                <span>
+                <div>
                   <MarkdownWithLinks text={data} />
-                </span>
-                <span>
+                </div>
+                <div>
                   <b><span>{author}</span></b> <i><span>{date}</span></i>
-                </span>
+                </div>
               </p>
             );
           })}

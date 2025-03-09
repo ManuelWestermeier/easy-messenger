@@ -10,9 +10,11 @@
     padding: 10px;
 }
 
-.message-form input,
+.message-form textarea,
 .message-form select {
     flex: 1;
+    height: 40px;
+    resize: none;
 }
 
 .message-form button {

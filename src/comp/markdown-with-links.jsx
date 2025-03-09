@@ -23,7 +23,8 @@ const preprocessText = (text) => {
     return text.replace(/(^|\s)(https?:\/\/[^\s]+)/g, "$1<$2>");
 };
 
-export default function MarkdownWithLinks({ text }) {
+export default function MarkdownWithLinks({ text = "" }) {
+    text = text.replaceAll("\n", "\n\n");
     const [linkTitles, setLinkTitles] = useState({});
 
     // Process the text once so that plain URLs become markdown links.
