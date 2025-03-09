@@ -23,6 +23,13 @@
     transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     font-size: 0.9rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.message.focus {
+    box-shadow: 0 0 100px 100px var(--primary);
+    z-index: 1000;
+    outline: 2px solid var(--text);
 }
 
 .message.own-msg {

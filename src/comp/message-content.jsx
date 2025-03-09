@@ -14,28 +14,31 @@ export default function MessageConetent({
   react,
   id
 }) {
-  const [seeMenu, setSeeMenu] = useState(false);
   const [seeComments, setSeeComments] = useState(comments?.length != 0);
-
 
   useEffect(() => {
     if (comments?.length > 0 && !seeComments) setSeeComments(true);
   }, [comments?.length]);
 
-  if (seeComments && !seeMenu) setSeeMenu(true);
-
   const isUserMessage = userMessageTypes.includes(type);
 
   return (
-    <div onClick={() => setSeeMenu(true)} className={seeMenu ? "menu-active" : ""}>
+    <div className="menu-active">
       {react && <div
         className="reaction-text"
         onClick={e => {
           e.preventDefault();
-          document.getElementById(react[0])?.scrollIntoView?.({
+          const messageElem = document.getElementById(react[0]);
+          if (!messageElem) return;
+
+          messageElem.scrollIntoView({
             behavior: "smooth",
             block: "center"
           });
+          console.log(messageElem);
+
+          messageElem.classList.add("focus");
+          setTimeout(() => messageElem.classList.remove("focus"), 1500);
         }}
         style={{
           backgroundColor: react[1].author != authorUser ? userColors[react[1].author] : "var(--own-msg-bg)",
@@ -94,7 +97,7 @@ export default function MessageConetent({
         )
       }
       {
-        seeMenu && isUserMessage && (
+        isUserMessage && (
           <div className="menu">
             <button title="delete message" className="danger" onClick={deleteMessage}>
               <svg

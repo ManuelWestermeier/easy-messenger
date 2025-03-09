@@ -130,3 +130,7 @@ svg {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-hover);
 }
+
+iframe {
+    border-radius: 5px;
+}
