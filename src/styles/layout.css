@@ -69,9 +69,14 @@ aside {
     }
 
     .chat-room {
-        width: calc(100dvw - 40px);
+        width: 100dvw;
         height: calc(100dvh - 43px);
         margin: auto;
+    }
+
+    main {
+        margin: 0;
+        padding: 0;
     }
 
     .messages {
