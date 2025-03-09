@@ -6,14 +6,14 @@ export default function getShareQueryParams() {
 
     let out = "";
 
-    if (url.searchParams.get("title") != "") {
+    if (url.searchParams.get("title")) {
         out += `Title: ${url.searchParams.get("title")}`;
     }
-    if (url.searchParams.get("text") != "") {
-        out += `Text: ${url.searchParams.get("text")}`;
+    if (url.searchParams.get("text")) {
+        out += `\nText: ${url.searchParams.get("text")}`;
     }
-    if (url.searchParams.get("url") != "") {
-        out += `URL: ${url.searchParams.get("url")}`;
+    if (url.searchParams.get("url")) {
+        out += `\nURL: ${url.searchParams.get("url")}`;
     }
 
     return out || false;
