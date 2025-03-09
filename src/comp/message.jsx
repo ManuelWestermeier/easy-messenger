@@ -54,10 +54,10 @@ export default function Message({
             id: _msg.id,
           });
 
-          if (!isSent) alert("error: message isn't deleted");
+          if (!isSent) return alert("error: message isn't deleted");
         }
       } else if (_msg.react) {
-        const [reactId] = msg.react;
+        const [reactId] = _msg.react;
 
         if (reactId == msg.id) {
           const isSent = await client.get("delete-message", {
@@ -65,13 +65,15 @@ export default function Message({
             id: _msg.id,
           });
 
-          if (!isSent) alert("error: message isn't deleted");
+          if (!isSent) return alert("error: message isn't deleted");
         }
       }
     }
 
     setData((old) => {
-      let messages = old[chatId].messages.filter((m) => m.id !== msg.id);
+      let messages = old[chatId].messages.filter((m) => {
+        return m.id !== msg.id && m?.react?.[0] !== msg.id;
+      });
       return {
         ...old,
         [chatId]: {
