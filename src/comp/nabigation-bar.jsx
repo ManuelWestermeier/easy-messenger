@@ -1,5 +1,3 @@
-import { getSubscription } from "../utils/notify";
-
 // Navigation bar to switch between chat groups
 export function NavigationBar({
   chats,
@@ -17,16 +15,57 @@ export function NavigationBar({
       )
     )
       return;
+
     if (!(await client.get("delete-chat", chatId)))
       return alert("error: chat cant be deleted");
+
     setChats((old) => {
       const newChats = { ...old };
       delete newChats[chatId];
       return newChats;
     });
+
+    handleCloseForm(e);
   }
 
   window.deleteChat = deleteChat;
+
+  const exitChat = (chatId) => async e => {
+    e.preventDefault();
+    if (!confirm(`are you sure you want to leave chat: "${chats[chatId]?.chatName}"?`)) return;
+    if (!(await client.get("exit", { chatId, subscription: window.notificationSubscription })))
+      return alert("error: chat cant be exited");
+    setChats((old) => {
+      const newChats = { ...old };
+      delete newChats[chatId];
+      return newChats;
+    });
+  };
+
+  const selectChat = (chatId) => e => {
+    e.preventDefault();
+    setCurrentChat(chatId);
+    if (setPage) setPage(false);
+    setChats((old) => {
+      return {
+        ...old,
+        [chatId]: {
+          ...old[chatId],
+          unread: 0,
+        },
+      };
+    });
+    const messageInput = document.querySelector(
+      '.chat-room .message-form input[name="text"]'
+    );
+    messageInput?.focus?.();
+
+    const chatElem = document.querySelector(".chat-room");
+    chatElem?.scrollIntoView?.({
+      block: "start",
+      behavior: "smooth",
+    });
+  }
 
   return (
     <nav className="nav-bar">
@@ -35,43 +74,11 @@ export function NavigationBar({
           <li
             key={chatId}
             className={chatId === currentChat ? "active" : ""}
-            onContextMenu={async e => {
-              e.preventDefault();
-              if (!confirm(`are you sure you want to leave chat: "${chats[chatId]?.chatName}"?`)) return;
-              if (!(await client.get("exit", { chatId, subscription: await getSubscription() })))
-                return alert("error: chat cant be exited");
-              setChats((old) => {
-                const newChats = { ...old };
-                delete newChats[chatId];
-                return newChats;
-              });
-            }}
+            onContextMenu={exitChat(chatId)}
           >
             <button
               className="chat-select-button"
-              onClick={() => {
-                setCurrentChat(chatId);
-                if (setPage) setPage(false);
-                setChats((old) => {
-                  return {
-                    ...old,
-                    [chatId]: {
-                      ...old[chatId],
-                      unread: 0,
-                    },
-                  };
-                });
-                const messageInput = document.querySelector(
-                  '.chat-room .message-form input[name="text"]'
-                );
-                messageInput?.focus?.();
-
-                const chatElem = document.querySelector(".chat-room");
-                chatElem?.scrollIntoView?.({
-                  block: "start",
-                  behavior: "smooth",
-                });
-              }}
+              onClick={selectChat(chatId)}
             >
               <span>{chats[chatId]?.chatName}</span>
               <span

@@ -196,7 +196,7 @@ export default function initMessengerServer() {
     });
 
     // Handle sending messages
-    client.onGet("delete-chat", (chatId) => {
+    client.onGet("delete-chat", async (chatId) => {
       if (typeof chatId !== "string") return false;
       if (!joinedChats.includes(chatId)) return false;
       if (!chats[chatId]) return false;
@@ -205,8 +205,12 @@ export default function initMessengerServer() {
 
       joinedChats = joinedChats.filter((chat) => chat != chatId);
 
-      for (const subscription of chats[chatId].subscriptions) {
-        sendPushNotification(subscription, "chat-deleted");
+      for (const subscriptionId in (chats[chatId].subscriptions)) {
+        const subscription = chats[chatId].subscriptions[subscriptionId];
+        const isSend = await sendPushNotification(subscription, "chat-deleted");
+        if (isSend instanceof Error) {
+          delete chats[chatId].subscriptions[subscriptionId];
+        }
       }
 
       chats[chatId].clients.forEach(({ client }) => {

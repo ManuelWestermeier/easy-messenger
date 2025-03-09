@@ -57,6 +57,7 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
   async function handleDeleteAllMessages(e) {
     e.preventDefault();
     await client.get("delete-all-messages", chatId);
+
     setData((prevData) => ({
       ...prevData,
       [chatId]: {
@@ -85,8 +86,8 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
 
         <fieldset>
           <legend>Delete Chat</legend>
-          <button title="delete chat" className="danger" onClick={window?.deleteChat?.(chatId)}>
-            <DeleteChatIcon /> Delete Chat  </button>
+          <button title="delete chat" className="danger" onClick={window?.deleteChat?.(chatId, handleCloseForm)}>
+            <DeleteChatIcon /> Delete Chat</button>
         </fieldset>
 
         <fieldset>
@@ -116,7 +117,7 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
           size={60}
           tabIndex={-1}
         />
-      </form>
+      </form >
     );
   }
 

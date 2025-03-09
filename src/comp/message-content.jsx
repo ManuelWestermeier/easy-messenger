@@ -33,7 +33,7 @@ export default function MessageConetent({
           {comments.map(({ author, data, date, id }) => {
             // Generate a random color for the user if they don't have one already.
             if (!userColors[author]) {
-              userColors[msg.author] = `rgb(${Math.floor(
+              userColors[author] = `rgb(${Math.floor(
                 Math.random() * 100 + 50
               )}, ${Math.floor(Math.random() * 100 + 50)}, ${Math.floor(
                 Math.random() * 100 + 50
