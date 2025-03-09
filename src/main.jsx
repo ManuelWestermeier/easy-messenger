@@ -7,23 +7,11 @@ import "./styles/import.jsx";
 import "./utils/pwa.jsx";
 import CreateAccount from "./comp/create-account.jsx";
 import Login from "./comp/login.jsx";
-import { getSubscription } from "./utils/notify.jsx";
 
 window.notificationSubscription = false;
 
 function Main() {
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/easy-messenger/service-worker.js", { scope: "/easy-messenger/" })
-        .then(() => {
-          console.log("Service Worker Active!");
-        }).catch(error => console.error(error));
-      getSubscription().then(s => {
-        window.notificationSubscription = s;
-      });
-    }
-  }, []);
+  useEffect(installApp, []);
 
   const [password, setPassword] = useState(null);
   const [data, setData] = useLocalStorage("enc-chat-data", null);

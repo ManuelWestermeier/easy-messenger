@@ -108,3 +108,10 @@ self.addEventListener("notificationclick", function (event) {
     })
   );
 });
+
+// Listen for the update event to ensure the new service worker takes control immediately
+self.addEventListener('message', (event) => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
