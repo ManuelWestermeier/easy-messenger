@@ -12,6 +12,8 @@ export default function getShareQueryParams() {
         url: params.get("url")
     };
 
+    alert(window.location);
+
     // Replace only the hash, not the entire URL
     window.history.replaceState("", "", window.location.pathname);
 
