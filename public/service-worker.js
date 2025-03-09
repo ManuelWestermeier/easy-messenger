@@ -8,6 +8,7 @@ const ASSETS = [
   "/easy-messenger/img/logo-512.png",
   "/easy-messenger/img/logo-128.png",
   "/easy-messenger/img/logo-192.png",
+  "/easy-messenger/sounds/messager-ringtone.mp3"
 ];
 
 // Install event - Pre-caches assets
