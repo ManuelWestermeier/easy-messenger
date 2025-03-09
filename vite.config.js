@@ -35,8 +35,8 @@ export default defineConfig({
     outDir: "docs",
     rollupOptions: {
       input: {
-        main: "index.html",
-        sw: "public/service-worker.js", // Include SW in the build process
+        script: "index.html",
+        "service-worker": "public/service-worker.js", // Include SW in the build process
       },
       output: {
         entryFileNames: "[name].js",
