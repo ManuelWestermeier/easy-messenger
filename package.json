@@ -22,7 +22,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-facebook": "^9.0.12",
-    "react-instagram-embed": "^3.0.0",
     "react-markdown": "^10.1.0",
     "react-oembed-container": "^1.0.1",
     "react-player": "^2.16.0",
