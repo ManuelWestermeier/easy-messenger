@@ -156,10 +156,12 @@ async function fetchAllChatRoomsData() {
             clients: [],
             subscriptions: data?.subscriptions || {},
           };
-        } catch (error) {}
+        } catch (error) {
+          console.error("Error fetching chat room data:", error);
+        }
       }
     }
-    console.log("Fetched all chat room data");
+    console.error("Fetched all chat room data");
   } catch (error) {
     console.error("Error fetching chat room data:", error);
   }
