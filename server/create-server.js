@@ -4,7 +4,6 @@ dotenv.config(); // Load environment variables
 import webpush from "web-push";
 import WEB_PUSH_PUBLIC_KEY from "../web-push-public-key.js";
 
-
 const publicVapidKey = WEB_PUSH_PUBLIC_KEY;
 const privateVapidKey = process.env.WEB_PUSH_PRIVATE_KEY;
 const email = process.env.EMAIL;
@@ -23,7 +22,6 @@ async function sendPushNotification(subscription, data = "send") {
     return error;
   }
 }
-
 
 import { areSetAndTheSameType } from "are-set";
 import { createServer } from "wsnet-server";
@@ -86,7 +84,9 @@ export default function initMessengerServer() {
 
       const passwordHashHash = basicHash(passwordHash).slice(0, 12);
 
-      let subscription = data?.subscription?.endpoint ? data?.subscription : false;
+      let subscription = data?.subscription?.endpoint
+        ? data?.subscription
+        : false;
       if (subscription) {
         try {
           new URL(subscription.endpoint);
@@ -110,7 +110,9 @@ export default function initMessengerServer() {
           clients: [{ client, author }],
           messages: [],
           passwordHashHash,
-          subscriptions: subscription ? { [subscription.endpoint]: subscription } : {},
+          subscriptions: subscription
+            ? { [subscription.endpoint]: subscription }
+            : {},
         };
         return [];
       }
@@ -163,7 +165,9 @@ export default function initMessengerServer() {
       const { chatId } = data;
       if (!joinedChats.includes(chatId)) return false;
 
-      let subscription = data?.subscription?.endpoint ? data?.subscription : false;
+      let subscription = data?.subscription?.endpoint
+        ? data?.subscription
+        : false;
 
       let author;
       // Hier: Entferne den aktuellen Client aus der Liste
@@ -205,7 +209,7 @@ export default function initMessengerServer() {
 
       joinedChats = joinedChats.filter((chat) => chat != chatId);
 
-      for (const subscriptionId in (chats[chatId].subscriptions)) {
+      for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
         const isSend = await sendPushNotification(subscription, "chat-deleted");
         if (isSend instanceof Error) {
@@ -222,7 +226,7 @@ export default function initMessengerServer() {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}.json`;
           githubFS.deleteFile(fileName);
-        } catch (error) { }
+        } catch (error) {}
       }
 
       return true;
@@ -238,9 +242,12 @@ export default function initMessengerServer() {
 
       send("all-messages-deleted", chatId, 0, 0);
 
-      for (const subscriptionId in (chats[chatId].subscriptions)) {
+      for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        const isSend = await sendPushNotification(subscription, "delete-all-messages");
+        const isSend = await sendPushNotification(
+          subscription,
+          "delete-all-messages"
+        );
         if (isSend instanceof Error) {
           delete chats[chatId].subscriptions[subscriptionId];
         }
@@ -265,7 +272,7 @@ export default function initMessengerServer() {
 
       send("message", chatId, message, id);
 
-      for (const subscriptionId in (chats[chatId].subscriptions)) {
+      for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
         const isSend = await sendPushNotification(subscription, "send");
         if (isSend instanceof Error) {
@@ -293,9 +300,12 @@ export default function initMessengerServer() {
 
       send("message-deleted", chatId, 0, id);
 
-      for (const subscriptionId in (chats[chatId].subscriptions)) {
+      for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        const isSend = await sendPushNotification(subscription, "message-deleted");
+        const isSend = await sendPushNotification(
+          subscription,
+          "message-deleted"
+        );
         if (isSend instanceof Error) {
           delete chats[chatId].subscriptions[subscriptionId];
         }

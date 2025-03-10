@@ -28,7 +28,7 @@ installBtn.addEventListener("click", () => {
 });
 
 export default function installApp() {
-  if ('serviceWorker' in navigator) {
+  if ("serviceWorker" in navigator) {
     // Handle the notification subscription (if applicable)
     getSubscription().then((s) => {
       window.notificationSubscription = s;
@@ -36,27 +36,38 @@ export default function installApp() {
 
     // Register the service worker
     navigator.serviceWorker
-      .register('/easy-messenger/service-worker.js', { scope: '/easy-messenger/' })
+      .register("/easy-messenger/service-worker.js", {
+        scope: "/easy-messenger/",
+      })
       .then((registration) => {
-        console.log('Service Worker Active!');
+        console.log("Service Worker Active!");
 
         // Check for updates every 5 minutes
         const updateInterval = setInterval(() => {
-          registration.update().then(() => {
-            console.log('Service Worker updated!');
-          }).catch((error) => {
-            console.error('Error checking for service worker updates:', error);
-          });
+          registration
+            .update()
+            .then(() => {
+              console.log("Service Worker updated!");
+            })
+            .catch((error) => {
+              console.error(
+                "Error checking for service worker updates:",
+                error
+              );
+            });
         }, 5 * 60 * 1000); // Check for updates every 5 minutes
 
         // Listen for the 'updatefound' event and handle the new service worker
         registration.onupdatefound = () => {
           const installingWorker = registration.installing;
           installingWorker.onstatechange = () => {
-            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            if (
+              installingWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
               // A new service worker has been installed, trigger skipWaiting to update immediately
-              installingWorker.postMessage({ type: 'skipWaiting' });
-              console.log('New service worker found and taking control');
+              installingWorker.postMessage({ type: "skipWaiting" });
+              console.log("New service worker found and taking control");
             }
           };
         };
@@ -65,7 +76,7 @@ export default function installApp() {
         return () => clearInterval(updateInterval);
       })
       .catch((error) => {
-        console.error('Service Worker registration failed:', error);
+        console.error("Service Worker registration failed:", error);
       });
   }
 }

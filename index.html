@@ -1,57 +1,96 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>QUATSCHER</title>
 
-  <title>QUATSCHER</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/easy-messenger/img/logo-512.png" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/easy-messenger/img/logo-512.png">
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/easy-messenger/manifest.json?v=4" />
 
-  <!-- Web App Manifest -->
-  <link rel="manifest" href="/easy-messenger/manifest.json?v=4">
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="QUATSCHER - The ultra-secure, open-source messenger with symetric end-to-end encryption."
+    />
+    <meta
+      name="keywords"
+      content="secure messenger, encrypted chat, end to end, privacy, open-source, QUATSCHER"
+    />
+    <meta name="author" content="Manuel Westermeier" />
 
-  <!-- SEO Meta Tags -->
-  <meta name="description"
-    content="QUATSCHER - The ultra-secure, open-source messenger with symetric end-to-end encryption." />
-  <meta name="keywords" content="secure messenger, encrypted chat, end to end, privacy, open-source, QUATSCHER" />
-  <meta name="author" content="Manuel Westermeier" />
+    <!-- Open Graph Meta Tags (for social media) -->
+    <meta
+      property="og:title"
+      content="QUATSCHER - Open Source & Ultra Secure Messenger"
+    />
+    <meta
+      property="og:description"
+      content="All data is encrypted directly on your device, ensuring maximum security."
+    />
+    <meta property="og:image" content="/easy-messenger/img/logo-512.png" />
+    <meta
+      property="og:url"
+      content="https://manuelwestermeier.github.io/easy-messenger/"
+    />
+    <meta property="og:type" content="website" />
 
-  <!-- Open Graph Meta Tags (for social media) -->
-  <meta property="og:title" content="QUATSCHER - Open Source & Ultra Secure Messenger" />
-  <meta property="og:description" content="All data is encrypted directly on your device, ensuring maximum security." />
-  <meta property="og:image" content="/easy-messenger/img/logo-512.png" />
-  <meta property="og:url" content="https://manuelwestermeier.github.io/easy-messenger/" />
-  <meta property="og:type" content="website" />
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="QUATSCHER - Secure Messenger" />
+    <meta
+      name="twitter:description"
+      content="End-to-end encrypted, open-source, and designed for privacy."
+    />
+    <meta name="twitter:image" content="/easy-messenger/img/logo-512.png" />
 
-  <!-- Twitter Card Meta Tags -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="QUATSCHER - Secure Messenger" />
-  <meta name="twitter:description" content="End-to-end encrypted, open-source, and designed for privacy." />
-  <meta name="twitter:image" content="/easy-messenger/img/logo-512.png" />
+    <!-- PWA Optimization -->
+    <meta name="theme-color" content="#F2F2F2" />
+    <meta name="background-color" content="#F2F2F2" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta
+      name="apple-mobile-web-app-title"
+      content="QUATSCHER - Secure Messenger"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="512x512"
+      href="/easy-messenger/img/logo-512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="192x192"
+      href="/easy-messenger/img/logo-192.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="128x128"
+      href="/easy-messenger/img/logo-128.png"
+    />
+    <meta name="msapplication-TileColor" content="#F2F2F2" />
+    <meta
+      name="msapplication-TileImage"
+      content="/easy-messenger/img/logo-192.png"
+    />
+  </head>
 
-  <!-- PWA Optimization -->
-  <meta name="theme-color" content="#F2F2F2" />
-  <meta name="background-color" content="#F2F2F2" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="QUATSCHER - Secure Messenger" />
-  <link rel="apple-touch-icon" sizes="512x512" href="/easy-messenger/img/logo-512.png" />
-  <link rel="apple-touch-icon" sizes="192x192" href="/easy-messenger/img/logo-192.png" />
-  <link rel="apple-touch-icon" sizes="128x128" href="/easy-messenger/img/logo-128.png" />
-  <meta name="msapplication-TileColor" content="#F2F2F2" />
-  <meta name="msapplication-TileImage" content="/easy-messenger/img/logo-192.png" />
-</head>
-
-<body>
-  <button id="installBtn">Install App</button>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-  <audio src="https://manuelwestermeier.github.io/easy-messenger/sounds/messager-ringtone.mp3" style="display: none;"
-    autoplay></audio>
-</body>
-
+  <body>
+    <button id="installBtn">Install App</button>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <audio
+      src="https://manuelwestermeier.github.io/easy-messenger/sounds/messager-ringtone.mp3"
+      style="display: none"
+      autoplay
+    ></audio>
+  </body>
 </html>

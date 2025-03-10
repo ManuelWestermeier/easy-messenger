@@ -5,7 +5,13 @@ import { basicHash, decrypt, encrypt, randomBytes } from "../utils/crypto";
 import CryptoJS from "crypto-js";
 
 // Component for joining a new chat room
-export function JoinChat({ client, setData, setCurrentChat, setPage, data }) {
+export function JoinChat({
+  client,
+  setData,
+  setCurrentChat,
+  setPage,
+  data: chatData,
+}) {
   const [scanQrCode, setScanQrCode] = useState(false);
   const [[chatId, password], setChatData] = useState(["", ""]);
 
@@ -24,7 +30,7 @@ export function JoinChat({ client, setData, setCurrentChat, setPage, data }) {
         "Please Scan QR Code first or switch to input mode and input the group id and password."
       );
 
-    if (data?.[chatId]) {
+    if (chatData?.[chatId]) {
       return alert("you are ich chat: " + chatName);
     }
 

@@ -8,7 +8,7 @@ const ASSETS = [
   "/easy-messenger/img/logo-512.png",
   "/easy-messenger/img/logo-128.png",
   "/easy-messenger/img/logo-192.png",
-  "/easy-messenger/sounds/messager-ringtone.mp3"
+  "/easy-messenger/sounds/messager-ringtone.mp3",
 ];
 
 // Install event - Pre-caches assets
@@ -49,7 +49,6 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-
 // Push notification event
 self.addEventListener("push", async function (event) {
   console.log("Push notification received:", event);
@@ -69,10 +68,12 @@ self.addEventListener("push", async function (event) {
     message = data;
   }
 
-
   // Check if the website is currently open and focused
-  const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-  const isClientFocused = clients.some(client => client.focused);
+  const clients = await self.clients.matchAll({
+    type: "window",
+    includeUncontrolled: true,
+  });
+  const isClientFocused = clients.some((client) => client.focused);
 
   if (!isClientFocused) {
     const options = {
@@ -81,19 +82,16 @@ self.addEventListener("push", async function (event) {
       title: "New Message",
       tag: "message-notification",
       vibration: [200, 100, 200],
-      sound: "https://manuelwestermeier.github.io/easy-messenger/sounds/messager-ringtone.mp3",
+      sound:
+        "https://manuelwestermeier.github.io/easy-messenger/sounds/messager-ringtone.mp3",
       renotify: true,
       silent: false,
       timestamp: Date.now(),
     };
 
-    event.waitUntil(
-      self.registration.showNotification(options.title, options)
-    );
-
+    event.waitUntil(self.registration.showNotification(options.title, options));
   }
 });
-
 
 // Handle notification clicks
 self.addEventListener("notificationclick", function (event) {
@@ -105,14 +103,16 @@ self.addEventListener("notificationclick", function (event) {
           return client.focus();
         }
       }
-      return clients.openWindow("https://manuelwestermeier.github.io/easy-messenger/");
+      return clients.openWindow(
+        "https://manuelwestermeier.github.io/easy-messenger/"
+      );
     })
   );
 });
 
 // Listen for the update event to ensure the new service worker takes control immediately
-self.addEventListener('message', (event) => {
-  if (event.data === 'skipWaiting') {
+self.addEventListener("message", (event) => {
+  if (event.data === "skipWaiting") {
     self.skipWaiting();
   }
 });

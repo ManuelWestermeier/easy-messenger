@@ -26,14 +26,24 @@ export function NavigationBar({
     });
 
     handleCloseForm(e);
-  }
+  };
 
   window.deleteChat = deleteChat;
 
-  const exitChat = (chatId) => async e => {
+  const exitChat = (chatId) => async (e) => {
     e.preventDefault();
-    if (!confirm(`are you sure you want to leave chat: "${chats[chatId]?.chatName}"?`)) return;
-    if (!(await client.get("exit", { chatId, subscription: window.notificationSubscription })))
+    if (
+      !confirm(
+        `are you sure you want to leave chat: "${chats[chatId]?.chatName}"?`
+      )
+    )
+      return;
+    if (
+      !(await client.get("exit", {
+        chatId,
+        subscription: window.notificationSubscription,
+      }))
+    )
       return alert("error: chat cant be exited");
     setChats((old) => {
       const newChats = { ...old };
@@ -42,7 +52,7 @@ export function NavigationBar({
     });
   };
 
-  const selectChat = (chatId) => e => {
+  const selectChat = (chatId) => (e) => {
     e.preventDefault();
     setCurrentChat(chatId);
     if (setPage) setPage(false);
@@ -65,7 +75,7 @@ export function NavigationBar({
       block: "start",
       behavior: "smooth",
     });
-  }
+  };
 
   return (
     <nav className="nav-bar">
@@ -76,10 +86,7 @@ export function NavigationBar({
             className={chatId === currentChat ? "active" : ""}
             onContextMenu={exitChat(chatId)}
           >
-            <button
-              className="chat-select-button"
-              onClick={selectChat(chatId)}
-            >
+            <button className="chat-select-button" onClick={selectChat(chatId)}>
               <span>{chats[chatId]?.chatName}</span>
               <span
                 className={

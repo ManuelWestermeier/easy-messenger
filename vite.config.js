@@ -17,7 +17,11 @@ export default defineConfig({
         const manifestPath = path.join(docsDir, "manifest.json");
         if (fs.existsSync(manifestPath)) {
           const manifestCode = fs.readFileSync(manifestPath, "utf8");
-          fs.writeFileSync(manifestPath, JSON.stringify(JSON.parse(manifestCode)), "utf8");
+          fs.writeFileSync(
+            manifestPath,
+            JSON.stringify(JSON.parse(manifestCode)),
+            "utf8"
+          );
         }
 
         // Minify service-worker.js

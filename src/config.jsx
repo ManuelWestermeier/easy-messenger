@@ -7,4 +7,4 @@ export const serverURL =
   document.location.protocol == "http:" ? localHostURL : remoteServerURL;
 
 const ws = new WebSocket(remoteServerURL);
-ws.onopen = () => ws.close(23);
+ws.onopen = () => ws.close(1000);

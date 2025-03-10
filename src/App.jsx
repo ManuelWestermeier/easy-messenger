@@ -20,31 +20,37 @@ export default function App({ setData, data }) {
   );
 
   if (state === "failed" || isClosed) {
-    return <div style={{ margin: "20px" }}>
-      <button onClick={() => reCreateClient()}>Reconnect</button>
-    </div>;
+    return (
+      <div style={{ margin: "20px" }}>
+        <button onClick={() => reCreateClient()}>Reconnect</button>
+      </div>
+    );
   }
 
   if (client == null) return <LoadingState state={state} />;
 
   if (shareData) {
-    return <ShareData
-      client={client}
-      shareData={shareData}
-      setShareData={setShareData}
-      setChats={setData}
-      chats={data}
-    />;
+    return (
+      <ShareData
+        client={client}
+        shareData={shareData}
+        setShareData={setShareData}
+        setChats={setData}
+        chats={data}
+      />
+    );
   }
 
   if (innerWidth > 768)
-    return <Desktop
-      client={client}
-      currentChat={currentChat}
-      data={data}
-      setCurrentChat={setCurrentChat}
-      setData={setData}
-    />
+    return (
+      <Desktop
+        client={client}
+        currentChat={currentChat}
+        data={data}
+        setCurrentChat={setCurrentChat}
+        setData={setData}
+      />
+    );
   else
     return (
       <Mobile

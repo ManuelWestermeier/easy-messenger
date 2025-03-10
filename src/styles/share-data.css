@@ -5,6 +5,12 @@
     border-radius: 10px;
 }
 
+.share-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .share-container textarea {
     width: 100%;
     min-height: 5rem;
@@ -45,6 +51,7 @@ h3 {
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
     background-color: var(--bg);
+    margin: 5px 0;
 }
 
 .chat-select-button:hover {
