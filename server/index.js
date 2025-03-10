@@ -1,6 +1,8 @@
 import { config } from "dotenv";
 config();
 
+console.clear();
+
 const log = console.log;
 console.log = function (...args) {
   if (process.env.LOG) {
@@ -69,7 +71,7 @@ export async function storeAllChatRoomsData() {
         new Date().toString(), // commit message as a string
         { branch: "main" } // explicitly specify the branch
       );
-      for (let index = 0; index < array.length; index++) {
+      for (let index = 0; index < messages.length; index++) {
         const messageFileName = `chats/${encodeURIComponent(
           chatId
         )}-message-${index}.json`;
