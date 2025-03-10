@@ -1,13 +1,10 @@
 import { Html5QrcodeScanner } from "html5-qrcode";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const qrcodeRegionId = "html5qr-code-full-region";
 
 // Creates the configuration object for Html5QrcodeScanner.
 function createConfig(props) {
-  /**
-   * @type {import("html5-qrcode/esm/html5-qrcode-scanner").Html5QrcodeScannerConfig}
-   */
   let config = {};
   if (props.fps) {
     config.fps = props.fps;
@@ -25,11 +22,19 @@ function createConfig(props) {
 }
 
 export default function Html5QrcodePlugin(props) {
+  const [qrResult, setQrResult] = useState("");
+
+  // Wrap the success callback to update our state as well.
+  const onScanSuccess = (decodedText, decodedResult) => {
+    setQrResult(decodedText);
+    if (props.qrCodeSuccessCallback) {
+      props.qrCodeSuccessCallback(decodedText, decodedResult);
+    }
+  };
+
   useEffect(() => {
-    // when component mounts
     const config = createConfig(props);
     const verbose = props.verbose === true;
-    // Suceess callback is required.
     if (!props.qrCodeSuccessCallback) {
       throw "qrCodeSuccessCallback is required callback.";
     }
@@ -38,18 +43,29 @@ export default function Html5QrcodePlugin(props) {
       config,
       verbose
     );
-    html5QrcodeScanner.render(
-      props.qrCodeSuccessCallback,
-      props.qrCodeErrorCallback
-    );
+    html5QrcodeScanner.render(onScanSuccess, props.qrCodeErrorCallback);
 
-    // cleanup function when component will unmount
     return () => {
       html5QrcodeScanner.clear().catch((error) => {
         console.error("Failed to clear html5QrcodeScanner. ", error);
       });
     };
-  }, []);
+  }, [props]);
 
-  return <div id={qrcodeRegionId} />;
+  return (
+    <div>
+      <div id={qrcodeRegionId} />
+      <div style={{ marginTop: "1rem" }}>
+        <label htmlFor="qr-code-result">QR Code Result:</label>
+        <input
+          type="text"
+          id="qr-code-result"
+          value={qrResult}
+          readOnly
+          placeholder="Scan a QR code..."
+          style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
+        />
+      </div>
+    </div>
+  );
 }
