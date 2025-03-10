@@ -35,6 +35,7 @@ chats[chatId] = {
   passwordHashHash: basicHash(passwordHash),
 };
 */
+
 export const chats = {};
 
 /**
@@ -44,28 +45,45 @@ export const chats = {};
  * The chatId is encoded to ensure a valid filename.
  */
 let lastStored = 0;
+let isStroring = false;
 export async function storeAllChatRoomsData() {
-  if (process.env?.DEBUG) return;
-  if (Date.now() - lastStored < storeInterval) return;
+  if (process.env?.DEBUG || isStroring) return;
+  if (Date.now() - lastStored < 10_000 /*10s*/) return;
+  isStroring = true;
   lastStored = Date.now();
   for (const chatId in chats) {
     const { messages, passwordHashHash, subscriptions } = chats[chatId];
-    const chatRoomData = { messages, passwordHashHash, subscriptions };
+    const chatRoomData = {
+      passwordHashHash,
+      subscriptions,
+      messagesLength: messages.length,
+    };
 
     // Encode chatId to ensure a valid file name.
-    const fileName = `chats/${encodeURIComponent(chatId)}.json`;
     try {
+      const dataFileName = `chats/${encodeURIComponent(chatId)}.json`;
       await githubFS.writeFile(
-        fileName,
+        dataFileName,
         JSON.stringify(chatRoomData),
         new Date().toString(), // commit message as a string
         { branch: "main" } // explicitly specify the branch
       );
-      console.log(`Chat room ${chatId} stored successfully at ${fileName}.`);
+      for (let index = 0; index < array.length; index++) {
+        const messageFileName = `chats/${encodeURIComponent(
+          chatId
+        )}-message-${index}.json`;
+        await githubFS.writeFile(
+          messageFileName,
+          JSON.stringify(messages[index]),
+          new Date().toString(), // commit message as a string
+          { branch: "main" } // explicitly specify the branch
+        );
+      }
     } catch (error) {
       console.error(`Failed to store chat room ${chatId}:`, error);
     }
   }
+  isStroring = false;
 }
 
 /**
@@ -103,7 +121,11 @@ async function fetchAllChatRoomsData() {
     }
 
     for (const file of files) {
-      if (file.type === "file" && file.name.endsWith(".json")) {
+      if (
+        file.type === "file" &&
+        file.name.endsWith(".json") &&
+        !file.name.includes("-message-")
+      ) {
         try {
           // Remove the ".json" extension and decode the chatId.
           const chatIdEncoded = file.name.slice(0, -5);
@@ -112,16 +134,24 @@ async function fetchAllChatRoomsData() {
           const content = await githubFS.readFile(filePath);
           const data = JSON.parse(content);
 
+          const messages = new Array({ length: content.messagesLength });
+
+          for (let index = 0; index < messages.length; index++) {
+            const messageFileName = `chats/${encodeURIComponent(
+              chatId
+            )}-message-${index}.json`;
+            const content = await githubFS.readFile(messageFileName);
+            messages[index] = JSON.parse(content);
+          }
+
           // Initialize the chat room in memory (clients array remains empty).
           chats[chatId] = {
-            messages: data.messages || [],
+            messages,
             passwordHashHash: data.passwordHashHash,
             clients: [],
             subscriptions: data?.subscriptions || {},
           };
-        } catch (error) {
-
-        }
+        } catch (error) {}
       }
     }
     console.log("Fetched all chat room data");
