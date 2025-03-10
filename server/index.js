@@ -1,6 +1,13 @@
 import { config } from "dotenv";
 config();
 
+const log = console.log;
+console.log = function (...args) {
+  if (process.env.LOG) {
+    log(...args);
+  }
+};
+
 import GitHubFS from "gh-fs";
 import initMessengerServer from "./create-server.js";
 

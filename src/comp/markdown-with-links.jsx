@@ -1,19 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
 
 const RedditEmbedComponent = ({ url, width, height }) => {
+    const elem = useRef(null);
+
     useEffect(() => {
-        const script = document.createElement("script");
-        script.src = "https://embed.redditmedia.com/widgets/platform.js";
-        script.async = true;
-        document.body.appendChild(script);
+        if (!elem.current) return;
+
+        // Check if the script is already loaded
+        if (!document.querySelector('script[src="https://embed.redditmedia.com/widgets/platform.js"]')) {
+            const script = document.createElement("script");
+            script.src = "https://embed.redditmedia.com/widgets/platform.js";
+            script.async = true;
+            document.head.appendChild(script);
+        }
     }, []);
 
     return (
-        <div style={{ width, height }}>
-            <blockquote className="reddit-card" data-url={url} data-card-created="1553892582">
-                <a href={url}>View Reddit Post</a>
+        <div ref={elem} style={{ width, height }}>
+            <blockquote
+                className="reddit-embed-bq"
+                data-embed-height="30dvh"
+                data-url={url}
+                style={{ width, height }}
+            >
+                <a href={url}>Loading post...</a>
             </blockquote>
         </div>
     );
@@ -214,20 +226,21 @@ export default function MarkdownWithLinks({ text = "" }) {
             }
 
             const mediaExtensions = [
-                ".jpg", ".jpeg", ".png", ".gif",
+                ".jpg", ".jpeg", ".png", ".gif", ".ico",
                 ".mp4", ".webm", ".ogg", ".mp3", ".wav"
             ];
 
             for (const ext of mediaExtensions) {
-                if (href.endsWith(ext)) {
-                    if (ext == ".jpg" || ext == ".jepg" || ext == ".png" || ext == ".gif") {
-                        return <TryImg src={href} alternative={"NoImage"} />
+                const error = (name) => <a href={href}>{name}</a>
+                if (pathName.endsWith(ext)) {
+                    if (ext == ".jpg" || ext == ".jepg" || ext == ".ico" || ext == ".png" || ext == ".gif") {
+                        return <TryImg style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Image")} />
                     }
                     if (ext == ".mp4" || ext == ".webm") {
-                        return <TryVideo src={href} alternative={"NoVideo"} />
+                        return <TryVideo style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Video")} />
                     }
                     if (ext == ".mp3" || ext == ".wav") {
-                        return <TryAudio src={href} alternative={"NoAudio"} />
+                        return <TryAudio style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Audio")} />
                     }
                 }
             }
@@ -243,7 +256,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                         origin={origin}
                         href={href}
                         linkTitles={linkTitles}
-                        embedContent={<FacebookEmbed url={href} width="100%" height="auto" />}
+                        embedContent={<FacebookEmbed url={href} width="100%" height="30dvh" style={{ objectFit: "contain" }} />}
                     >
                         {children}
                     </LinkEmbed>
@@ -260,7 +273,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                         embedContent={
                             <InstagramEmbed
                                 url={href}
-                                height="auto"
+                                height="30dvh" style={{ objectFit: "contain" }}
                                 width="100%"
                                 hideCaption={false}
                                 containerTagName="div"
@@ -282,7 +295,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                         href={href}
                         linkTitles={linkTitles}
                         embedContent={
-                            <LinkedInEmbed url={href} postUrl={href} height="auto" width="100%" />
+                            <LinkedInEmbed url={href} postUrl={href} height="30dvh" style={{ objectFit: "contain" }} width="100%" />
                         }
                     >
                         {children}
@@ -297,7 +310,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                         origin={origin}
                         href={href}
                         linkTitles={linkTitles}
-                        embedContent={<PinterestEmbed url={href} height="auto" width="100%" />}
+                        embedContent={<PinterestEmbed url={href} height="30dvh" style={{ objectFit: "contain" }} width="100%" />}
                     >
                         {children}
                     </LinkEmbed>
@@ -311,7 +324,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                         origin={origin}
                         href={href}
                         linkTitles={linkTitles}
-                        embedContent={<TikTokEmbed url={href} height="auto" width="100%" />}
+                        embedContent={<TikTokEmbed url={href} height="30dvh" style={{ objectFit: "contain" }} width="100%" />}
                     >
                         {children}
                     </LinkEmbed>
@@ -325,7 +338,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                         origin={origin}
                         href={href}
                         linkTitles={linkTitles}
-                        embedContent={<XEmbed url={href} height="auto" width="100%" />}
+                        embedContent={<XEmbed url={href} height="30dvh" style={{ objectFit: "contain" }} width="100%" />}
                     >
                         {children}
                     </LinkEmbed>
@@ -339,7 +352,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                         origin={origin}
                         href={href}
                         linkTitles={linkTitles}
-                        embedContent={<YouTubeEmbed url={href} height="auto" width="100%" />}
+                        embedContent={<YouTubeEmbed url={href} height="30dvh" style={{ objectFit: "contain" }} width="100%" />}
                     >
                         {children}
                     </LinkEmbed>
@@ -353,7 +366,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                         origin={origin}
                         href={href}
                         linkTitles={linkTitles}
-                        embedContent={<TelegramEmbed src={href} height="auto" width="100%" />}
+                        embedContent={<TelegramEmbed src={href} height="30dvh" style={{ objectFit: "contain" }} width="100%" />}
                     >
                         {children}
                     </LinkEmbed>
@@ -366,7 +379,7 @@ export default function MarkdownWithLinks({ text = "" }) {
                     origin={origin}
                     href={href}
                     linkTitles={linkTitles}
-                    embedContent={<RedditEmbedComponent height="auto" width="100%" url={href} />}
+                    embedContent={<RedditEmbedComponent height="30dvh" style={{ objectFit: "contain" }} width="100%" url={href} />}
                 >
                     {children}
                 </LinkEmbed>
