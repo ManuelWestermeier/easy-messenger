@@ -48,6 +48,7 @@ let lastStored = 0;
 let isStroring = false;
 export async function storeAllChatRoomsData() {
   if (process.env?.DEBUG || isStroring) return;
+  log("[store all chatrooms data]");
   if (Date.now() - lastStored < 10_000 /*10s*/) return;
   isStroring = true;
   lastStored = Date.now();
@@ -92,6 +93,8 @@ export async function storeAllChatRoomsData() {
  */
 async function fetchAllChatRoomsData() {
   if (process.env?.DEBUG) return;
+
+  log("[fetching all chatrooms data]");
 
   try {
     let filesResponse;
