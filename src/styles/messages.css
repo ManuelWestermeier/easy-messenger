@@ -149,7 +149,7 @@
 }
 
 .message .comments input {
-    width: calc(100% - 20px);
+    width: calc(100%);
     padding: 8px;
     border-radius: 6px;
     border: 1px solid var(--text-ni);
@@ -159,17 +159,18 @@
 
 .message .comments button {
     margin-top: 6px;
-    background-color: var(--button-bg);
-    color: var(--button-text);
+    background-color: var(--primary);
+    color: var(--text);
     padding: 8px 12px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    width: 100%;
     transition: background-color 0.2s;
 }
 
 .message .comments button:hover {
-    background-color: var(--button-hover-bg);
+    background-color: var(--primary-hover);
 }
 
 .messages .menu {
