@@ -251,13 +251,22 @@ export default function MarkdownWithLinks({ text: _text }) {
                 const error = (name) => <a href={href}>{name}</a>
                 if (pathName.endsWith(ext)) {
                     if (ext == ".jpg" || ext == ".jepg" || ext == ".ico" || ext == ".png" || ext == ".gif") {
-                        return <TryImg style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Image")} />
+                        return <LinkEmbed children={children} embedContent={
+                            <TryImg style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Image")} />
+                        } href={href} linkTitles={linkTitles} origin={origin}>
+                        </LinkEmbed>;
                     }
                     if (ext == ".mp4" || ext == ".webm") {
-                        return <TryVideo style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Video")} />
+                        return <LinkEmbed children={children} embedContent={
+                            <TryVideo style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Video")} />
+                        } href={href} linkTitles={linkTitles} origin={origin}>
+                        </LinkEmbed>;
                     }
                     if (ext == ".mp3" || ext == ".wav") {
-                        return <TryAudio style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Audio")} />
+                        return <LinkEmbed children={children} embedContent={
+                            <TryAudio style={{ width: "100%", height: "30dvh", objectFit: "contain" }} src={href} alternative={error("No Audio")} />
+                        } href={href} linkTitles={linkTitles} origin={origin}>
+                        </LinkEmbed>;
                     }
                 }
             }
