@@ -151,8 +151,11 @@ export default function MarkdownWithLinks({ text = "" }) {
         a: ({ href, children }) => {
             if (!href) return <>{children}</>;
             let origin;
+            let pathName;
             try {
-                origin = new URL(href).origin;
+                const url = new URL(href);
+                origin = url.origin;
+                pathName = url.pathname;
             } catch (error) {
                 console.error("Invalid URL:", href);
                 return (
@@ -160,6 +163,19 @@ export default function MarkdownWithLinks({ text = "" }) {
                         {children}
                     </a>
                 );
+            }
+
+            const mediaExtensions = [
+                ".jpg", ".jpeg", ".png", ".gif",
+                ".mp4", ".webm", ".ogg", ".mp3", ".wav"
+            ];
+
+            for (const ext of mediaExtensions) {
+                if (href.endsWith(ext)) {
+                    if (ext == ".jpg" || ext == ".jepg" || ext == ".png" || ext == ".gif") {
+                        return <TryImg src={href} alternative={NoImage} />
+                    }
+                }
             }
 
             // Facebook
