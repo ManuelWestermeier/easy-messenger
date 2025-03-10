@@ -12,7 +12,7 @@ const RedditEmbedComponent = ({ url, width, height }) => {
 
     return (
         <div style={{ width, height }}>
-            <blockquote className="reddit-card" data-card-created="1553892582">
+            <blockquote className="reddit-card" data-url={url} data-card-created="1553892582">
                 <a href={url}>View Reddit Post</a>
             </blockquote>
         </div>
@@ -29,6 +29,54 @@ function TryImg({ src, alt, alternative, style, ...data }) {
 
     return (
         <img
+            {...data}
+            src={src}
+            style={{
+                ...style,
+                display: render ? style?.display || "block" : "none"
+            }}
+            alt={alt}
+            onError={(e) => {
+                e.preventDefault();
+                setRender(false);
+            }}
+        />
+    );
+}
+
+function TryVideo({ src, alt, alternative, style, ...data }) {
+    const [render, setRender] = useState(true);
+
+    if (!render && alternative) {
+        return alternative;
+    }
+
+    return (
+        <video
+            {...data}
+            src={src}
+            style={{
+                ...style,
+                display: render ? style?.display || "block" : "none"
+            }}
+            alt={alt}
+            onError={(e) => {
+                e.preventDefault();
+                setRender(false);
+            }}
+        />
+    );
+}
+
+function TryAudio({ src, alt, alternative, style, ...data }) {
+    const [render, setRender] = useState(true);
+
+    if (!render && alternative) {
+        return alternative;
+    }
+
+    return (
+        <audio
             {...data}
             src={src}
             style={{
@@ -173,7 +221,13 @@ export default function MarkdownWithLinks({ text = "" }) {
             for (const ext of mediaExtensions) {
                 if (href.endsWith(ext)) {
                     if (ext == ".jpg" || ext == ".jepg" || ext == ".png" || ext == ".gif") {
-                        return <TryImg src={href} alternative={NoImage} />
+                        return <TryImg src={href} alternative={"NoImage"} />
+                    }
+                    if (ext == ".mp4" || ext == ".webm") {
+                        return <TryVideo src={href} alternative={"NoVideo"} />
+                    }
+                    if (ext == ".mp3" || ext == ".wav") {
+                        return <TryAudio src={href} alternative={"NoAudio"} />
                     }
                 }
             }
