@@ -180,6 +180,12 @@
     gap: 12px;
 }
 
+.message form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 @keyframes fade-in-left {
     0% {
         opacity: 0;
