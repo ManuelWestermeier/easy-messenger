@@ -13,7 +13,8 @@ export default async function initClient(client, data, setData) {
       acc[chatId] = {
         ...oldData[chatId],
         messages: oldData[chatId].messages.filter(
-          ({ type }) => !["user-joined", "user-exited", "deleted-messages"].includes(type)
+          ({ type }) =>
+            !["user-joined", "user-exited", "deleted-messages"].includes(type)
         ),
       };
       return acc;
@@ -32,8 +33,8 @@ export default async function initClient(client, data, setData) {
       // Attempt to join the chat and fetch new messages.
       let joinRes = await client.get("join", {
         chatId,
-        author: encrypt(chatInfo.password, chatInfo.author),
         passwordHash: basicHash(basicHash(chatInfo.password)),
+        author: encrypt(chatInfo.password, chatInfo.author),
         messageIds,
         subscription: window.notificationSubscription,
       });
@@ -121,7 +122,7 @@ export default async function initClient(client, data, setData) {
       } else
         return alert(
           "Maybe your password is incorct (remove the group from your chats) => group: " +
-          chatId
+            chatId
         );
     })
   );

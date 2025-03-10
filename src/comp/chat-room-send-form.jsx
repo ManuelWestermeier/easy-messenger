@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { encrypt, randomBytes } from "../utils/crypto";
 
 export default function ChatRoomSendForm({
@@ -12,7 +12,7 @@ export default function ChatRoomSendForm({
   window.setReactId = setReactId;
   window.reactId = reactId;
 
-  const reactMessageCt = chatData.messages.find(({ id }) => id == reactId)
+  const reactMessageCt = chatData.messages.find(({ id }) => id == reactId);
 
   if (reactMessageCt?.data?.length > 100) {
     reactMessageCt.data = reactMessageCt.data.slice(0, 100);
@@ -27,12 +27,17 @@ export default function ChatRoomSendForm({
       date: new Date().toLocaleString(),
       author: chatData.author,
       comments: [],
-      react: reactId && reactMessageCt ? [reactId, {
-        author: reactMessageCt.author,
-        data: reactMessageCt.data,
-      }] : false,
+      react:
+        reactId && reactMessageCt
+          ? [
+              reactId,
+              {
+                author: reactMessageCt.author,
+                data: reactMessageCt.data,
+              },
+            ]
+          : false,
     };
-
 
     const messagePublic = {
       id: randomBytes(4).toString(),
@@ -68,9 +73,17 @@ export default function ChatRoomSendForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} onKeyDown={e => {
-      if (e.key == "Escape") handleSubmit({ preventDefault: () => 0, target: document.querySelector(".message-form") });
-    }} className="message-form">
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        if (e.key == "Escape")
+          handleSubmit({
+            preventDefault: () => 0,
+            target: document.querySelector(".message-form"),
+          });
+      }}
+      className="message-form"
+    >
       {/* <select name="type">
              <option value="text">Text</option>
          </select> */}
@@ -81,33 +94,53 @@ export default function ChatRoomSendForm({
         placeholder="Type your message..."
         required
       />
-      <button type="submit" className="send-button" title="Send"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" /></svg></button>
-      {reactMessageCt && <div className="react-elem">
-        <button
-          type="button"
-          onClick={e => {
-            e.preventDefault();
-            setReactId(false);
-          }}
-          className="danger"
+      <button type="submit" className="send-button" title="Send">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+          fill="#e8eaed"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
-        </button>
-        <div onClick={e => {
-          e.preventDefault();
-          document.getElementById(reactId).scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-          });
-        }}>
-          <b>
-            {reactMessageCt.author}
-          </b>:
-          <span>
-            <i>{reactMessageCt.data}</i>
-          </span>
+          <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" />
+        </svg>
+      </button>
+      {reactMessageCt && (
+        <div className="react-elem">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setReactId(false);
+            }}
+            className="danger"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#e8eaed"
+            >
+              <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+            </svg>
+          </button>
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById(reactId).scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }}
+          >
+            <b>{reactMessageCt.author}</b>:
+            <span>
+              <i>{reactMessageCt.data}</i>
+            </span>
+          </div>
         </div>
-      </div>}
+      )}
     </form>
   );
 }
