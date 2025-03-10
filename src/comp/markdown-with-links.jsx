@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
 
@@ -65,11 +65,17 @@ function TryVideo({ src, alt, alternative, style, ...data }) {
 
     return (
         <video
+            controls
             {...data}
             src={src}
             style={{
                 ...style,
-                display: render ? style?.display || "block" : "none"
+                display: render ? style?.display || "block" : "none",
+                aspectRatio: "16/9",
+                height: "auto",
+                maxHeight: "300px",
+                backgroundColor: "black",
+                borderRadius: "5px",
             }}
             alt={alt}
             onError={(e) => {
@@ -89,11 +95,13 @@ function TryAudio({ src, alt, alternative, style, ...data }) {
 
     return (
         <audio
+            controls
             {...data}
             src={src}
             style={{
                 ...style,
-                display: render ? style?.display || "block" : "none"
+                display: render ? style?.display || "block" : "none",
+                height: "50px"
             }}
             alt={alt}
             onError={(e) => {
@@ -176,7 +184,16 @@ const LinkEmbed = ({ origin, href, children, embedContent, linkTitles }) => {
     );
 };
 
-export default function MarkdownWithLinks({ text = "" }) {
+function formatContactString(input) {
+    return input
+        // .replace(/(?:^|\s)(\+?\d[\d\s\-()]{5,})(?=\s|$)/g, ' tel:$1') // Phone numbers
+        // .replace(/(?:^|\s)([\w.-]+@[\w.-]+\.[a-zA-Z]{2,})(?=\s|$)/g, ' mailto:$1') // Emails
+        .replace(/(?:^|\s)(?!(?:tel:|mailto:|https?:\/\/))([\w.-]+\.[a-zA-Z]{2,})(?=\s|$)/g, ' https://$1'); // Websites
+}
+
+export default function MarkdownWithLinks({ text: _text }) {
+    const text = useMemo(() => formatContactString(_text), [_text]);
+
     // Replace single line breaks with double line breaks for proper markdown parsing.
     const processedText = preprocessText(text.replaceAll("\n", "\n\n"));
     const [linkTitles, setLinkTitles] = useState({});
