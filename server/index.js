@@ -46,14 +46,11 @@ export const chats = {};
  * contain only the messages and password hash (the clients are excluded).
  * The chatId is encoded to ensure a valid filename.
  */
-let lastStored = 0;
 let isStroring = false;
 export async function storeAllChatRoomsData() {
   if (process.env?.DEBUG || isStroring) return;
   log("[store all chatrooms data]");
-  if (Date.now() - lastStored < 10_000 /*10s*/) return;
   isStroring = true;
-  lastStored = Date.now();
   for (const chatId in chats) {
     const { messages, passwordHashHash, subscriptions } = chats[chatId];
     const chatRoomData = {
@@ -71,7 +68,9 @@ export async function storeAllChatRoomsData() {
         new Date().toString(), // commit message as a string
         { branch: "main" } // explicitly specify the branch
       );
-      for (let index = 0; index < messages.length; index++) {
+
+      let index = 0;
+      for (index = 0; index < messages.length; index++) {
         const messageFileName = `chats/${encodeURIComponent(
           chatId
         )}-message-${index}.json`;
@@ -82,6 +81,26 @@ export async function storeAllChatRoomsData() {
           { branch: "main" } // explicitly specify the branch
         );
       }
+
+      let checkForUndeletedChats = true;
+      while (checkForUndeletedChats) {
+        index++;
+        try {
+          const messageFileName = `chats/${encodeURIComponent(
+            chatId
+          )}-message-${index}.json`;
+
+          if (await githubFS.exists(messageFileName)) {
+            await githubFS.deleteFile(messageFileName);
+          }
+          else {
+            checkForUndeletedChats = false;
+          }
+        } catch (error) {
+          checkForUndeletedChats = false;
+        }
+      }
+
     } catch (error) {
       console.error(`Failed to store chat room ${chatId}:`, error);
     }
@@ -141,12 +160,32 @@ async function fetchAllChatRoomsData() {
 
           const messages = new Array({ length: content.messagesLength });
 
-          for (let index = 0; index < messages.length; index++) {
+          let index = 0;
+          for (index = 0; index < messages.length; index++) {
             const messageFileName = `chats/${encodeURIComponent(
               chatId
             )}-message-${index}.json`;
             const content = await githubFS.readFile(messageFileName);
             messages[index] = JSON.parse(content);
+          }
+
+          let checkForUndeletedChats = true;
+          while (checkForUndeletedChats) {
+            index++;
+            try {
+              const messageFileName = `chats/${encodeURIComponent(
+                chatId
+              )}-message-${index}.json`;
+
+              if (await githubFS.exists(messageFileName)) {
+                await githubFS.deleteFile(messageFileName);
+              }
+              else {
+                checkForUndeletedChats = false;
+              }
+            } catch (error) {
+              checkForUndeletedChats = false;
+            }
           }
 
           // Initialize the chat room in memory (clients array remains empty).

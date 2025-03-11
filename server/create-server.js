@@ -221,13 +221,35 @@ export default function initMessengerServer() {
         client.removeChat(chatId);
       });
 
-      delete chats[chatId];
       if (!process.env.DEBUG) {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}.json`;
-          githubFS.deleteFile(fileName);
-        } catch (error) {}
+          await githubFS.deleteFile(fileName);
+
+          let index = 0;
+          let checkForUndeletedChats = true;
+
+          while (checkForUndeletedChats) {
+            index++;
+            try {
+              const messageFileName = `chats/${encodeURIComponent(
+                chatId
+              )}-message-${index}.json`;
+
+              if (await githubFS.exists(messageFileName)) {
+                await githubFS.deleteFile(messageFileName);
+              }
+              else {
+                checkForUndeletedChats = false;
+              }
+            } catch (error) {
+              checkForUndeletedChats = false;
+            }
+          }
+        } catch (error) { }
       }
+
+      delete chats[chatId];
 
       return true;
     });
