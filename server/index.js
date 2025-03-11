@@ -226,11 +226,18 @@ async function initialize() {
     try {
       await storeAllChatRoomsData();
       if (process.env.DEBUG) console.log("Current chats:", chats);
-      log("clients: ", (() => {
-        const entrys = Object.entries(chats);
-        for (const [chatId, { clients }] of entrys) {
-          console.log(`clients in room: ${chatId}`, clients);
+      log("amount of clients: ", (() => {
+        const entrys = Object.values(chats);
+
+        let clientsLength = 0;
+
+        for (const { clients } of entrys) {
+          for (const _ of clients) {
+            clientsLength++;
+          }
         }
+
+        return clientsLength;
       })());
     } catch (error) {
       console.error("Error during periodic store:", error);
