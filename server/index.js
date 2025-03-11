@@ -221,9 +221,17 @@ async function initialize() {
 
   // Third, start the periodic interval to store chats.
   setTimeout(async function update() {
+    log("update:", (new Date()).toLocaleDateString("de"));
+
     try {
       await storeAllChatRoomsData();
       if (process.env.DEBUG) console.log("Current chats:", chats);
+      log("clients: ", (() => {
+        const entrys = Object.entries(chats);
+        for (const [chatId, { clients }] of entrys) {
+          console.log(`clients in room: ${chatId}`, clients);
+        }
+      })());
     } catch (error) {
       console.error("Error during periodic store:", error);
     }
