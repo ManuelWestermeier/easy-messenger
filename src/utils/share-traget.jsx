@@ -3,6 +3,8 @@ export default function getShareQueryParams() {
   if (window.location.hash !== "#share") return false;
 
   const url = new URL(window.location);
+  
+  alert(url.href);
 
   let out = "## Share:";
 
