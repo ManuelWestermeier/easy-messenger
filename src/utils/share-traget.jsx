@@ -1,9 +1,9 @@
 export default function getShareQueryParams() {
   // Check if the URL hash is "#share"
-  if (window.location.hash !== "#share") return false;
+  if (window.location.hash != "#share") return false;
 
   const url = new URL(window.location);
-  
+
   let out = "## Share:";
 
   if (url.searchParams.get("title")) {
