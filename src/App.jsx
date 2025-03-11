@@ -29,7 +29,7 @@ export default function App({ setData, data }) {
 
   if (client == null) return <LoadingState state={state} />;
 
-  if (shareData) {
+  if (shareData != false) {
     return (
       <ShareData
         client={client}

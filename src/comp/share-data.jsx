@@ -148,9 +148,8 @@ export default function ShareData({
             <li key={chatId}>
               <button
                 type="button"
-                className={`chat-select-button ${
-                  selectedChats.includes(chatId) ? "selected" : ""
-                }`}
+                className={`chat-select-button ${selectedChats.includes(chatId) ? "selected" : ""
+                  }`}
                 onClick={(e) => {
                   e.preventDefault();
                   toggleChatSelection(chatId);

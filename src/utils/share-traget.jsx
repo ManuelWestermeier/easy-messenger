@@ -4,10 +4,10 @@ export default function getShareQueryParams() {
 
   const url = new URL(window.location);
 
-  let out = "";
+  let out = "## Share:";
 
   if (url.searchParams.get("title")) {
-    out += `Title: ${url.searchParams.get("title")}`;
+    out += `\nTitle: ${url.searchParams.get("title")}`;
   }
   if (url.searchParams.get("text")) {
     out += `\nText: ${url.searchParams.get("text")}`;
@@ -16,5 +16,5 @@ export default function getShareQueryParams() {
     out += `\nURL: ${url.searchParams.get("url")}`;
   }
 
-  return out || false;
+  return out;
 }
