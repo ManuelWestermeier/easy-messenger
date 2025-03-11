@@ -4,8 +4,6 @@ export default function getShareQueryParams() {
 
   const url = new URL(window.location);
   
-  alert(url.href);
-
   let out = "## Share:";
 
   if (url.searchParams.get("title")) {
