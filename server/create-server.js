@@ -49,7 +49,6 @@ and contains all the logic for handling client events.
 
 export default function initMessengerServer() {
   createServer({ port: 8080 }, async (client) => {
-    storeAllChatRoomsData();
     // Keep track of the chats this client has joined
     let joinedChats = [];
 
@@ -238,15 +237,14 @@ export default function initMessengerServer() {
 
               if (await githubFS.exists(messageFileName)) {
                 await githubFS.deleteFile(messageFileName);
-              }
-              else {
+              } else {
                 checkForUndeletedChats = false;
               }
             } catch (error) {
               checkForUndeletedChats = false;
             }
           }
-        } catch (error) { }
+        } catch (error) {}
       }
 
       delete chats[chatId];
@@ -342,8 +340,6 @@ export default function initMessengerServer() {
 
     // Clean up when a client disconnects
     client.onclose = () => {
-      storeAllChatRoomsData();
-
       joinedChats.forEach((chatId) => {
         let author;
         chats[chatId].clients = chats[chatId].clients.filter(
@@ -360,5 +356,7 @@ export default function initMessengerServer() {
         }
       });
     };
+    storeAllChatRoomsData();
   });
+  storeAllChatRoomsData();
 }
