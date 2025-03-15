@@ -59,7 +59,17 @@ export default function MessageConetent({
         </div>
       )}
       <div>
-        <MarkdownWithLinks text={data} />
+        {Array.from(data).length > 5 ? (
+          <MarkdownWithLinks text={data} />
+        ) : (
+          <span
+            style={{
+              fontSize: (14 - 2.2 * Array.from(data).length) * 0.5 + "rem",
+            }}
+          >
+            {data}
+          </span>
+        )}
       </div>
       {seeComments && isUserMessage && (
         <fieldset className="comments">
