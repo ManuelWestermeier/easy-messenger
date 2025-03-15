@@ -34,7 +34,8 @@
     padding: 0;
 }
 
-body {
+body,
+html {
     font-family: Arial, sans-serif;
     scroll-behavior: smooth;
     background-color: var(--bg);

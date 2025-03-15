@@ -228,15 +228,15 @@ async function initialize() {
         (() => {
           const entrys = Object.values(chats);
 
-          let clientsLength = 0;
+          let _clients = new Set([]);
 
           for (const { clients } of entrys) {
-            for (const _ of clients) {
-              clientsLength++;
+            for (const { client } of clients) {
+              _clients.add(client);
             }
           }
 
-          return clientsLength;
+          return _clients.size;
         })()
       );
     } catch (error) {
