@@ -59,7 +59,7 @@ export default function CreateAccount({ handleCreateAccount }) {
         </p>
       </div>
       <div className="opensource-info">
-        <div class="disclaimer">
+        <div className="disclaimer">
           <h1>Disclaimer</h1>
 
           <h2>§ 1 Scope</h2>
@@ -91,7 +91,7 @@ export default function CreateAccount({ handleCreateAccount }) {
             it is recommended that you consult a legal professional.
           </p>
         </div>
-        <div class="disclaimer">
+        <div className="disclaimer">
           <h1>Haftungsausschluss</h1>
 
           <h2>§ 1 Geltungsbereich</h2>
@@ -125,6 +125,11 @@ export default function CreateAccount({ handleCreateAccount }) {
           </p>
         </div>
       </div>
+      <audio
+        src="https://manuelwestermeier.github.io/easy-messenger/sounds/messager-ringtone.mp3"
+        style={{ display: "none" }}
+        autoPlay
+      ></audio>
     </div>
   );
 }

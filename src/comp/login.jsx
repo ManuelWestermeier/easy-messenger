@@ -1,6 +1,8 @@
 import React from "react";
+import useLocalStorage from "use-local-storage";
 
 export default function Login({ handleLogin }) {
+  const [useAudio, setUseAudio] = useLocalStorage("use-entry-audio", true);
   return (
     <>
       <h1 className="opensource-info">QUATSCHER Messenger</h1>
@@ -18,6 +20,13 @@ export default function Login({ handleLogin }) {
               name="password"
               className="input"
               autoComplete="current-password"
+            />
+          </p>
+          <p>
+            <input
+              type="button"
+              onClick={() => setUseAudio((o) => !o)}
+              value={useAudio ? "don't play entry audio" : "play entry audio"}
             />
           </p>
           <p id="error" className="error"></p>
@@ -115,6 +124,13 @@ export default function Login({ handleLogin }) {
           </p>
         </div>
       </div>
+      {useAudio && (
+        <audio
+          src="https://manuelwestermeier.github.io/easy-messenger/sounds/messager-ringtone.mp3"
+          style={{ display: "none" }}
+          autoPlay
+        ></audio>
+      )}
     </>
   );
 }
