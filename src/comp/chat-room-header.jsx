@@ -176,6 +176,14 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
       <header key={chatId}>
         <h3>{chatData?.chatName}</h3>
 
+        <div className="user-states">
+          {Object.keys(chatData?.userStates || {})
+            .filter((key) => chatData?.userStates?.[key] == "is-writing")
+            .map((author) => {
+              return <span>{author}<span>🖋️</span></span>;
+            })}
+        </div>
+
         <button
           type="button"
           title="Chat Settings"

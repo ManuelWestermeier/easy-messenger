@@ -14,6 +14,24 @@
     justify-content: space-between;
 }
 
+.chat-room .user-states>span {
+    background-color: var(--primary-hover);
+    border-radius: 20px;
+    padding: 5px;
+    animation: user-state-anim 2s ease-in-out infinite;
+}
+
+@keyframes user-state-anim {
+    50% {
+        background-color: rebeccapurple;
+    }
+}
+
+.chat-room .user-states span span {
+    background-color: var(--text);
+    border-radius: 15px;
+}
+
 /* Expanded/zoomed chat data form */
 .chat-room header #chat-data-form {
     position: fixed;

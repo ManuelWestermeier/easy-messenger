@@ -128,6 +128,44 @@ export default function createClient(setData) {
       });
     });
 
+    const userStateChangeTimeouts = {};
+    client.onSay("user-state-change", ({ chatId, message }) => {
+      setData((old) => {
+        const { author, state } = JSON.parse(
+          decrypt(old[chatId].password, message)
+        );
+
+        userStateChangeTimeouts[chatId] = userStateChangeTimeouts[chatId] || {};
+
+        if (userStateChangeTimeouts[chatId][author]) {
+          clearTimeout(userStateChangeTimeouts[chatId][author]);
+        }
+
+        userStateChangeTimeouts[chatId][author] = setTimeout(() => {
+          setData((old) => {
+            const userStates = old[chatId].userStates;
+            delete userStates[author];
+
+            return {
+              ...old,
+              [chatId]: {
+                ...old[chatId],
+                userStates,
+              },
+            };
+          });
+        }, 4_000);
+
+        return {
+          ...old,
+          [chatId]: {
+            ...old[chatId],
+            userStates: { ...old[chatId].userStates, [author]: state },
+          },
+        };
+      });
+    });
+
     client.onSay("all-messages-deleted", ({ chatId }) => {
       setData((old) => {
         return {

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { encrypt, randomBytes } from "../utils/crypto";
 
+let lastStateChangeTime;
+
 export default function ChatRoomSendForm({
   chatId,
   chatData,
@@ -70,6 +72,14 @@ export default function ChatRoomSendForm({
         block: "center",
       });
     }
+
+    client.say("user-state-change", {
+      chatId,
+      message: encrypt(
+        chatData.password,
+        JSON.stringify({ author: chatData?.author, state: "idle" })
+      ),
+    });
   };
 
   return (
@@ -92,6 +102,18 @@ export default function ChatRoomSendForm({
         autoFocus
         name="text"
         placeholder="Type your message..."
+        onInput={() => {
+          if (lastStateChangeTime > Date.now() - 3_000) return;
+          lastStateChangeTime = Date.now();
+
+          client.say("user-state-change", {
+            chatId,
+            message: encrypt(
+              chatData.password,
+              JSON.stringify({ author: chatData?.author, state: "is-writing" })
+            ),
+          });
+        }}
         required
       />
       <button type="submit" className="send-button" title="Send">

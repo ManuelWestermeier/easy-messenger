@@ -19,7 +19,7 @@ async function sendPushNotification(subscription, data = "send") {
   try {
     return await webpush.sendNotification(subscription, data);
   } catch (error) {
-    return error;
+    return new Error(error);
   }
 }
 
@@ -97,6 +97,8 @@ export default function initMessengerServer() {
       if (chat) {
         if (chat.passwordHashHash != passwordHashHash) return false;
 
+        joinedChats.push(chatId);
+
         chat.clients.push({ client, author });
 
         if (subscription && !chat.subscriptions[subscription.endpoint]) {
@@ -105,6 +107,8 @@ export default function initMessengerServer() {
 
         send("user-joined", chatId, author, 0);
       } else {
+        joinedChats.push(chatId);
+
         chats[chatId] = {
           clients: [{ client, author }],
           messages: [],
@@ -113,10 +117,9 @@ export default function initMessengerServer() {
             ? { [subscription.endpoint]: subscription }
             : {},
         };
+
         return [];
       }
-
-      joinedChats.push(chatId);
 
       const unread = [];
 
@@ -276,6 +279,22 @@ export default function initMessengerServer() {
       return true;
     });
 
+    client.onSay("user-state-change", (data) => {
+      if (
+        !areSetAndTheSameType(data, [
+          ["chatId", "string"],
+          ["message", "string"],
+        ])
+      )
+        return false;
+
+      const { chatId, message } = data;
+      if (!joinedChats.includes(chatId)) return false;
+      if (!chats[chatId]) return false;
+
+      send("user-state-change", chatId, message);
+    });
+
     // Handle sending messages
     client.onGet("send", async (data) => {
       if (
@@ -356,7 +375,11 @@ export default function initMessengerServer() {
         }
       });
     };
-    storeAllChatRoomsData();
+    try {
+      storeAllChatRoomsData();
+    } catch (error) {}
   });
-  storeAllChatRoomsData();
+  try {
+    storeAllChatRoomsData();
+  } catch (error) {}
 }

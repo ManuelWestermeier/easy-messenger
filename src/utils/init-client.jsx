@@ -95,9 +95,18 @@ export default async function initClient(client, data, setData) {
         });
 
         // Fetch and add user data.
-        const users = await client.get("users", chatId);
+        let users = await client.get("users", chatId);
 
         if (users) {
+          users = users.map((user) => {
+            let author;
+            try {
+              author = decrypt(old[chatId].password, user);
+            } catch (error) {
+              author = "error";
+            }
+            return author;
+          });
           setData((old) => {
             return {
               ...old,
@@ -105,8 +114,7 @@ export default async function initClient(client, data, setData) {
                 ...old[chatId],
                 messages: [
                   ...old[chatId].messages,
-                  ...users.map((user) => {
-                    const author = decrypt(old[chatId].password, user);
+                  ...users.map((author) => {
                     return {
                       type: "user-joined",
                       data: "user joined: " + author,
@@ -115,6 +123,7 @@ export default async function initClient(client, data, setData) {
                     };
                   }),
                 ],
+                userStates: {},
               },
             };
           });

@@ -49,8 +49,8 @@ export const chats = {};
 let isStroring = false;
 export async function storeAllChatRoomsData() {
   if (process.env?.DEBUG || isStroring) return;
-  log("[store all chatrooms data]");
   isStroring = true;
+  log("[store all chatrooms data]");
   for (const chatId in chats) {
     const { messages, passwordHashHash, subscriptions } = chats[chatId];
     const chatRoomData = {
@@ -92,15 +92,13 @@ export async function storeAllChatRoomsData() {
 
           if (await githubFS.exists(messageFileName)) {
             await githubFS.deleteFile(messageFileName);
-          }
-          else {
+          } else {
             checkForUndeletedChats = false;
           }
         } catch (error) {
           checkForUndeletedChats = false;
         }
       }
-
     } catch (error) {
       console.error(`Failed to store chat room ${chatId}:`, error);
     }
@@ -179,8 +177,7 @@ async function fetchAllChatRoomsData() {
 
               if (await githubFS.exists(messageFileName)) {
                 await githubFS.deleteFile(messageFileName);
-              }
-              else {
+              } else {
                 checkForUndeletedChats = false;
               }
             } catch (error) {
@@ -221,24 +218,27 @@ async function initialize() {
 
   // Third, start the periodic interval to store chats.
   setTimeout(async function update() {
-    log("update:", (new Date()).toLocaleDateString("de"));
+    log("update:", new Date().toLocaleDateString("de"));
 
     try {
       await storeAllChatRoomsData();
       if (process.env.DEBUG) console.log("Current chats:", chats);
-      log("amount of clients: ", (() => {
-        const entrys = Object.values(chats);
+      log(
+        "amount of clients: ",
+        (() => {
+          const entrys = Object.values(chats);
 
-        let clientsLength = 0;
+          let clientsLength = 0;
 
-        for (const { clients } of entrys) {
-          for (const _ of clients) {
-            clientsLength++;
+          for (const { clients } of entrys) {
+            for (const _ of clients) {
+              clientsLength++;
+            }
           }
-        }
 
-        return clientsLength;
-      })());
+          return clientsLength;
+        })()
+      );
     } catch (error) {
       console.error("Error during periodic store:", error);
     }

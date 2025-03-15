@@ -19,6 +19,7 @@ export function JoinChat({
     e.preventDefault();
 
     const fd = new FormData(e.target);
+
     const chatName = fd.get("id");
     const chatId = basicHash(chatName);
     const rawPassword = fd.get("password");
