@@ -32,6 +32,8 @@ export default function createClient(setData) {
             const messagesDiv = document.querySelector(".messages");
             if (messagesDiv) {
               if (
+                //scroll everytime in view
+                true ||
                 messagesDiv.scrollTop == 0 ||
                 messagesDiv.scrollHeight - messagesDiv.scrollTop < innerHeight
               ) {
