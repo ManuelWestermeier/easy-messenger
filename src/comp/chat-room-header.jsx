@@ -180,7 +180,7 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
           {Object.keys(chatData?.userStates || {})
             .filter((key) => chatData?.userStates?.[key] == "is-writing")
             .map((author) => {
-              return <span>{author}<span>🖋️</span></span>;
+              return <span key={author}>{author}<span>🖋️</span></span>;
             })}
         </div>
 

@@ -101,12 +101,13 @@ export default async function initClient(client, data, setData) {
           users = users.map((user) => {
             let author;
             try {
-              author = decrypt(old[chatId].password, user);
+              author = decrypt(chatInfo.password, user);
             } catch (error) {
               author = "error";
             }
             return author;
           });
+
           setData((old) => {
             return {
               ...old,

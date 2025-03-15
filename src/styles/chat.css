@@ -44,6 +44,7 @@
     top: 0;
     background-color: var(--text-light);
     backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
     gap: 5px;
     display: flex;
     flex-direction: column;

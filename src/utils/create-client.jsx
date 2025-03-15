@@ -88,7 +88,12 @@ export default function createClient(setData) {
 
     client.onSay("user-joined", ({ chatId, message }) => {
       setData((old) => {
-        const author = decrypt(old[chatId].password, message);
+        let author;
+        try {
+          author = decrypt(old[chatId].password, message);
+        } catch (error) {
+          author = "error";
+        }
         return {
           ...old,
           [chatId]: {
@@ -109,7 +114,12 @@ export default function createClient(setData) {
 
     client.onSay("user-exited", ({ chatId, message }) => {
       setData((old) => {
-        const author = decrypt(old[chatId].password, message);
+        let author;
+        try {
+          author = decrypt(old[chatId].password, message);
+        } catch (error) {
+          author = "error";
+        }
         return {
           ...old,
           [chatId]: {
@@ -131,9 +141,14 @@ export default function createClient(setData) {
     const userStateChangeTimeouts = {};
     client.onSay("user-state-change", ({ chatId, message }) => {
       setData((old) => {
-        const { author, state } = JSON.parse(
-          decrypt(old[chatId].password, message)
-        );
+        let author, state;
+        try {
+          const data = JSON.parse(decrypt(old[chatId].password, message));
+          author = data.author;
+          state = data.state;
+        } catch (error) {
+          return old;
+        }
 
         userStateChangeTimeouts[chatId] = userStateChangeTimeouts[chatId] || {};
 
@@ -143,7 +158,7 @@ export default function createClient(setData) {
 
         userStateChangeTimeouts[chatId][author] = setTimeout(() => {
           setData((old) => {
-            const userStates = old[chatId].userStates;
+            const userStates = old[chatId].userStates || {};
             delete userStates[author];
 
             return {
@@ -160,7 +175,7 @@ export default function createClient(setData) {
           ...old,
           [chatId]: {
             ...old[chatId],
-            userStates: { ...old[chatId].userStates, [author]: state },
+            userStates: { ...(old[chatId].userStates || {}), [author]: state },
           },
         };
       });

@@ -159,6 +159,7 @@ export default function MessageConetent({
             onClick={(e) => {
               e.preventDefault();
               window?.setReactId?.(id);
+              document.querySelector(".message-form textarea").focus();
             }}
           >
             <svg
