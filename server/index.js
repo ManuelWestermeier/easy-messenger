@@ -3,10 +3,10 @@ config();
 
 console.clear();
 
-const log = console.log;
+const originalLog = console.log;
 console.log = function (...args) {
   if (process.env.LOG) {
-    log(...args);
+    originalLog(...args);
   }
 };
 
@@ -26,7 +26,7 @@ export const githubFS = new GitHubFS({
   encryptionKey: process.env.ENC_PASSWORD, // Use a strong, secure key
 });
 
-const storeInterval = process.env?.DEBUG ? 2_000 : 40_000; // 40 seconds
+const storeInterval = process.env?.DEBUG ? 2000 : 40000; // 40 seconds
 
 /*
 Server Data:
@@ -46,11 +46,11 @@ export const chats = {};
  * contain only the messages and password hash (the clients are excluded).
  * The chatId is encoded to ensure a valid filename.
  */
-let isStroring = false;
+let isStoring = false;
 export async function storeAllChatRoomsData() {
-  if (process.env?.DEBUG || isStroring) return;
-  isStroring = true;
-  log("[store all chatrooms data]");
+  if (process.env?.DEBUG || isStoring) return;
+  isStoring = true;
+  console.log("[store all chatrooms data]");
   for (const chatId in chats) {
     const { messages, passwordHashHash, subscriptions } = chats[chatId];
     const chatRoomData = {
@@ -69,41 +69,37 @@ export async function storeAllChatRoomsData() {
         { branch: "main" } // explicitly specify the branch
       );
 
-      let index = 0;
-      for (index = 0; index < messages.length; index++) {
+      // Write each message to its own file.
+      for (let index = 0; index < messages.length; index++) {
         const messageFileName = `chats/${encodeURIComponent(
           chatId
         )}-message-${index}.json`;
         await githubFS.writeFile(
           messageFileName,
           JSON.stringify(messages[index]),
-          new Date().toString(), // commit message as a string
-          { branch: "main" } // explicitly specify the branch
+          new Date().toString(),
+          { branch: "main" }
         );
       }
 
-      let checkForUndeletedChats = true;
-      while (checkForUndeletedChats) {
-        index++;
-        try {
-          const messageFileName = `chats/${encodeURIComponent(
-            chatId
-          )}-message-${index}.json`;
-
-          if (await githubFS.exists(messageFileName)) {
-            await githubFS.deleteFile(messageFileName);
-          } else {
-            checkForUndeletedChats = false;
-          }
-        } catch (error) {
-          checkForUndeletedChats = false;
+      // Clean up any undeleted message files if the number of messages has decreased.
+      let index = messages.length;
+      while (true) {
+        const messageFileName = `chats/${encodeURIComponent(
+          chatId
+        )}-message-${index}.json`;
+        if (await githubFS.exists(messageFileName)) {
+          await githubFS.deleteFile(messageFileName);
+          index++;
+        } else {
+          break;
         }
       }
     } catch (error) {
       console.error(`Failed to store chat room ${chatId}:`, error);
     }
   }
-  isStroring = false;
+  isStoring = false;
 }
 
 /**
@@ -113,7 +109,7 @@ export async function storeAllChatRoomsData() {
 async function fetchAllChatRoomsData() {
   if (process.env?.DEBUG) return;
 
-  log("[fetching all chatrooms data]");
+  console.log("[fetching all chatrooms data]");
 
   try {
     let filesResponse;
@@ -137,7 +133,6 @@ async function fetchAllChatRoomsData() {
 
     // If no chat files exist, create a default chat room.
     if (files.length === 0) {
-      // Store the default chat room
       await storeAllChatRoomsData();
       return;
     }
@@ -156,32 +151,28 @@ async function fetchAllChatRoomsData() {
           const content = await githubFS.readFile(filePath);
           const data = JSON.parse(content);
 
-          const messages = new Array({ length: content.messagesLength });
+          // Create an array with the number of messages.
+          const messages = new Array(data.messagesLength);
 
-          let index = 0;
-          for (index = 0; index < messages.length; index++) {
+          for (let index = 0; index < data.messagesLength; index++) {
             const messageFileName = `chats/${encodeURIComponent(
               chatId
             )}-message-${index}.json`;
-            const content = await githubFS.readFile(messageFileName);
-            messages[index] = JSON.parse(content);
+            const messageContent = await githubFS.readFile(messageFileName);
+            messages[index] = JSON.parse(messageContent);
           }
 
-          let checkForUndeletedChats = true;
-          while (checkForUndeletedChats) {
-            index++;
-            try {
-              const messageFileName = `chats/${encodeURIComponent(
-                chatId
-              )}-message-${index}.json`;
-
-              if (await githubFS.exists(messageFileName)) {
-                await githubFS.deleteFile(messageFileName);
-              } else {
-                checkForUndeletedChats = false;
-              }
-            } catch (error) {
-              checkForUndeletedChats = false;
+          // Clean up any extra message files.
+          let index = data.messagesLength;
+          while (true) {
+            const messageFileName = `chats/${encodeURIComponent(
+              chatId
+            )}-message-${index}.json`;
+            if (await githubFS.exists(messageFileName)) {
+              await githubFS.deleteFile(messageFileName);
+              index++;
+            } else {
+              break;
             }
           }
 
@@ -197,7 +188,7 @@ async function fetchAllChatRoomsData() {
         }
       }
     }
-    console.error("Fetched all chat room data");
+    console.log("Fetched all chat room data");
   } catch (error) {
     console.error("Error fetching chat room data:", error);
   }
@@ -207,7 +198,7 @@ async function fetchAllChatRoomsData() {
  * Initialize the application:
  * 1. Fetch the stored chat data (or create a default chat room on first run).
  * 2. Start the messenger server.
- * 3. Set up a periodic task (every 10 seconds) to store all chat rooms.
+ * 3. Set up a periodic task to store all chat rooms.
  */
 async function initialize() {
   // First, fetch existing chat data.
@@ -218,25 +209,22 @@ async function initialize() {
 
   // Third, start the periodic interval to store chats.
   setTimeout(async function update() {
-    log("update:", new Date().toLocaleDateString("de"));
+    console.log("update:", new Date().toLocaleDateString("de"));
 
     try {
       await storeAllChatRoomsData();
       if (process.env.DEBUG) console.log("Current chats:", chats);
-      log(
+      console.log(
         "amount of clients: ",
         (() => {
-          const entrys = Object.values(chats);
-
-          let _clients = new Set([]);
-
-          for (const { clients } of entrys) {
+          const entries = Object.values(chats);
+          const clientsSet = new Set();
+          for (const { clients } of entries) {
             for (const { client } of clients) {
-              _clients.add(client);
+              clientsSet.add(client);
             }
           }
-
-          return _clients.size;
+          return clientsSet.size;
         })()
       );
     } catch (error) {
