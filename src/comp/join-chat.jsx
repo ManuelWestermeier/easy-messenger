@@ -123,6 +123,13 @@ export function JoinChat({
         name="password"
         placeholder="Encryption password..."
         required
+        defaultValue={randomBytes(8).toString(CryptoJS.enc.Base64url)}
+        onFocus={e => {
+          e.target.type = "text";
+        }}
+        onBlur={e => {
+          e.target.type = "password";
+        }}
       />
       <input type="text" name="author" placeholder="Your name..." required />
 
