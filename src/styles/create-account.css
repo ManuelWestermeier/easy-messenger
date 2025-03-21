@@ -11,7 +11,7 @@
 
 .opensource-info img {
     width: 20vmin;
-    border-radius: 10vmin;
+    /* border-radius: 10vmin; */
 }
 
 .opensource-info h2 {
