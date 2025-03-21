@@ -5,7 +5,9 @@ const qrcodeRegionId = "html5qr-code-full-region";
 
 // Creates the configuration object for Html5QrcodeScanner.
 function createConfig(props) {
-  let config = {};
+  let config = {
+    rememberLastUsedCamera: false
+  };
   if (props.fps) {
     config.fps = props.fps;
   }
@@ -33,6 +35,7 @@ export default function Html5QrcodePlugin(props) {
   };
 
   useEffect(() => {
+    localStorage.removeItem("HTML5_QRCODE_DATA");
     const config = createConfig(props);
     const verbose = props.verbose === true;
     if (!props.qrCodeSuccessCallback) {
