@@ -6,6 +6,7 @@ import NoChat from "./comp/nochat";
 
 export default function Mobile({ currentChat, setCurrentChat, client, setData, data }) {
   const [page, setPage] = useState(true);
+  window.setPage = setPage;
 
   useEffect(() => {
     let startX = 0;
