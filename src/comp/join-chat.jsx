@@ -124,10 +124,10 @@ export function JoinChat({
         placeholder="Encryption password..."
         required
         defaultValue={randomBytes(8).toString(CryptoJS.enc.Base64url)}
-        onFocus={e => {
+        onFocus={(e) => {
           e.target.type = "text";
         }}
-        onBlur={e => {
+        onBlur={(e) => {
           e.target.type = "password";
         }}
       />
@@ -179,14 +179,14 @@ export function JoinChat({
       </button>
       <Html5QrcodePlugin
         fps={10}
-        qrbox={350}
-        disableFlip={false}
+        qrbox={250}
         qrCodeSuccessCallback={(decodedText = "") => {
           const [chatId, password] = decodedText.split("\n") || ["", ""];
           if (!chatId || !password) {
             return alert("error: Invalid QR Code");
           }
           setChatData([chatId, password]);
+          alert("qrcode detected...input your username");
           document.getElementById("author-input").focus();
         }}
       />

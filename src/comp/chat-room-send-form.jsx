@@ -94,12 +94,9 @@ export default function ChatRoomSendForm({
       }}
       className="message-form"
     >
-      {/* <select name="type">
-             <option value="text">Text</option>
-         </select> */}
       <input type="hidden" value="text" name="type" />
       <textarea
-        autoFocus
+        autoFocus={innerWidth > 768}
         name="text"
         placeholder="Type your message..."
         onInput={() => {

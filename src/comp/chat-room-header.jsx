@@ -175,9 +175,19 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
     return (
       <header key={chatId}>
         <h3>
-          {window?.setPage && <button onClick={() => window.setPage(true)} type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" /></svg>
-          </button>}
+          {window?.setPage && (
+            <button onClick={() => window.setPage(true)} type="button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e8eaed"
+              >
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+              </svg>
+            </button>
+          )}
 
           {chatData?.chatName}
         </h3>
@@ -186,7 +196,12 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
           {Object.keys(chatData?.userStates || {})
             .filter((key) => chatData?.userStates?.[key] == "is-writing")
             .map((author) => {
-              return <span key={author}>{author}<span>🖋️</span></span>;
+              return (
+                <span key={author}>
+                  {author}
+                  <span>🖋️</span>
+                </span>
+              );
             })}
         </div>
 
