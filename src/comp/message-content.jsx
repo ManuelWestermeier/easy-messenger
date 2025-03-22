@@ -186,11 +186,11 @@ export default function MessageConetent({
             title="share with other groups"
             onClick={(e) => {
               e.preventDefault();
-              window.setShareData?.(`Date: ${date} Author: ${author}
-                Message: ${data}
-                comments:" ${comments
-                  .map((data) => `${data.author}: ${data.data}; ${data.date}`)
-                  .join("\n")}`);
+              window.setShareData?.(
+                `## Shared \n${date} ${author}:\n\n${data}\n\n------------\n\n${comments
+                  .map(({ author, data, date }) => `***${date} ${author}***:\n\n ${data}`)
+                  .join("\n\n")}`
+              );
             }}
           >
             <svg

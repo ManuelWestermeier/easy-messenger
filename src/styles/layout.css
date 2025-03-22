@@ -79,11 +79,15 @@ aside {
         margin-bottom: 30px;
     }
 
-    .page:not(.page-open) {
-        display: none;
+    .page {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
     }
 
-    .page .page-open {
-        display: block;
+    .page.page-open {
+        max-height: 100dvh;
+        opacity: 1;
     }
 }
