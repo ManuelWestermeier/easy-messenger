@@ -75,10 +75,6 @@ aside {
         color: var(--text);
     }
 
-    .messages form {
-        margin-bottom: 30px;
-    }
-
     .page {
         max-height: 0;
         overflow: hidden;
