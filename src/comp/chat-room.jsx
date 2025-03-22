@@ -34,7 +34,7 @@ export function ChatRoom({ chatId, chatData, client, setData, page }) {
               msg={msg}
               chatData={chatData}
               index={index}
-              key={msg.id || index}
+              key={msg.id}
               chatId={chatId}
               client={client}
               setData={setData}
