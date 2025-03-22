@@ -14,6 +14,14 @@
     justify-content: space-between;
 }
 
+
+.chat-room header h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
 .chat-room .user-states>span {
     background-color: var(--primary-hover);
     border-radius: 20px;

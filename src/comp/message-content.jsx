@@ -186,7 +186,7 @@ export default function MessageConetent({
             title="share with other groups"
             onClick={(e) => {
               e.preventDefault();
-              window.setShareData?.(`Date: ${data} Author: ${author}
+              window.setShareData?.(`Date: ${date} Author: ${author}
                 Message: ${data}
                 comments:" ${comments
                   .map((data) => `${data.author}: ${data.data}; ${data.date}`)

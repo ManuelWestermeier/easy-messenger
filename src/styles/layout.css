@@ -37,30 +37,14 @@ aside {
 
 @media (max-width: 768px) {
     .app-container {
-        height: calc(100dvh - 20px);
+        height: 100dvh;
         display: flex;
         flex-direction: column;
     }
 
-    .navigation {
-        height: 50px;
-        padding: 1px;
-        margin: 0;
-        width: 100dvw;
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        background-color: var(--bg-transparent);
-        outline: 2px solid var(--bg) !important;
-    }
-
-    .navigation .active {
-        background-color: dodgerblue;
-    }
-
     .nav-bar {
         width: 100dvw;
-        height: calc(100dvh - 265px);
+        height: calc(100dvh - 230px);
     }
 
     aside {
@@ -70,7 +54,7 @@ aside {
 
     .chat-room {
         width: 100dvw;
-        height: calc(100dvh - 43px);
+        height: 100dvh;
         margin: auto;
     }
 
@@ -80,7 +64,7 @@ aside {
     }
 
     .messages {
-        height: calc(100dvh - 110px + 2.5rem - 90px) !important;
+        height: calc(100dvh - 110px + 2.5rem - 60px) !important;
     }
 
     /* No Chat Selected Message */
@@ -93,5 +77,13 @@ aside {
 
     .messages form {
         margin-bottom: 30px;
+    }
+
+    .page:not(.page-open) {
+        display: none;
+    }
+
+    .page .page-open {
+        display: block;
     }
 }
