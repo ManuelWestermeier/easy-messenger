@@ -63,11 +63,9 @@
         "method": "GET",
         "enctype": "application/x-www-form-urlencoded",
         "params": {
-            "query": {
-                "title": "title",
-                "text": "text",
-                "url": "url"
-            }
+            "title": "title",
+            "text": "text",
+            "url": "url"
         }
     }
 }
