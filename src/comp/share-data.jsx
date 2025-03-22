@@ -12,6 +12,7 @@ export default function ShareData({
 }) {
   const [messageText, setMessageText] = useState(shareData);
   const [selectedChats, setSelectedChats] = useState([]);
+  const [inEditMode, setInEditMode] = useState(false);
 
   const toggleChatSelection = (chatId) => {
     setSelectedChats((prev) =>
@@ -115,34 +116,7 @@ export default function ShareData({
           </svg>
         </button>
       </div>
-      <h3>Preview:</h3>
-      <div className="preview-box">
-        <MarkdownWithLinks text={messageText} />
-      </div>
-      <h3>Send:</h3>
-      <form onSubmit={send} className="share-form preview-box">
-        <textarea
-          autoFocus
-          name="text"
-          placeholder="Type your message..."
-          required
-          value={messageText}
-          onChange={(e) => setMessageText(e.target.value)}
-        />
-        <button type="submit" className="send-btn" title="Send">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#e8eaed"
-          >
-            <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" />
-          </svg>
-        </button>
-      </form>
       <div>
-        <h3>Select Chats:</h3>
         <ul className="chat-list">
           {Object.keys(chats).map((chatId) => (
             <li key={chatId}>
@@ -161,6 +135,33 @@ export default function ShareData({
           ))}
         </ul>
       </div>
+      <br />
+
+      <div onClick={() => setInEditMode(true)} className="preview-box">
+        <MarkdownWithLinks text={messageText} />
+      </div>
+
+      <form onSubmit={send} className="share-form preview-box">
+        {inEditMode && <textarea
+          autoFocus
+          name="text"
+          placeholder="Type your message..."
+          required
+          value={messageText}
+          onChange={(e) => setMessageText(e.target.value)}
+        />}
+        <button type="submit" className="send-btn" title="Send">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#e8eaed"
+          >
+            <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" />
+          </svg>
+        </button>
+      </form>
     </div>
   );
 }
