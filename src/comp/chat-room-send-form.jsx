@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { encrypt, randomBytes } from "../utils/crypto";
+import { useEffect, useState } from "react";
+import { decrypt, encrypt, hash, randomBytes } from "../utils/crypto";
 
 let lastStateChangeTime;
 
@@ -9,7 +9,15 @@ export default function ChatRoomSendForm({
   client,
   setData,
 }) {
+  const chatInputTextKey = "inp-" + hash(chatId);
+
+  const [lastWroteText, setLastWroteText] = useState("");
   const [reactId, setReactId] = useState(false);
+
+  useEffect(() => {
+    const inputText = localStorage.getItem(chatInputTextKey)
+    setLastWroteText(inputText ? decrypt(chatData.password, inputText) : "")
+  }, [chatId])
 
   window.setReactId = setReactId;
   window.reactId = reactId;
@@ -32,12 +40,12 @@ export default function ChatRoomSendForm({
       react:
         reactId && reactMessageCt
           ? [
-              reactId,
-              {
-                author: reactMessageCt.author,
-                data: reactMessageCt.data,
-              },
-            ]
+            reactId,
+            {
+              author: reactMessageCt.author,
+              data: reactMessageCt.data,
+            },
+          ]
           : false,
     };
 
@@ -55,6 +63,9 @@ export default function ChatRoomSendForm({
     }));
 
     e.target.reset();
+    setLastWroteText("");
+    localStorage.setItem(chatInputTextKey, encrypt(chatData.password, ""));
+
     const isSent = await client.get("send", {
       chatId,
       message: encrypt(chatData.password, JSON.stringify(message)),
@@ -96,10 +107,14 @@ export default function ChatRoomSendForm({
     >
       <input type="hidden" value="text" name="type" />
       <textarea
+        value={lastWroteText || ""}
         autoFocus={innerWidth > 768}
         name="text"
         placeholder="Type your message..."
-        onInput={() => {
+        onInput={(e) => {
+          setLastWroteText(e.target.value)
+          localStorage.setItem(chatInputTextKey, encrypt(chatData.password, e.target.value));
+
           if (lastStateChangeTime > Date.now() - 3_000) return;
           lastStateChangeTime = Date.now();
 

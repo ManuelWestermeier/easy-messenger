@@ -29,7 +29,7 @@ export default function LoadingState({ state }) {
 
       <div className="ads">
         {ads.map(({ img, text, url }) => {
-          return <a href={url} className="ad">
+          return <a href={url} className="ad" key={url}>
             <img alt={text} title={text} src={img}></img>
             <span>
               {text}
