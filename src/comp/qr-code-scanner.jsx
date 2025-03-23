@@ -7,10 +7,12 @@ export default function Html5QrcodePlugin(props) {
   useEffect(() => {
     const html5QrcodeScanner = new Html5QrcodeScanner(qrcodeRegionId, {
       ...props,
+      fps: 10, qrbox: 250,
       useBarCodeDetectorIfSupported: false,
       rememberLastUsedCamera: false,
-      videoConstraints: { facingMode: "envoirement" },
+      videoConstraints: { facingMode: "environment" },
     });
+
     html5QrcodeScanner.render((decodedText) => {
       props.qrCodeSuccessCallback(decodedText);
       html5QrcodeScanner.clear();

@@ -48,12 +48,20 @@ button {
     fill: black;
     width: calc(100vmin - 40px);
     height: calc(100vmin - 40px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    display: grid;
+    overflow: hidden;
+    place-items: center;
     gap: 10px;
     margin: auto;
+}
+
+#html5qr-code-full-region:has(video) {
+    display: block;
+    place-content: unset;
+}
+
+#html5qr-code-full-region video {
+    margin-top: -50px;
 }
 
 #html5qr-code-full-region__dashboard_section {
