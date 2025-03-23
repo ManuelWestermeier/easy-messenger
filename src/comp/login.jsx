@@ -3,6 +3,10 @@ import useLocalStorage from "use-local-storage";
 
 export default function Login({ handleLogin }) {
   const [useAudio, setUseAudio] = useLocalStorage("use-entry-audio", true);
+  const [darkMode, setDarkmode] = useLocalStorage("use-darkmode", true);
+
+  document.body.classList = darkMode ? "dark-mode" : "light-mode";
+
   return (
     <>
       <h1 className="opensource-info">QUATSCHER Messenger</h1>
@@ -27,6 +31,13 @@ export default function Login({ handleLogin }) {
               type="button"
               onClick={() => setUseAudio((o) => !o)}
               value={useAudio ? "don't play entry audio" : "play entry audio"}
+            />
+          </p>
+          <p>
+            <input
+              type="button"
+              onClick={() => setDarkmode((o) => !o)}
+              value={darkMode ? "light mode" : "dark mode"}
             />
           </p>
           <p id="error" className="error"></p>

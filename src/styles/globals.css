@@ -1,4 +1,4 @@
-:root {
+.dark-mode {
     /* Main Colors */
     --primary: #2979ff;
     --primary-hover: #0056b3;
@@ -22,6 +22,29 @@
     --menagement-msg-bg: rgb(4, 21, 37);
 }
 
+.light-mode {
+    /* Main Colors */
+    --primary: #2979ff;
+    --primary-hover: #0056b3;
+    --error: red;
+
+    /* Backgrounds */
+    --bg: #ffffff;
+    --select-chat-bg: #ddd;
+    --bg-light: #f5f5f5;
+    --input-bg: #eee;
+    --bg-transparent: rgba(255, 255, 255, 0.4);
+
+    /* Text & Borders */
+    --text: #000;
+    --text-ni: #222;
+    --border: #ccc;
+
+    --text-light: rgba(0, 0, 0, 0.5);
+
+    --own-msg-bg: #007bff;
+    --menagement-msg-bg: #e3f2fd;
+}
 
 /* globals.css */
 
@@ -82,6 +105,10 @@ textarea:focus {
 
 ::placeholder {
     color: var(--bg-light);
+}
+
+.light-mode ::placeholder {
+    color: black;
 }
 
 /* Default button styles */
