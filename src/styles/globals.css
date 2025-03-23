@@ -24,9 +24,9 @@
 
 .light-mode {
     /* Main Colors */
-    --primary: #2979ff;
-    --primary-hover: #0056b3;
-    --error: red;
+    --primary: #6eb4ff;
+    --primary-hover: #56a8ff;
+    --error: rgb(255, 112, 112);
 
     /* Backgrounds */
     --bg: #ffffff;
@@ -42,7 +42,7 @@
 
     --text-light: rgba(0, 0, 0, 0.5);
 
-    --own-msg-bg: #007bff;
+    --own-msg-bg: #6eb4ff;
     --menagement-msg-bg: #e3f2fd;
 }
 
