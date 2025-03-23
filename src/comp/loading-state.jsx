@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import useLocalStorage from "use-local-storage";
 
 export default function LoadingState({ state }) {
+  const [ads, setAds] = useLocalStorage("loaded-ads", []);
   const [timePassed, setTimePassed] = useState(0);
   const [speed, setSpeed] = useState(1000);
 
@@ -11,6 +13,12 @@ export default function LoadingState({ state }) {
     return () => clearInterval(increaseInterval);
   }, [speed]);
 
+  useEffect(() => {
+    fetch("/easy-messenger/ads.json").then(res => res.json())
+      .then(data => setAds(data))
+      .catch(err => err)
+  }, [])
+
   return (
     <div style={{ margin: "20px" }}>
       <p>Loading state: {state}...</p>
@@ -19,13 +27,15 @@ export default function LoadingState({ state }) {
         Click This Button To Make It Faster
       </button>
 
-      {/* Fake Advertising Section */}
-      <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc", backgroundColor: "#f9f9f9" }}>
-        <h4>🚀 Boost Your Speed Instantly! 🚀</h4>
-        <p>Upgrade to <b>LoadingPro+</b> and experience 10x faster loading times.</p>
-        <button style={{ backgroundColor: "gold", padding: "5px 10px", border: "none", cursor: "pointer" }}>
-          Upgrade Now!
-        </button>
+      <div className="ads">
+        {ads.map(({ img, text, url }) => {
+          return <a href={url} className="ad">
+            <img alt={text} title={text} src={img}></img>
+            <span>
+              {text}
+            </span>
+          </a>
+        })}
       </div>
     </div>
   );
