@@ -4,13 +4,19 @@ import { JoinChat } from "./comp/join-chat";
 import { NavigationBar } from "./comp/nabigation-bar";
 import NoChat from "./comp/nochat";
 
-export default function Mobile({ currentChat, setCurrentChat, client, setData, data }) {
+export default function Mobile({
+  currentChat,
+  setCurrentChat,
+  client,
+  setData,
+  data,
+}) {
   const [page, setPage] = useState(true);
   window.setPage = setPage;
 
   useEffect(() => {
     let startX = 0;
-    const threshold = 50; // Minimum swipe distance
+    const threshold = innerWidth / 2; // Minimum swipe distance
 
     const handleTouchStart = (event) => {
       startX = event.touches[0].clientX;
