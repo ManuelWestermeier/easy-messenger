@@ -5,7 +5,7 @@
     "start_url": "/easy-messenger/",
     "display": "standalone",
     "background_color": "#121212",
-    "theme_color": "#ffffff",
+    "theme_color": "#ededed",
     "id": "/easy-messenger/",
     "orientation": "portrait-primary",
     "scope": "/easy-messenger/",
