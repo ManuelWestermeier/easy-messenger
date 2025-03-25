@@ -39,6 +39,64 @@ chats[chatId] = {
 */
 export const chats = {};
 
+export async function storeChatRommData(chatId) {
+  const { messages, passwordHashHash, subscriptions } = chats[chatId];
+  const chatFolder = `chats/${encodeURIComponent(chatId)}`;
+  try {
+    // Update data file
+    const dataContent = JSON.stringify([passwordHashHash, messages.length]);
+    await githubFS.writeFile(
+      `${chatFolder}/data.data`,
+      dataContent,
+      new Date().toString(),
+      { branch: "main" }
+    );
+
+    // Update subscriptions file: delete if exists first to avoid conflicts
+    const subsPath = `${chatFolder}/subscriptions.txt`;
+    if (await githubFS.exists(subsPath)) {
+      await githubFS.deleteFile(
+        subsPath,
+        `Delete old subscriptions file for ${chatId}`
+      );
+    }
+    await githubFS.writeFile(
+      subsPath,
+      JSON.stringify(subscriptions),
+      `Update subscriptions for ${chatId}`,
+      { branch: "main" }
+    );
+
+    // Save each message in the messages folder
+    const messagesFolder = `${chatFolder}/messages`;
+    for (let index = 0; index < messages.length; index++) {
+      await githubFS.writeFile(
+        `${messagesFolder}/${index}.txt`,
+        messages[index].message,
+        `Save message ${index} for ${chatId}`,
+        { branch: "main" }
+      );
+    }
+
+    // Clean up any extra message files if messages have decreased
+    let index = messages.length;
+    while (true) {
+      const messageFileName = `${messagesFolder}/${index}.txt`;
+      if (await githubFS.exists(messageFileName)) {
+        await githubFS.deleteFile(
+          messageFileName,
+          `Delete extra message file ${index} for ${chatId}`
+        );
+        index++;
+      } else {
+        break;
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to store chat room ${chatId}:`, error);
+  }
+}
+
 /**
  * Store each chat room’s data to GitHubFS.
  * Structure for each chat:
@@ -51,61 +109,78 @@ export async function storeAllChatRoomsData() {
   if (process.env?.DEBUG) return;
   console.log("[store all chatrooms data]");
   for (const chatId in chats) {
-    const { messages, passwordHashHash, subscriptions } = chats[chatId];
+    if (!chats[chatId].hasChanged) continue;
+    chats[chatId].hasChanged = false;
+    await storeChatRommData(chatId);
+  }
+}
+
+export async function loadCharRoom(name) {
+  try {
+    const chatId = decodeURIComponent(name);
     const chatFolder = `chats/${encodeURIComponent(chatId)}`;
+    // Read data file
+    const dataContent = await githubFS.readFile(`${chatFolder}/data.data`);
+    const [passwordHashHash, messagesLength] = JSON.parse(dataContent);
+
+    // Read subscriptions file
+    let subscriptions = {};
     try {
-      // Update data file
-      const dataContent = JSON.stringify([passwordHashHash, messages.length]);
-      await githubFS.writeFile(
-        `${chatFolder}/data.data`,
-        dataContent,
-        new Date().toString(),
-        { branch: "main" },
+      const subsContent = await githubFS.readFile(
+        `${chatFolder}/subscriptions.txt`
       );
+      subscriptions = JSON.parse(subsContent);
+    } catch (e) {
+      console.error("Error reading subscriptions for chat", chatId, e);
+    }
 
-      // Update subscriptions file: delete if exists first to avoid conflicts
-      const subsPath = `${chatFolder}/subscriptions.txt`;
-      if (await githubFS.exists(subsPath)) {
-        await githubFS.deleteFile(
-          subsPath,
-          `Delete old subscriptions file for ${chatId}`,
-        );
-      }
-      await githubFS.writeFile(
-        subsPath,
-        JSON.stringify(subscriptions),
-        `Update subscriptions for ${chatId}`,
-        { branch: "main" },
+    // Read messages from messages folder
+    const messagesFolder = `${chatFolder}/messages`;
+    let messages = [];
+    try {
+      const messageFiles = await githubFS.readDir(messagesFolder);
+      // Sort files numerically by file name (e.g. "0.txt", "1.txt", etc.)
+      const sortedFiles = messageFiles.sort(
+        (a, b) => parseInt(a.name) - parseInt(b.name)
       );
-
-      // Save each message in the messages folder
-      const messagesFolder = `${chatFolder}/messages`;
-      for (let index = 0; index < messages.length; index++) {
-        await githubFS.writeFile(
-          `${messagesFolder}/${index}.txt`,
-          messages[index].message,
-          `Save message ${index} for ${chatId}`,
-          { branch: "main" },
-        );
-      }
-
-      // Clean up any extra message files if messages have decreased
-      let index = messages.length;
-      while (true) {
-        const messageFileName = `${messagesFolder}/${index}.txt`;
-        if (await githubFS.exists(messageFileName)) {
-          await githubFS.deleteFile(
-            messageFileName,
-            `Delete extra message file ${index} for ${chatId}`,
+      for (const file of sortedFiles) {
+        try {
+          const content = await githubFS.readFile(
+            `${messagesFolder}/${file.name}`
           );
-          index++;
-        } else {
-          break;
+          messages.push({ message: content });
+        } catch (err) {
+          console.error("Error reading message file", file.name, err);
         }
       }
-    } catch (error) {
-      console.error(`Failed to store chat room ${chatId}:`, error);
+    } catch (err) {
+      console.error("Error reading messages folder for chat", chatId, err);
     }
+
+    // Clean up any extra message files
+    let index = messagesLength;
+    while (true) {
+      const messageFileName = `${messagesFolder}/${index}.txt`;
+      if (await githubFS.exists(messageFileName)) {
+        await githubFS.deleteFile(
+          messageFileName,
+          `Delete extra message file ${index} for ${chatId}`
+        );
+        index++;
+      } else {
+        break;
+      }
+    }
+
+    // Initialize the chat room in memory (clients remain empty)
+    chats[chatId] = {
+      messages,
+      passwordHashHash,
+      clients: [],
+      subscriptions,
+    };
+  } catch (error) {
+    console.error("Error fetching chat room data:", error);
   }
 }
 
@@ -131,74 +206,6 @@ async function fetchAllChatRoomsData() {
     if (chatDirs.length === 0) {
       await storeAllChatRoomsData();
       return;
-    }
-    for (const dir of chatDirs) {
-      try {
-        const chatId = decodeURIComponent(dir.name);
-        const chatFolder = `chats/${encodeURIComponent(chatId)}`;
-        // Read data file
-        const dataContent = await githubFS.readFile(`${chatFolder}/data.data`);
-        const [passwordHashHash, messagesLength] = JSON.parse(dataContent);
-
-        // Read subscriptions file
-        let subscriptions = {};
-        try {
-          const subsContent = await githubFS.readFile(
-            `${chatFolder}/subscriptions.txt`,
-          );
-          subscriptions = JSON.parse(subsContent);
-        } catch (e) {
-          console.error("Error reading subscriptions for chat", chatId, e);
-        }
-
-        // Read messages from messages folder
-        const messagesFolder = `${chatFolder}/messages`;
-        let messages = [];
-        try {
-          const messageFiles = await githubFS.readDir(messagesFolder);
-          // Sort files numerically by file name (e.g. "0.txt", "1.txt", etc.)
-          const sortedFiles = messageFiles.sort(
-            (a, b) => parseInt(a.name) - parseInt(b.name),
-          );
-          for (const file of sortedFiles) {
-            try {
-              const content = await githubFS.readFile(
-                `${messagesFolder}/${file.name}`,
-              );
-              messages.push({ message: content });
-            } catch (err) {
-              console.error("Error reading message file", file.name, err);
-            }
-          }
-        } catch (err) {
-          console.error("Error reading messages folder for chat", chatId, err);
-        }
-
-        // Clean up any extra message files
-        let index = messagesLength;
-        while (true) {
-          const messageFileName = `${messagesFolder}/${index}.txt`;
-          if (await githubFS.exists(messageFileName)) {
-            await githubFS.deleteFile(
-              messageFileName,
-              `Delete extra message file ${index} for ${chatId}`,
-            );
-            index++;
-          } else {
-            break;
-          }
-        }
-
-        // Initialize the chat room in memory (clients remain empty)
-        chats[chatId] = {
-          messages,
-          passwordHashHash,
-          clients: [],
-          subscriptions,
-        };
-      } catch (error) {
-        console.error("Error fetching chat room data:", error);
-      }
     }
     console.log("Fetched all chat room data");
   } catch (error) {
@@ -236,7 +243,7 @@ async function initialize() {
             }
           }
           return clientsSet.size;
-        })(),
+        })()
       );
     } catch (error) {
       console.error("Error during periodic store:", error);

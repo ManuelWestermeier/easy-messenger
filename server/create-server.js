@@ -25,7 +25,13 @@ async function sendPushNotification(subscription, data = "send") {
 
 import { areSetAndTheSameType } from "are-set";
 import { createServer } from "wsnet-server";
-import { chats, githubFS, storeAllChatRoomsData } from "./index.js";
+import {
+  chats,
+  githubFS,
+  loadCharRoom,
+  storeAllChatRoomsData,
+  storeChatRommData,
+} from "./index.js";
 
 import CryptoJS from "crypto-js";
 
@@ -65,7 +71,7 @@ export default function initMessengerServer() {
     }
 
     // Handle join requests
-    client.onGet("join", (data) => {
+    client.onGet("join", async (data) => {
       if (
         !areSetAndTheSameType(data, [
           ["chatId", "string"],
@@ -78,6 +84,8 @@ export default function initMessengerServer() {
       const { chatId, author, passwordHash, messageIds } = data;
 
       if (joinedChats.includes(chatId)) return false;
+
+      await loadCharRoom(chatId);
 
       const chat = chats[chatId];
 
@@ -103,6 +111,7 @@ export default function initMessengerServer() {
 
         if (subscription && !chat.subscriptions[subscription.endpoint]) {
           chat.subscriptions[subscription.endpoint] = subscription;
+          chats[chatId].hasChanged = true;
         }
 
         send("user-joined", chatId, author, 0);
@@ -116,6 +125,7 @@ export default function initMessengerServer() {
           subscriptions: subscription
             ? { [subscription.endpoint]: subscription }
             : {},
+          hasChanged: true,
         };
 
         return [];
@@ -180,13 +190,14 @@ export default function initMessengerServer() {
             return false; // Client entfernen
           }
           return true;
-        },
+        }
       );
 
       if (subscription) {
         try {
           new URL(subscription.endpoint);
           delete chats[chatId].subscriptions[subscription.endpoint];
+          chats[chatId].hasChanged = true;
         } catch (error) {
           subscription = false;
         }
@@ -225,28 +236,8 @@ export default function initMessengerServer() {
 
       if (!process.env.DEBUG) {
         try {
-          const fileName = `chats/${encodeURIComponent(chatId)}.json`;
-          await githubFS.deleteFile(fileName);
-
-          let index = 0;
-          let checkForUndeletedChats = true;
-
-          while (checkForUndeletedChats) {
-            index++;
-            try {
-              const messageFileName = `chats/${encodeURIComponent(
-                chatId,
-              )}-message-${index}.json`;
-
-              if (await githubFS.exists(messageFileName)) {
-                await githubFS.deleteFile(messageFileName);
-              } else {
-                checkForUndeletedChats = false;
-              }
-            } catch (error) {
-              checkForUndeletedChats = false;
-            }
-          }
+          const fileName = `chats/${encodeURIComponent(chatId)}`;
+          await githubFS.deleteDir(fileName);
         } catch (error) {}
       }
 
@@ -261,6 +252,7 @@ export default function initMessengerServer() {
       if (!joinedChats.includes(chatId)) return false;
       if (!chats[chatId]) return false;
 
+      if (chats[chatId].messages.length != 0) chats[chatId].hasChanged = true;
       chats[chatId].messages = [];
 
       send("all-messages-deleted", chatId, 0, 0);
@@ -269,7 +261,7 @@ export default function initMessengerServer() {
         const subscription = chats[chatId].subscriptions[subscriptionId];
         const isSend = await sendPushNotification(
           subscription,
-          "delete-all-messages",
+          "delete-all-messages"
         );
         if (isSend instanceof Error) {
           delete chats[chatId].subscriptions[subscriptionId];
@@ -320,6 +312,7 @@ export default function initMessengerServer() {
       }
 
       chats[chatId].messages.push({ id, message });
+      chats[chatId].hasChanged = true;
 
       return true;
     });
@@ -343,23 +336,35 @@ export default function initMessengerServer() {
         const subscription = chats[chatId].subscriptions[subscriptionId];
         const isSend = await sendPushNotification(
           subscription,
-          "message-deleted",
+          "message-deleted"
         );
         if (isSend instanceof Error) {
           delete chats[chatId].subscriptions[subscriptionId];
         }
       }
 
+      const prevMessagesLength = chats[chatId].messages.length;
       chats[chatId].messages = chats[chatId].messages.filter(
-        ({ id: msgId }) => msgId != id,
+        ({ id: msgId }) => msgId != id
       );
+
+      if (prevMessagesLength != chats[chatId].messages.length)
+        try {
+          chats[chatId].hasChanged = true;
+          await githubFS.deleteFile(
+            `chats/${encodeURIComponent(chatId)}/messages/${
+              prevMessagesLength - 1
+            }.txt`
+          );
+          storeAllChatRoomsData();
+        } catch (error) {}
 
       return true;
     });
 
     // Clean up when a client disconnects
     client.onclose = () => {
-      joinedChats.forEach((chatId) => {
+      joinedChats.forEach(async (chatId) => {
         let author;
         chats[chatId].clients = chats[chatId].clients.filter(
           ({ client: otherClient, author: auth }) => {
@@ -368,10 +373,17 @@ export default function initMessengerServer() {
               return false; // Client entfernen
             }
             return true;
-          },
+          }
         );
         if (author) {
           send("user-exited", chatId, author, 0);
+        }
+        if (chats[chatId].clients.length == 0) {
+          if (chats[chatId].hasChanged) {
+            await storeChatRommData();
+            delete chats[chatId];
+          }
+          delete chats[chatId];
         }
       });
     };
