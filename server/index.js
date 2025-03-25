@@ -245,11 +245,11 @@ async function initialize() {
   }, storeInterval);
 }
 
-// fetch the data.
-initialize();
 // Second, start the messenger server.
 initMessengerServer();
 
+// fetch the data.
+initialize();
 // Ensure data is stored when the process exits.
 process.on("exit", () => {
   storeAllChatRoomsData().catch(console.error);
