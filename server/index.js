@@ -115,7 +115,7 @@ export async function storeAllChatRoomsData() {
   }
 }
 
-export async function loadCharRoom(name) {
+export async function loadChatRoom(name) {
   try {
     const chatId = decodeURIComponent(name);
     const chatFolder = `chats/${encodeURIComponent(chatId)}`;
@@ -138,16 +138,9 @@ export async function loadCharRoom(name) {
     const messagesFolder = `${chatFolder}/messages`;
     let messages = [];
     try {
-      const messageFiles = await githubFS.readDir(messagesFolder);
-      // Sort files numerically by file name (e.g. "0.txt", "1.txt", etc.)
-      const sortedFiles = messageFiles.sort(
-        (a, b) => parseInt(a.name) - parseInt(b.name)
-      );
-      for (const file of sortedFiles) {
+      for (let i = 0; i < messagesLength; i++) {
         try {
-          const content = await githubFS.readFile(
-            `${messagesFolder}/${file.name}`
-          );
+          const content = await githubFS.readFile(`${messagesFolder}/${i}.txt`);
           messages.push({ message: content });
         } catch (err) {
           console.error("Error reading message file", file.name, err);
@@ -223,9 +216,6 @@ async function initialize() {
   // First, fetch existing chat data.
   await fetchAllChatRoomsData();
 
-  // Second, start the messenger server.
-  initMessengerServer();
-
   // Third, start the periodic interval to store chats.
   setTimeout(async function update() {
     console.log("update:", new Date().toLocaleDateString("de"));
@@ -252,8 +242,10 @@ async function initialize() {
   }, storeInterval);
 }
 
-// Start the application.
+// fetch the data.
 initialize();
+// Second, start the messenger server.
+initMessengerServer();
 
 // Ensure data is stored when the process exits.
 process.on("exit", () => {

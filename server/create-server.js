@@ -28,7 +28,7 @@ import { createServer } from "wsnet-server";
 import {
   chats,
   githubFS,
-  loadCharRoom,
+  loadChatRoom,
   storeAllChatRoomsData,
   storeChatRommData,
 } from "./index.js";
@@ -85,7 +85,7 @@ export default function initMessengerServer() {
 
       if (joinedChats.includes(chatId)) return false;
 
-      await loadCharRoom(chatId);
+      if (!chats[chatId]) await loadChatRoom(chatId);
 
       const chat = chats[chatId];
 
