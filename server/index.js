@@ -17,7 +17,7 @@ import initMessengerServer from "./create-server.js";
 export const githubFS = new GitHubFS({
   authToken: process.env.GITHUB_API_TOKEN,
   owner: "manuelwestermeier",
-  repo: "easy-messenger-data",
+  repo: "easy-messenger-data-2",
   branch: "main", // Ensure this branch exists in your repository
   defaultCommitter: {
     email: "westermeier111@gmail.com",
@@ -32,64 +32,66 @@ const storeInterval = process.env?.DEBUG ? 2000 : 40000; // 40 seconds
 Server Data:
 chats[chatId] = {
   clients: [{ client, author }],
-  messages: [{ id, message }],
+  messages: [{ message }],
   subscriptions: {},
   passwordHashHash: basicHash(passwordHash),
 };
 */
-
 export const chats = {};
 
 /**
  * Store each chat room’s data to GitHubFS.
- * The stored file will be located in the "chats" directory and will
- * contain only the messages and password hash (the clients are excluded).
- * The chatId is encoded to ensure a valid filename.
+ * Structure for each chat:
+ *  chats/<chatid>/ 
+ *    data.data         : JSON array [passwordHashHash, messagesLength]
+ *    subscriptions.txt : JSON object for subscriptions
+ *    messages/         : directory with each message in a file named {index}.txt
  */
-let isStoring = false;
 export async function storeAllChatRoomsData() {
-  if (process.env?.DEBUG || isStoring) return;
-  isStoring = true;
+  if (process.env?.DEBUG) return;
   console.log("[store all chatrooms data]");
   for (const chatId in chats) {
     const { messages, passwordHashHash, subscriptions } = chats[chatId];
-    const chatRoomData = {
-      passwordHashHash,
-      subscriptions,
-      messagesLength: messages.length,
-    };
-
-    // Encode chatId to ensure a valid file name.
+    const chatFolder = `chats/${encodeURIComponent(chatId)}`;
     try {
-      const dataFileName = `chats/${encodeURIComponent(chatId)}.json`;
+      // Update data file
+      const dataContent = JSON.stringify([passwordHashHash, messages.length]);
       await githubFS.writeFile(
-        dataFileName,
-        JSON.stringify(chatRoomData),
-        new Date().toString(), // commit message as a string
-        { branch: "main" } // explicitly specify the branch
+        `${chatFolder}/data.data`,
+        dataContent,
+        new Date().toString(),
+        { branch: "main" }
       );
 
-      // Write each message to its own file.
+      // Update subscriptions file: delete if exists first to avoid conflicts
+      const subsPath = `${chatFolder}/subscriptions.txt`;
+      if (await githubFS.exists(subsPath)) {
+        await githubFS.deleteFile(subsPath, `Delete old subscriptions file for ${chatId}`);
+      }
+      await githubFS.writeFile(
+        subsPath,
+        JSON.stringify(subscriptions),
+        `Update subscriptions for ${chatId}`,
+        { branch: "main" }
+      );
+
+      // Save each message in the messages folder
+      const messagesFolder = `${chatFolder}/messages`;
       for (let index = 0; index < messages.length; index++) {
-        const messageFileName = `chats/${encodeURIComponent(
-          chatId
-        )}-message-${index}.json`;
         await githubFS.writeFile(
-          messageFileName,
-          JSON.stringify(messages[index]),
-          new Date().toString(),
+          `${messagesFolder}/${index}.txt`,
+          messages[index].message,
+          `Save message ${index} for ${chatId}`,
           { branch: "main" }
         );
       }
 
-      // Clean up any undeleted message files if the number of messages has decreased.
+      // Clean up any extra message files if messages have decreased
       let index = messages.length;
       while (true) {
-        const messageFileName = `chats/${encodeURIComponent(
-          chatId
-        )}-message-${index}.json`;
+        const messageFileName = `${messagesFolder}/${index}.txt`;
         if (await githubFS.exists(messageFileName)) {
-          await githubFS.deleteFile(messageFileName);
+          await githubFS.deleteFile(messageFileName, `Delete extra message file ${index} for ${chatId}`);
           index++;
         } else {
           break;
@@ -99,93 +101,88 @@ export async function storeAllChatRoomsData() {
       console.error(`Failed to store chat room ${chatId}:`, error);
     }
   }
-  isStoring = false;
 }
 
 /**
  * Fetch all existing chat room data from the "chats" directory.
- * If the directory is missing or no files exist, a default chat room is created.
+ * It expects that each chat is stored as a directory under "chats/".
+ * For each chat, the data file, subscriptions file and messages folder are loaded.
  */
 async function fetchAllChatRoomsData() {
   if (process.env?.DEBUG) return;
-
   console.log("[fetching all chatrooms data]");
-
   try {
-    let filesResponse;
+    let chatDirs = [];
     try {
-      filesResponse = await githubFS.readDir("chats");
+      const items = await githubFS.readDir("chats");
+      // We expect directories here (each representing a chat room)
+      chatDirs = items.filter((item) => item.type === "dir");
     } catch (readError) {
-      // If the chats directory doesn't exist, create it.
       console.warn("Chats directory not found, creating directory...");
       await githubFS.createDir("chats", "Initial creation of chats directory");
-      filesResponse = [];
+      chatDirs = [];
     }
-
-    // Default to an empty array if no response is returned.
-    if (!filesResponse) {
-      filesResponse = [];
-    }
-
-    const files = Array.isArray(filesResponse)
-      ? filesResponse
-      : Object.values(filesResponse);
-
-    // If no chat files exist, create a default chat room.
-    if (files.length === 0) {
+    if (chatDirs.length === 0) {
       await storeAllChatRoomsData();
       return;
     }
+    for (const dir of chatDirs) {
+      try {
+        const chatId = decodeURIComponent(dir.name);
+        const chatFolder = `chats/${encodeURIComponent(chatId)}`;
+        // Read data file
+        const dataContent = await githubFS.readFile(`${chatFolder}/data.data`);
+        const [passwordHashHash, messagesLength] = JSON.parse(dataContent);
 
-    for (const file of files) {
-      if (
-        file.type === "file" &&
-        file.name.endsWith(".json") &&
-        !file.name.includes("-message-")
-      ) {
+        // Read subscriptions file
+        let subscriptions = {};
         try {
-          // Remove the ".json" extension and decode the chatId.
-          const chatIdEncoded = file.name.slice(0, -5);
-          const chatId = decodeURIComponent(chatIdEncoded);
-          const filePath = `chats/${file.name}`;
-          const content = await githubFS.readFile(filePath);
-          const data = JSON.parse(content);
+          const subsContent = await githubFS.readFile(`${chatFolder}/subscriptions.txt`);
+          subscriptions = JSON.parse(subsContent);
+        } catch (e) {
+          console.error("Error reading subscriptions for chat", chatId, e);
+        }
 
-          // Create an array with the number of messages.
-          const messages = new Array(data.messagesLength);
-
-          for (let index = 0; index < data.messagesLength; index++) {
-            const messageFileName = `chats/${encodeURIComponent(
-              chatId
-            )}-message-${index}.json`;
-            const messageContent = await githubFS.readFile(messageFileName);
-            messages[index] = JSON.parse(messageContent);
-          }
-
-          // Clean up any extra message files.
-          let index = data.messagesLength;
-          while (true) {
-            const messageFileName = `chats/${encodeURIComponent(
-              chatId
-            )}-message-${index}.json`;
-            if (await githubFS.exists(messageFileName)) {
-              await githubFS.deleteFile(messageFileName);
-              index++;
-            } else {
-              break;
+        // Read messages from messages folder
+        const messagesFolder = `${chatFolder}/messages`;
+        let messages = [];
+        try {
+          const messageFiles = await githubFS.readDir(messagesFolder);
+          // Sort files numerically by file name (e.g. "0.txt", "1.txt", etc.)
+          const sortedFiles = messageFiles.sort((a, b) => parseInt(a.name) - parseInt(b.name));
+          for (const file of sortedFiles) {
+            try {
+              const content = await githubFS.readFile(`${messagesFolder}/${file.name}`);
+              messages.push({ message: content });
+            } catch (err) {
+              console.error("Error reading message file", file.name, err);
             }
           }
-
-          // Initialize the chat room in memory (clients array remains empty).
-          chats[chatId] = {
-            messages,
-            passwordHashHash: data.passwordHashHash,
-            clients: [],
-            subscriptions: data?.subscriptions || {},
-          };
-        } catch (error) {
-          console.error("Error fetching chat room data:", error);
+        } catch (err) {
+          console.error("Error reading messages folder for chat", chatId, err);
         }
+
+        // Clean up any extra message files
+        let index = messagesLength;
+        while (true) {
+          const messageFileName = `${messagesFolder}/${index}.txt`;
+          if (await githubFS.exists(messageFileName)) {
+            await githubFS.deleteFile(messageFileName, `Delete extra message file ${index} for ${chatId}`);
+            index++;
+          } else {
+            break;
+          }
+        }
+
+        // Initialize the chat room in memory (clients remain empty)
+        chats[chatId] = {
+          messages,
+          passwordHashHash,
+          clients: [],
+          subscriptions,
+        };
+      } catch (error) {
+        console.error("Error fetching chat room data:", error);
       }
     }
     console.log("Fetched all chat room data");
@@ -196,9 +193,9 @@ async function fetchAllChatRoomsData() {
 
 /**
  * Initialize the application:
- * 1. Fetch the stored chat data (or create a default chat room on first run).
+ * 1. Fetch the stored chat data.
  * 2. Start the messenger server.
- * 3. Set up a periodic task to store all chat rooms.
+ * 3. Set up a periodic task to store all chats.
  */
 async function initialize() {
   // First, fetch existing chat data.
@@ -210,7 +207,6 @@ async function initialize() {
   // Third, start the periodic interval to store chats.
   setTimeout(async function update() {
     console.log("update:", new Date().toLocaleDateString("de"));
-
     try {
       await storeAllChatRoomsData();
       if (process.env.DEBUG) console.log("Current chats:", chats);
