@@ -5,6 +5,7 @@ import getShareQueryParams from "./utils/share-traget";
 import LoadingState from "./comp/loading-state";
 import ShareData from "./comp/share-data";
 import Desktop from "./desktop";
+import "./utils/shortcut";
 
 export default function App({ setData, data }) {
   const [shareData, setShareData] = useState(getShareQueryParams());
