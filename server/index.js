@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 config();
 
+console.log("initializing...");
 console.clear();
 
 const originalLog = console.log;

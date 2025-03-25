@@ -54,6 +54,8 @@ and contains all the logic for handling client events.
 */
 
 export default function initMessengerServer() {
+  console.log("server started...");
+
   createServer({ port: 8080 }, async (client) => {
     // Keep track of the chats this client has joined
     let joinedChats = [];
