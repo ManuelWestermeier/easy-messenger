@@ -1,3 +1,4 @@
-const WEB_PUSH_PUBLIC_KEY = "BHURkyBnGRp0-kUFq6wsz7Xw8ZJTU6yMv8VxlYgwadhhBZBqXhgKtzr9TwOJPNacgwAEn5Q106h9ZN0llgrNHpQ";
+const WEB_PUSH_PUBLIC_KEY =
+  "BHURkyBnGRp0-kUFq6wsz7Xw8ZJTU6yMv8VxlYgwadhhBZBqXhgKtzr9TwOJPNacgwAEn5Q106h9ZN0llgrNHpQ";
 
 export default WEB_PUSH_PUBLIC_KEY;

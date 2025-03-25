@@ -11,7 +11,7 @@ const RedditEmbedComponent = ({ url, width, height }) => {
     // Check if the script is already loaded
     if (
       !document.querySelector(
-        'script[src="https://embed.redditmedia.com/widgets/platform.js"]'
+        'script[src="https://embed.redditmedia.com/widgets/platform.js"]',
       )
     ) {
       const script = document.createElement("script");
@@ -195,7 +195,7 @@ function formatContactString(input) {
       // .replace(/(?:^|\s)([\w.-]+@[\w.-]+\.[a-zA-Z]{2,})(?=\s|$)/g, ' mailto:$1') // Emails
       .replace(
         /(?:^|\s)(?!(?:tel:|mailto:|https?:\/\/))([\w.-]+\.[a-zA-Z]{2,})(?=\s|$)/g,
-        " https://$1"
+        " https://$1",
       )
   ); // Websites
 }
@@ -222,7 +222,7 @@ export default function MarkdownWithLinks({ text: _text }) {
       ];
       const links = (processedText.match(/https?:\/\/[^\s>]+/g) || []).filter(
         (link) =>
-          !mediaExtensions.some((ext) => link.toLowerCase().endsWith(ext))
+          !mediaExtensions.some((ext) => link.toLowerCase().endsWith(ext)),
       );
       if (links.length) {
         const titles = {};

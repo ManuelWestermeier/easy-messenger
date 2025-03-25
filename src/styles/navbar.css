@@ -1,68 +1,68 @@
 .nav-bar {
-    grid-area: nav;
-    background-color: var(--bg);
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    max-height: calc(100dvh - 165px);
-    overflow-y: auto;
-    overflow-x: hidden;
+  grid-area: nav;
+  background-color: var(--bg);
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  max-height: calc(100dvh - 165px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .nav-bar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .nav-bar li {
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .nav-bar .chat-select-button {
-    width: 100%;
-    background: none;
-    border: none;
-    color: var(--text);
-    text-align: left;
-    padding: 10px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: all 0.3s ease-in-out;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  text-align: left;
+  padding: 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease-in-out;
 }
 
 .nav-bar .chat-select-button .unread {
-    background-color: var(--primary);
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease-in-out;
+  background-color: var(--primary);
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease-in-out;
 }
 
 .nav-bar .chat-select-button .unread.hide {
-    transform: scale(0) rotate(360deg);
+  transform: scale(0) rotate(360deg);
 }
 
 .nav-bar li.active .chat-select-button,
 .nav-bar .chat-select-button:hover {
-    box-shadow: 0 0 100px 0px var(--select-chat-bg);
-    background-color: var(--select-chat-bg);
+  box-shadow: 0 0 100px 0px var(--select-chat-bg);
+  background-color: var(--select-chat-bg);
 }
 
 .nav-bar li.active .chat-select-button {
-    box-shadow: 0 0 100px 0px var(--select-chat-bg);
+  box-shadow: 0 0 100px 0px var(--select-chat-bg);
 }
 
 .nav-bar button.danger {
-    width: 20px;
-    height: 20px;
-    transform: scale(1.5);
+  width: 20px;
+  height: 20px;
+  transform: scale(1.5);
 }
 
 .nav-bar button.danger svg {
-    transform: scale(4);
+  transform: scale(4);
 }

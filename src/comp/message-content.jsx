@@ -78,9 +78,9 @@ export default function MessageConetent({
             // Generate a random color for the user if they don't have one already.
             if (!userColors[author]) {
               userColors[author] = `rgb(${Math.floor(
-                Math.random() * 100 + 50
+                Math.random() * 100 + 50,
               )}, ${Math.floor(Math.random() * 100 + 50)}, ${Math.floor(
-                Math.random() * 100 + 50
+                Math.random() * 100 + 50,
               )})`;
             }
 
@@ -188,8 +188,11 @@ export default function MessageConetent({
               e.preventDefault();
               window.setShareData?.(
                 `## Shared \n${date} ${author}:\n\n${data}\n\n------------\n\n${comments
-                  .map(({ author, data, date }) => `***${date} ${author}***:\n\n ${data}`)
-                  .join("\n\n")}`
+                  .map(
+                    ({ author, data, date }) =>
+                      `***${date} ${author}***:\n\n ${data}`,
+                  )
+                  .join("\n\n")}`,
               );
             }}
           >

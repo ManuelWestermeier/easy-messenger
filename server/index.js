@@ -42,7 +42,7 @@ export const chats = {};
 /**
  * Store each chat room’s data to GitHubFS.
  * Structure for each chat:
- *  chats/<chatid>/ 
+ *  chats/<chatid>/
  *    data.data         : JSON array [passwordHashHash, messagesLength]
  *    subscriptions.txt : JSON object for subscriptions
  *    messages/         : directory with each message in a file named {index}.txt
@@ -60,19 +60,22 @@ export async function storeAllChatRoomsData() {
         `${chatFolder}/data.data`,
         dataContent,
         new Date().toString(),
-        { branch: "main" }
+        { branch: "main" },
       );
 
       // Update subscriptions file: delete if exists first to avoid conflicts
       const subsPath = `${chatFolder}/subscriptions.txt`;
       if (await githubFS.exists(subsPath)) {
-        await githubFS.deleteFile(subsPath, `Delete old subscriptions file for ${chatId}`);
+        await githubFS.deleteFile(
+          subsPath,
+          `Delete old subscriptions file for ${chatId}`,
+        );
       }
       await githubFS.writeFile(
         subsPath,
         JSON.stringify(subscriptions),
         `Update subscriptions for ${chatId}`,
-        { branch: "main" }
+        { branch: "main" },
       );
 
       // Save each message in the messages folder
@@ -82,7 +85,7 @@ export async function storeAllChatRoomsData() {
           `${messagesFolder}/${index}.txt`,
           messages[index].message,
           `Save message ${index} for ${chatId}`,
-          { branch: "main" }
+          { branch: "main" },
         );
       }
 
@@ -91,7 +94,10 @@ export async function storeAllChatRoomsData() {
       while (true) {
         const messageFileName = `${messagesFolder}/${index}.txt`;
         if (await githubFS.exists(messageFileName)) {
-          await githubFS.deleteFile(messageFileName, `Delete extra message file ${index} for ${chatId}`);
+          await githubFS.deleteFile(
+            messageFileName,
+            `Delete extra message file ${index} for ${chatId}`,
+          );
           index++;
         } else {
           break;
@@ -137,7 +143,9 @@ async function fetchAllChatRoomsData() {
         // Read subscriptions file
         let subscriptions = {};
         try {
-          const subsContent = await githubFS.readFile(`${chatFolder}/subscriptions.txt`);
+          const subsContent = await githubFS.readFile(
+            `${chatFolder}/subscriptions.txt`,
+          );
           subscriptions = JSON.parse(subsContent);
         } catch (e) {
           console.error("Error reading subscriptions for chat", chatId, e);
@@ -149,10 +157,14 @@ async function fetchAllChatRoomsData() {
         try {
           const messageFiles = await githubFS.readDir(messagesFolder);
           // Sort files numerically by file name (e.g. "0.txt", "1.txt", etc.)
-          const sortedFiles = messageFiles.sort((a, b) => parseInt(a.name) - parseInt(b.name));
+          const sortedFiles = messageFiles.sort(
+            (a, b) => parseInt(a.name) - parseInt(b.name),
+          );
           for (const file of sortedFiles) {
             try {
-              const content = await githubFS.readFile(`${messagesFolder}/${file.name}`);
+              const content = await githubFS.readFile(
+                `${messagesFolder}/${file.name}`,
+              );
               messages.push({ message: content });
             } catch (err) {
               console.error("Error reading message file", file.name, err);
@@ -167,7 +179,10 @@ async function fetchAllChatRoomsData() {
         while (true) {
           const messageFileName = `${messagesFolder}/${index}.txt`;
           if (await githubFS.exists(messageFileName)) {
-            await githubFS.deleteFile(messageFileName, `Delete extra message file ${index} for ${chatId}`);
+            await githubFS.deleteFile(
+              messageFileName,
+              `Delete extra message file ${index} for ${chatId}`,
+            );
             index++;
           } else {
             break;
@@ -221,7 +236,7 @@ async function initialize() {
             }
           }
           return clientsSet.size;
-        })()
+        })(),
       );
     } catch (error) {
       console.error("Error during periodic store:", error);

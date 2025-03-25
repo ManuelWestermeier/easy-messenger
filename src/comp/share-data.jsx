@@ -18,7 +18,7 @@ export default function ShareData({
     setSelectedChats((prev) =>
       prev.includes(chatId)
         ? prev.filter((id) => id !== chatId)
-        : [...prev, chatId]
+        : [...prev, chatId],
     );
   };
 
@@ -63,7 +63,7 @@ export default function ShareData({
 
       const encryptedMessage = encrypt(
         chatData.password,
-        JSON.stringify(message)
+        JSON.stringify(message),
       );
 
       const isSent = await client.get("send", {
@@ -73,17 +73,13 @@ export default function ShareData({
       });
       if (!isSent) {
         alert(
-          `A send error occurred for chat ${chatData.chatName}. Your message wasn't sent!`
+          `A send error occurred for chat ${chatData.chatName}. Your message wasn't sent!`,
         );
       }
     }
 
     // Replace only the hash, not the entire URL
-    window.history.replaceState(
-      "",
-      "",
-      "/easy-messenger/"
-    );
+    window.history.replaceState("", "", "/easy-messenger/");
     // set the data do no share data => false
     setShareData(false);
   };
@@ -96,11 +92,7 @@ export default function ShareData({
           className="danger"
           onClick={() => {
             // Replace only the hash, not the entire URL
-            window.history.replaceState(
-              "",
-              "",
-              "/easy-messenger/"
-            );
+            window.history.replaceState("", "", "/easy-messenger/");
             // set the data do no share data => false
             setShareData(false);
           }}
@@ -122,8 +114,9 @@ export default function ShareData({
             <li key={chatId}>
               <button
                 type="button"
-                className={`chat-select-button ${selectedChats.includes(chatId) ? "selected" : ""
-                  }`}
+                className={`chat-select-button ${
+                  selectedChats.includes(chatId) ? "selected" : ""
+                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   toggleChatSelection(chatId);
@@ -142,14 +135,16 @@ export default function ShareData({
       </div>
 
       <form onSubmit={send} className="share-form preview-box">
-        {inEditMode && <textarea
-          autoFocus
-          name="text"
-          placeholder="Type your message..."
-          required
-          value={messageText}
-          onChange={(e) => setMessageText(e.target.value)}
-        />}
+        {inEditMode && (
+          <textarea
+            autoFocus
+            name="text"
+            placeholder="Type your message..."
+            required
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+          />
+        )}
         <button type="submit" className="send-btn" title="Send">
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -43,19 +43,22 @@ export default function installApp() {
         console.log("Service Worker Active!");
 
         // Check for updates every 5 minutes
-        const updateInterval = setInterval(() => {
-          registration
-            .update()
-            .then(() => {
-              console.log("Service Worker updated!");
-            })
-            .catch((error) => {
-              console.error(
-                "Error checking for service worker updates:",
-                error
-              );
-            });
-        }, 5 * 60 * 1000); // Check for updates every 5 minutes
+        const updateInterval = setInterval(
+          () => {
+            registration
+              .update()
+              .then(() => {
+                console.log("Service Worker updated!");
+              })
+              .catch((error) => {
+                console.error(
+                  "Error checking for service worker updates:",
+                  error,
+                );
+              });
+          },
+          5 * 60 * 1000,
+        ); // Check for updates every 5 minutes
 
         // Listen for the 'updatefound' event and handle the new service worker
         registration.onupdatefound = () => {

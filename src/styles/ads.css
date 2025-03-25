@@ -1,22 +1,22 @@
 .ads {
-    display: flex;
-    flex-direction: column;
-    max-width: 500px;
-    gap: 10px;
-    margin: 50px auto;
-    border: 2px solid var(--border);
-    border-radius: 5px;
-    padding: 10px;
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+  gap: 10px;
+  margin: 50px auto;
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  padding: 10px;
 }
 
 .ads .ad {
-    display: flex;
-    flex-direction: column;
-    border: 2px solid var(--border);
-    border-radius: 5px;
-    padding: 10px;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  padding: 10px;
 }
 
 .ad .ad img {
-    width: 100%;
+  width: 100%;
 }

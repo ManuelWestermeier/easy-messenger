@@ -16,7 +16,7 @@ self.addEventListener("install", (event) => {
   console.log("Service Worker Installed!");
   self.skipWaiting(); // Activate immediately
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)),
   );
 });
 
@@ -28,9 +28,9 @@ self.addEventListener("activate", (event) => {
       return Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME) // Remove outdated cache
-          .map((name) => caches.delete(name))
+          .map((name) => caches.delete(name)),
       );
-    })
+    }),
   );
   return self.clients.claim(); // Take control immediately
 });
@@ -45,7 +45,7 @@ self.addEventListener("fetch", (event) => {
           return networkResponse;
         });
       })
-      .catch(() => caches.match(event.request)) // Use cache if offline
+      .catch(() => caches.match(event.request)), // Use cache if offline
   );
 });
 
@@ -104,9 +104,9 @@ self.addEventListener("notificationclick", function (event) {
         }
       }
       return clients.openWindow(
-        "https://manuelwestermeier.github.io/easy-messenger/"
+        "https://manuelwestermeier.github.io/easy-messenger/",
       );
-    })
+    }),
   );
 });
 

@@ -16,7 +16,7 @@ export default function App({ setData, data }) {
 
   const { client, state, reCreateClient, isClosed } = useWsClient(
     data,
-    setData
+    setData,
   );
 
   if (state === "failed" || isClosed) {

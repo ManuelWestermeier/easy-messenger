@@ -20,7 +20,7 @@ export default defineConfig({
           fs.writeFileSync(
             manifestPath,
             JSON.stringify(JSON.parse(manifestCode)),
-            "utf8"
+            "utf8",
           );
         }
 

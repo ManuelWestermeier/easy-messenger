@@ -13,7 +13,7 @@ function read(pathName) {
   } else {
     if (
       [".js", ".jsx", ".html", ".json", ".md", ".env", ".gitignore"].includes(
-        path.extname(pathName)
+        path.extname(pathName),
       )
     )
       lines += fs.readFileSync(pathName).toString("utf-8").split("\n").length;
@@ -26,7 +26,7 @@ const files = fs
     (pathName) =>
       pathName != "node_modules" &&
       pathName != "docs" &&
-      pathName != "package-lock.json"
+      pathName != "package-lock.json",
   );
 
 files.forEach(read);

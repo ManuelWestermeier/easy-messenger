@@ -14,11 +14,11 @@ export default async function initClient(client, data, setData) {
         ...oldData[chatId],
         messages: oldData[chatId].messages.filter(
           ({ type }) =>
-            !["user-joined", "user-exited", "deleted-messages"].includes(type)
+            !["user-joined", "user-exited", "deleted-messages"].includes(type),
         ),
       };
       return acc;
-    }, {})
+    }, {}),
   );
 
   // Process each chat concurrently.
@@ -75,7 +75,7 @@ export default async function initClient(client, data, setData) {
             if (msg.type == "update") {
               const [editMsgId, type, value] = msg.data;
               const editMsgIndex = messages.findIndex(
-                ({ id }) => id == editMsgId
+                ({ id }) => id == editMsgId,
               );
               if (editMsgIndex == -1) continue;
               if (type == "comment") {
@@ -132,8 +132,8 @@ export default async function initClient(client, data, setData) {
       } else
         return alert(
           "Maybe your password is incorct (remove the group from your chats) => group: " +
-            chatId
+            chatId,
         );
-    })
+    }),
   );
 }

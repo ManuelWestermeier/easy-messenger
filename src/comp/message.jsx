@@ -18,9 +18,9 @@ export default function Message({
   // Generate a random color for the user if they don't have one already.
   if (!userColors[msg.author]) {
     userColors[msg.author] = `rgb(${Math.floor(
-      Math.random() * 100 + 50
+      Math.random() * 100 + 50,
     )}, ${Math.floor(Math.random() * 100 + 50)}, ${Math.floor(
-      Math.random() * 100 + 50
+      Math.random() * 100 + 50,
     )})`;
   }
 
@@ -107,7 +107,7 @@ export default function Message({
 
     setData((old) => {
       const editMsgIndex = old[chatId].messages.findIndex(
-        ({ id }) => id == message.data[0]
+        ({ id }) => id == message.data[0],
       );
 
       if (editMsgIndex != -1)

@@ -1,56 +1,56 @@
 /* login.css */
 
 .login {
-    margin: 0;
-    padding: 20px;
-    background-color: var(--bg);
+  margin: 0;
+  padding: 20px;
+  background-color: var(--bg);
 }
 
 fieldset.login {
-    max-width: 400px;
-    margin: 40px auto;
-    padding: 20px;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    background: var(--bg);
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
 }
 
 .login legend h1 {
-    font-size: 1.5rem;
-    text-align: center;
+  font-size: 1.5rem;
+  text-align: center;
 }
 
 .login form {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .login form p {
-    margin-bottom: 15px;
-    font-size: 1rem;
+  margin-bottom: 15px;
+  font-size: 1rem;
 }
 
 /* If you want to override the default input/button styles on the login page */
 .login input {
-    width: 100%;
-    margin-top: 5px;
+  width: 100%;
+  margin-top: 5px;
 }
 
 .login p.error {
-    color: var(--error);
-    font-size: 0.9em;
-    min-height: 1.2em;
+  color: var(--error);
+  font-size: 0.9em;
+  min-height: 1.2em;
 }
 
 .login button {
-    padding: 10px;
-    background: var(--primary);
-    color: var(--text);
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
+  padding: 10px;
+  background: var(--primary);
+  color: var(--text);
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
 .login button:hover {
-    background: var(--primary-hover);
+  background: var(--primary-hover);
 }

@@ -8,7 +8,7 @@ export function useWsClient(data, setData) {
   const [client, state, reCreateClient, isClosed] = useClient(
     createClient(setData),
     true,
-    true
+    true,
   );
 
   useEffect(() => {

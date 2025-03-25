@@ -15,9 +15,9 @@ export default function ChatRoomSendForm({
   const [reactId, setReactId] = useState(false);
 
   useEffect(() => {
-    const inputText = localStorage.getItem(chatInputTextKey)
-    setLastWroteText(inputText ? decrypt(chatData.password, inputText) : "")
-  }, [chatId])
+    const inputText = localStorage.getItem(chatInputTextKey);
+    setLastWroteText(inputText ? decrypt(chatData.password, inputText) : "");
+  }, [chatId]);
 
   window.setReactId = setReactId;
   window.reactId = reactId;
@@ -40,12 +40,12 @@ export default function ChatRoomSendForm({
       react:
         reactId && reactMessageCt
           ? [
-            reactId,
-            {
-              author: reactMessageCt.author,
-              data: reactMessageCt.data,
-            },
-          ]
+              reactId,
+              {
+                author: reactMessageCt.author,
+                data: reactMessageCt.data,
+              },
+            ]
           : false,
     };
 
@@ -88,7 +88,7 @@ export default function ChatRoomSendForm({
       chatId,
       message: encrypt(
         chatData.password,
-        JSON.stringify({ author: chatData?.author, state: "idle" })
+        JSON.stringify({ author: chatData?.author, state: "idle" }),
       ),
     });
   };
@@ -112,8 +112,11 @@ export default function ChatRoomSendForm({
         name="text"
         placeholder="Type your message..."
         onInput={(e) => {
-          setLastWroteText(e.target.value)
-          localStorage.setItem(chatInputTextKey, encrypt(chatData.password, e.target.value));
+          setLastWroteText(e.target.value);
+          localStorage.setItem(
+            chatInputTextKey,
+            encrypt(chatData.password, e.target.value),
+          );
 
           if (lastStateChangeTime > Date.now() - 3_000) return;
           lastStateChangeTime = Date.now();
@@ -122,7 +125,7 @@ export default function ChatRoomSendForm({
             chatId,
             message: encrypt(
               chatData.password,
-              JSON.stringify({ author: chatData?.author, state: "is-writing" })
+              JSON.stringify({ author: chatData?.author, state: "is-writing" }),
             ),
           });
         }}

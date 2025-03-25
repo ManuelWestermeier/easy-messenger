@@ -1,64 +1,66 @@
 .share-container {
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 10px;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 .share-container form {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .share-container textarea {
-    width: 100%;
-    min-height: 5rem;
-    resize: vertical;
+  width: 100%;
+  min-height: 5rem;
+  resize: vertical;
 }
 
 .share-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 h3 {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 .preview-box {
-    padding: 10px;
-    border-radius: 8px;
-    max-height: 200px;
-    overflow: auto;
-    margin-bottom: 10px;
-    border: 2px solid var(--border);
+  padding: 10px;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow: auto;
+  margin-bottom: 10px;
+  border: 2px solid var(--border);
 }
 
 .chat-list {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .chat-select-button {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    background-color: var(--bg);
-    margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+  background-color: var(--bg);
+  margin: 5px 0;
 }
 
 .chat-select-button:hover {
-    background-color: var(--primary-hover);
+  background-color: var(--primary-hover);
 }
 
 .chat-select-button.selected {
-    background: var(--primary);
-    color: var(--text);
+  background: var(--primary);
+  color: var(--text);
 }

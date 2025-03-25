@@ -14,10 +14,11 @@ export default function LoadingState({ state }) {
   }, [speed]);
 
   useEffect(() => {
-    fetch("/easy-messenger/ads.json").then(res => res.json())
-      .then(data => setAds(data))
-      .catch(err => err)
-  }, [])
+    fetch("/easy-messenger/ads.json")
+      .then((res) => res.json())
+      .then((data) => setAds(data))
+      .catch((err) => err);
+  }, []);
 
   return (
     <div style={{ margin: "20px" }}>
@@ -29,12 +30,12 @@ export default function LoadingState({ state }) {
 
       <div className="ads">
         {ads.map(({ img, text, url }) => {
-          return <a href={url} className="ad" key={url}>
-            <img alt={text} title={text} src={img}></img>
-            <span>
-              {text}
-            </span>
-          </a>
+          return (
+            <a href={url} className="ad" key={url}>
+              <img alt={text} title={text} src={img}></img>
+              <span>{text}</span>
+            </a>
+          );
         })}
       </div>
     </div>

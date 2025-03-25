@@ -1,73 +1,73 @@
 .dark-mode {
-    /* Main Colors */
-    --primary: #2979ff;
-    --primary-hover: #0056b3;
-    --error: red;
+  /* Main Colors */
+  --primary: #2979ff;
+  --primary-hover: #0056b3;
+  --error: red;
 
-    /* Backgrounds */
-    --bg: #121212;
-    --select-chat-bg: #575757;
-    --bg-light: #1e1e1e;
-    --input-bg: #222;
-    --bg-transparent: rgba(18, 18, 18, 0.4);
+  /* Backgrounds */
+  --bg: #121212;
+  --select-chat-bg: #575757;
+  --bg-light: #1e1e1e;
+  --input-bg: #222;
+  --bg-transparent: rgba(18, 18, 18, 0.4);
 
-    /* Text & Borders */
-    --text: #fff;
-    --text-ni: #eee;
-    --border: #444;
+  /* Text & Borders */
+  --text: #fff;
+  --text-ni: #eee;
+  --border: #444;
 
-    --text-light: rgba(238, 238, 238, 0.5);
+  --text-light: rgba(238, 238, 238, 0.5);
 
-    --own-msg-bg: dodgerblue;
-    --menagement-msg-bg: rgb(4, 21, 37);
+  --own-msg-bg: dodgerblue;
+  --menagement-msg-bg: rgb(4, 21, 37);
 }
 
 .light-mode {
-    /* Main Colors */
-    --primary: #6eb4ff;
-    --primary-hover: #56a8ff;
-    --error: rgb(255, 112, 112);
+  /* Main Colors */
+  --primary: #6eb4ff;
+  --primary-hover: #56a8ff;
+  --error: rgb(255, 112, 112);
 
-    /* Backgrounds */
-    --bg: #ffffff;
-    --select-chat-bg: #ddd;
-    --bg-light: #f5f5f5;
-    --input-bg: #eee;
-    --bg-transparent: rgba(255, 255, 255, 0.4);
+  /* Backgrounds */
+  --bg: #ffffff;
+  --select-chat-bg: #ddd;
+  --bg-light: #f5f5f5;
+  --input-bg: #eee;
+  --bg-transparent: rgba(255, 255, 255, 0.4);
 
-    /* Text & Borders */
-    --text: #000;
-    --text-ni: #222;
-    --border: #ccc;
+  /* Text & Borders */
+  --text: #000;
+  --text-ni: #222;
+  --border: #ccc;
 
-    --text-light: rgba(0, 0, 0, 0.5);
+  --text-light: rgba(0, 0, 0, 0.5);
 
-    --own-msg-bg: #6eb4ff;
-    --menagement-msg-bg: #e3f2fd;
+  --own-msg-bg: #6eb4ff;
+  --menagement-msg-bg: #e3f2fd;
 }
 
 /* globals.css */
 
 /* Global resets and defaults */
 * {
-    scrollbar-color: var(--primary) var(--bg);
-    scrollbar-width: thin;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  scrollbar-color: var(--primary) var(--bg);
+  scrollbar-width: thin;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body,
 html {
-    font-family: Arial, sans-serif;
-    scroll-behavior: smooth;
-    background-color: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
+  font-family: Arial, sans-serif;
+  scroll-behavior: smooth;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
 }
 
 .none {
-    display: none !important;
+  display: none !important;
 }
 
 /* Default typographic styles */
@@ -77,11 +77,11 @@ h3,
 h4,
 h5,
 h6 {
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 p {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 /* Default form elements styling */
@@ -89,84 +89,83 @@ input,
 button,
 select,
 textarea {
-    font-family: inherit;
-    padding: 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  font-family: inherit;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 input:focus,
 textarea:focus {
-    outline: 2px solid var(--text);
+  outline: 2px solid var(--text);
 }
 
 ::placeholder {
-    color: var(--bg-light);
+  color: var(--bg-light);
 }
 
 .light-mode ::placeholder {
-    color: black;
+  color: black;
 }
 
 /* Default button styles */
 button {
-    cursor: pointer;
-    background-color: var(--primary);
-    color: var(--text);
-    border: none;
+  cursor: pointer;
+  background-color: var(--primary);
+  color: var(--text);
+  border: none;
 }
 
 button:hover {
-    background-color: var(--primary-hover);
+  background-color: var(--primary-hover);
 }
 
 .danger {
-    background-color: var(--error) !important;
+  background-color: var(--error) !important;
 }
 
 /* Links */
 a {
-    text-decoration: none;
-    color: inherit;
+  text-decoration: none;
+  color: inherit;
 }
 
-
 [alt="Info icon"] {
-    display: none;
+  display: none;
 }
 
 fieldset {
-    padding: 10px;
-    border: 2px solid var(--text);
-    border-radius: 5px;
+  padding: 10px;
+  border: 2px solid var(--text);
+  border-radius: 5px;
 }
 
 svg {
-    fill: var(--text) !important;
+  fill: var(--text) !important;
 }
 
 /* For Webkit browsers (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
-    width: 12px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg);
-    border-radius: 5px;
+  background: var(--bg);
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 5px;
+  background: var(--primary);
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-hover);
+  background: var(--primary-hover);
 }
 
 iframe {
-    border-radius: 5px;
+  border-radius: 5px;
 }

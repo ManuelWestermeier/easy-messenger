@@ -57,8 +57,8 @@ function Main() {
       setData((prevData) =>
         encrypt(
           password,
-          JSON.stringify(newData(JSON.parse(decrypt(password, prevData))))
-        )
+          JSON.stringify(newData(JSON.parse(decrypt(password, prevData)))),
+        ),
       );
     } else {
       setData(encrypt(password, JSON.stringify(newData)));

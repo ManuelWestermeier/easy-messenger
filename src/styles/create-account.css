@@ -1,37 +1,37 @@
 .opensource-info {
-    margin-top: 30px;
-    padding: 20px;
-    border: 2px solid var(--primary);
-    border-radius: 8px;
-    background-color: var(--bg);
-    max-width: 600px;
-    text-align: center;
-    margin: 30px auto;
+  margin-top: 30px;
+  padding: 20px;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  background-color: var(--bg);
+  max-width: 600px;
+  text-align: center;
+  margin: 30px auto;
 }
 
 .opensource-info img {
-    width: 20vmin;
-    /* border-radius: 10vmin; */
+  width: 20vmin;
+  /* border-radius: 10vmin; */
 }
 
 .opensource-info h2 {
-    margin-bottom: 10px;
-    font-size: 1.5em;
-    color: var(--primary);
+  margin-bottom: 10px;
+  font-size: 1.5em;
+  color: var(--primary);
 }
 
 .opensource-info p {
-    font-size: 1em;
-    line-height: 1.5;
-    color: var(--text);
+  font-size: 1em;
+  line-height: 1.5;
+  color: var(--text);
 }
 
 .opensource-info a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: bold;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: bold;
 }
 
 .opensource-info a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

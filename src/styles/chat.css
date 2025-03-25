@@ -1,103 +1,102 @@
 /* chat.css */
 
 .chat-room {
-    overflow: hidden;
-    padding: 0.5rem;
-    border-radius: 4px;
-    /* fixed box-shadow rgba syntax */
-    background: linear-gradient(135deg, var(--primary) 20%, var(--bg) 100%);
+  overflow: hidden;
+  padding: 0.5rem;
+  border-radius: 4px;
+  /* fixed box-shadow rgba syntax */
+  background: linear-gradient(135deg, var(--primary) 20%, var(--bg) 100%);
 }
 
 .chat-room header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-
 
 .chat-room header h3 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
-.chat-room .user-states>span {
-    background-color: var(--primary-hover);
-    border-radius: 20px;
-    padding: 5px;
-    animation: user-state-anim 2s ease-in-out infinite;
+.chat-room .user-states > span {
+  background-color: var(--primary-hover);
+  border-radius: 20px;
+  padding: 5px;
+  animation: user-state-anim 2s ease-in-out infinite;
 }
 
 @keyframes user-state-anim {
-    50% {
-        background-color: rebeccapurple;
-    }
+  50% {
+    background-color: rebeccapurple;
+  }
 }
 
 .chat-room .user-states span span {
-    background-color: var(--text);
-    border-radius: 15px;
+  background-color: var(--text);
+  border-radius: 15px;
 }
 
 /* Expanded/zoomed chat data form */
 .chat-room header #chat-data-form {
-    position: fixed;
-    z-index: 10000000000;
-    height: 100vh;
-    /* Adjust to use viewport height in a better way */
-    width: 100vw;
-    /* Adjust to use viewport width in a better way */
-    left: 0;
-    top: 0;
-    background-color: var(--text-light);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    gap: 5px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow: auto;
-    /* Allows scrolling */
+  position: fixed;
+  z-index: 10000000000;
+  height: 100vh;
+  /* Adjust to use viewport height in a better way */
+  width: 100vw;
+  /* Adjust to use viewport width in a better way */
+  left: 0;
+  top: 0;
+  background-color: var(--text-light);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  gap: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  /* Allows scrolling */
 }
 
 /* Ensure the fieldset width is controlled */
 .chat-room header #chat-data-form fieldset {
-    min-width: 60vmin;
-    overflow: auto;
-    /* Prevents overflow inside fieldset */
+  min-width: 60vmin;
+  overflow: auto;
+  /* Prevents overflow inside fieldset */
 }
 
 /* Full width for input and button elements */
 .chat-room header #chat-data-form fieldset input,
 .chat-room header #chat-data-form fieldset button {
-    width: 100%;
+  width: 100%;
 }
 
 /* Button positioning */
 .chat-room header #chat-data-form button:first-child {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
 /* QR code behavior */
 .chat-room header .qr-code {
-    cursor: pointer;
-    width: 100px;
-    height: 100px;
+  cursor: pointer;
+  width: 100px;
+  height: 100px;
 }
 
 .chat-room header .qr-code:focus {
-    position: absolute;
-    top: calc(50vh - 50vmin);
-    /* Center the QR code in the viewport */
-    left: calc(50vw - 50vmin);
-    /* Center the QR code in the viewport */
-    z-index: 10000000001;
-    height: 100vmin;
-    width: 100vmin;
-    outline: none;
-    box-shadow: 10px 10px 100px 10px var(--bg);
+  position: absolute;
+  top: calc(50vh - 50vmin);
+  /* Center the QR code in the viewport */
+  left: calc(50vw - 50vmin);
+  /* Center the QR code in the viewport */
+  z-index: 10000000001;
+  height: 100vmin;
+  width: 100vmin;
+  outline: none;
+  box-shadow: 10px 10px 100px 10px var(--bg);
 }

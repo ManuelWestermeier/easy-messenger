@@ -70,5 +70,6 @@ node ./server/
 
 Enjoy using QUATSCHER – the secure and open source encrypted messenger!
 
-###     4,454 lines usercode
+### 4,454 lines usercode
+
 ### 1,668,110 lines full code

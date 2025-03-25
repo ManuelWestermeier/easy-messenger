@@ -180,7 +180,7 @@ export default function initMessengerServer() {
             return false; // Client entfernen
           }
           return true;
-        }
+        },
       );
 
       if (subscription) {
@@ -235,7 +235,7 @@ export default function initMessengerServer() {
             index++;
             try {
               const messageFileName = `chats/${encodeURIComponent(
-                chatId
+                chatId,
               )}-message-${index}.json`;
 
               if (await githubFS.exists(messageFileName)) {
@@ -269,7 +269,7 @@ export default function initMessengerServer() {
         const subscription = chats[chatId].subscriptions[subscriptionId];
         const isSend = await sendPushNotification(
           subscription,
-          "delete-all-messages"
+          "delete-all-messages",
         );
         if (isSend instanceof Error) {
           delete chats[chatId].subscriptions[subscriptionId];
@@ -343,7 +343,7 @@ export default function initMessengerServer() {
         const subscription = chats[chatId].subscriptions[subscriptionId];
         const isSend = await sendPushNotification(
           subscription,
-          "message-deleted"
+          "message-deleted",
         );
         if (isSend instanceof Error) {
           delete chats[chatId].subscriptions[subscriptionId];
@@ -351,7 +351,7 @@ export default function initMessengerServer() {
       }
 
       chats[chatId].messages = chats[chatId].messages.filter(
-        ({ id: msgId }) => msgId != id
+        ({ id: msgId }) => msgId != id,
       );
 
       return true;
@@ -368,7 +368,7 @@ export default function initMessengerServer() {
               return false; // Client entfernen
             }
             return true;
-          }
+          },
         );
         if (author) {
           send("user-exited", chatId, author, 0);
