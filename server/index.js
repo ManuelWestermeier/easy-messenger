@@ -119,6 +119,11 @@ export async function loadChatRoom(name) {
   try {
     const chatId = decodeURIComponent(name);
     const chatFolder = `chats/${encodeURIComponent(chatId)}`;
+
+    if (!(await githubFS.exists(`${chatFolder}/data.data`))) {
+      return;
+    }
+
     // Read data file
     const dataContent = await githubFS.readFile(`${chatFolder}/data.data`);
     const [passwordHashHash, messagesLength] = JSON.parse(dataContent);

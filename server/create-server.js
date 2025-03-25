@@ -103,7 +103,10 @@ export default function initMessengerServer() {
       }
 
       if (chat) {
-        if (chat.passwordHashHash != passwordHashHash) return false;
+        if (chat.passwordHashHash != passwordHashHash) {
+          delete chats[chatId];
+          return false;
+        }
 
         joinedChats.push(chatId);
 
