@@ -36,24 +36,24 @@ export function basicHash(data) {
 
 /*
 Client Function:
-"user-exited" => { chatId, message: author, messageId: 0 }
-"user-joined"  => { chatId, message: author, messageId: 0 }
-"message"      => { chatId, message, messageId }
+"user-exited"   => { chatId, message: author, messageId: 0 }
+"user-joined"   => { chatId, message: author, messageId: 0 }
+"message"       => { chatId, message, messageId }
 "message-deleted" => { chatId, message, messageId }
-"chat-deleted" => { chatId, message: 0, messageId: 0 }
+"chat-deleted"  => { chatId, message: 0, messageId: 0 }
 */
 
 // ---------- Helper Functions for Persistent Storage ----------
 
 /**
  * Create storage structure for a new chat.
- * Folder structure: Chats/<chatId>/
- *   - data.data : JSON [passwordHash, 0]
- *   - messages/ : directory for message files (each file named msg-<id>.txt)
+ * Folder structure: chats/<chatid>/
+ *   - data.data : JSON [passwordHashHash, 0]
+ *   - messages/ : directory for message files (each file is named {index}.txt)
  *   - subscriptions.txt : JSON object for subscriptions
  */
 async function createChatStorage(chatId, passwordHashHash, initialSubscriptions = {}) {
-  const chatFolder = `Chats/${encodeURIComponent(chatId)}`;
+  const chatFolder = `chats/${encodeURIComponent(chatId)}`;
   try {
     await githubFS.createDir(chatFolder, `Create chat folder for ${chatId}`);
     await githubFS.createDir(`${chatFolder}/messages`, `Create messages folder for ${chatId}`);
@@ -61,12 +61,24 @@ async function createChatStorage(chatId, passwordHashHash, initialSubscriptions 
     console.error("Error creating directories for chat", chatId, error);
   }
   try {
-    await githubFS.writeFile(`${chatFolder}/data.data`, JSON.stringify([passwordHashHash, 0]), `Create data file for ${chatId}`);
+    await githubFS.writeFile(
+      `${chatFolder}/data.data`,
+      JSON.stringify([passwordHashHash, 0]),
+      `Create data file for ${chatId}`
+    );
   } catch (error) {
     console.error("Error writing data file for chat", chatId, error);
   }
   try {
-    await githubFS.writeFile(`${chatFolder}/subscriptions.txt`, JSON.stringify(initialSubscriptions), `Create subscriptions file for ${chatId}`);
+    const subsPath = `${chatFolder}/subscriptions.txt`;
+    if (await githubFS.exists(subsPath)) {
+      await githubFS.deleteFile(subsPath, `Delete old subscriptions file for ${chatId}`);
+    }
+    await githubFS.writeFile(
+      subsPath,
+      JSON.stringify(initialSubscriptions),
+      `Create subscriptions file for ${chatId}`
+    );
   } catch (error) {
     console.error("Error writing subscriptions file for chat", chatId, error);
   }
@@ -75,9 +87,10 @@ async function createChatStorage(chatId, passwordHashHash, initialSubscriptions 
 /**
  * Load persistent storage for a chat.
  * Returns an object with passwordHashHash, messages array, and subscriptions.
+ * Messages are loaded from the messages folder, sorted by numeric filename.
  */
 async function loadChatStorage(chatId) {
-  const chatFolder = `Chats/${encodeURIComponent(chatId)}`;
+  const chatFolder = `chats/${encodeURIComponent(chatId)}`;
   let passwordHashHash = "";
   let messages = [];
   let subscriptions = {};
@@ -88,13 +101,12 @@ async function loadChatStorage(chatId) {
     // Load messages from the messages directory:
     try {
       const messageFiles = await githubFS.readDir(`${chatFolder}/messages`);
-      // Each message file is named "msg-<id>.txt"
-      for (const fileName of messageFiles) {
+      // Expect files named like "0.txt", "1.txt", etc.
+      const sortedFiles = messageFiles.sort((a, b) => parseInt(a) - parseInt(b));
+      for (const fileName of sortedFiles) {
         try {
           const fileContent = await githubFS.readFile(`${chatFolder}/messages/${fileName}`);
-          // Extract id from filename assuming format: msg-<id>.txt
-          const id = fileName.slice(4, -4); // remove "msg-" and ".txt"
-          messages.push({ id, message: fileContent });
+          messages.push({ message: fileContent });
         } catch (err) {
           console.error("Error reading message file", fileName, err);
         }
@@ -119,9 +131,13 @@ async function loadChatStorage(chatId) {
  * Stores [passwordHashHash, current number of messages]
  */
 async function updateChatData(chatId, passwordHashHash, messages) {
-  const chatFolder = `Chats/${encodeURIComponent(chatId)}`;
+  const chatFolder = `chats/${encodeURIComponent(chatId)}`;
   try {
-    await githubFS.writeFile(`${chatFolder}/data.data`, JSON.stringify([passwordHashHash, messages.length]), `Update data file for ${chatId}`);
+    await githubFS.writeFile(
+      `${chatFolder}/data.data`,
+      JSON.stringify([passwordHashHash, messages.length]),
+      `Update data file for ${chatId}`
+    );
   } catch (error) {
     console.error("Error updating data file for chat", chatId, error);
   }
@@ -131,35 +147,68 @@ async function updateChatData(chatId, passwordHashHash, messages) {
  * Update the subscriptions file for a chat.
  */
 async function updateChatSubscriptions(chatId, subscriptions) {
-  const chatFolder = `Chats/${encodeURIComponent(chatId)}`;
+  const chatFolder = `chats/${encodeURIComponent(chatId)}`;
+  const subsPath = `${chatFolder}/subscriptions.txt`;
   try {
-    await githubFS.writeFile(`${chatFolder}/subscriptions.txt`, JSON.stringify(subscriptions), `Update subscriptions for ${chatId}`);
+    if (await githubFS.exists(subsPath)) {
+      await githubFS.deleteFile(subsPath, `Delete old subscriptions file for ${chatId}`);
+    }
+    await githubFS.writeFile(
+      subsPath,
+      JSON.stringify(subscriptions),
+      `Update subscriptions for ${chatId}`
+    );
   } catch (error) {
     console.error("Error updating subscriptions file for chat", chatId, error);
   }
 }
 
 /**
- * Save a single message file.
+ * Save a new message file.
+ * The new message is stored as messages/{index}.txt where index equals the current messages array length.
  */
-async function saveMessage(chatId, id, message) {
-  const chatFolder = `Chats/${encodeURIComponent(chatId)}`;
+async function saveNewMessage(chatId, message) {
+  const chatFolder = `chats/${encodeURIComponent(chatId)}`;
+  const messagesDir = `${chatFolder}/messages`;
+  const index = chats[chatId].messages.length; // index for the new message
   try {
-    await githubFS.writeFile(`${chatFolder}/messages/msg-${id}.txt`, message, `Save message ${id} for ${chatId}`);
+    await githubFS.writeFile(
+      `${messagesDir}/${index}.txt`,
+      message,
+      `Save message ${index} for ${chatId}`
+    );
   } catch (error) {
-    console.error("Error saving message", id, "for chat", chatId, error);
+    console.error("Error saving message at index", index, "for chat", chatId, error);
   }
 }
 
 /**
- * Delete a single message file.
+ * Re-save all messages for a chat.
+ * Deletes all existing message files in the messages directory and re-writes them
+ * using the current order in the in-memory messages array.
  */
-async function deleteMessageFile(chatId, id) {
-  const chatFolder = `Chats/${encodeURIComponent(chatId)}`;
+async function reSaveMessages(chatId) {
+  const chatFolder = `chats/${encodeURIComponent(chatId)}`;
+  const messagesDir = `${chatFolder}/messages`;
   try {
-    await githubFS.deleteFile(`${chatFolder}/messages/msg-${id}.txt`, `Delete message ${id} for ${chatId}`);
-  } catch (error) {
-    console.error("Error deleting message file", id, "for chat", chatId, error);
+    const files = await githubFS.readDir(messagesDir);
+    for (const file of files) {
+      await githubFS.deleteFile(`${messagesDir}/${file.name}`, `Delete message file ${file} for ${chatId}`);
+    }
+  } catch (e) {
+    console.error("Error clearing messages for chat", chatId, e);
+  }
+  // Re-save messages with new indices
+  for (let i = 0; i < chats[chatId].messages.length; i++) {
+    try {
+      await githubFS.writeFile(
+        `${messagesDir}/${i}.txt`,
+        chats[chatId].messages[i].message,
+        `Re-save message ${i} for ${chatId}`
+      );
+    } catch (error) {
+      console.error("Error re-saving message at index", i, "for chat", chatId, error);
+    }
   }
 }
 
@@ -167,7 +216,7 @@ async function deleteMessageFile(chatId, id) {
  * Delete the entire chat folder from storage.
  */
 async function deleteChatStorage(chatId) {
-  const chatFolder = `Chats/${encodeURIComponent(chatId)}`;
+  const chatFolder = `chats/${encodeURIComponent(chatId)}`;
   try {
     await githubFS.deleteDir(chatFolder, `Delete chat folder for ${chatId}`);
   } catch (error) {
@@ -232,7 +281,7 @@ export default function initMessengerServer() {
           subscription = false;
         }
       }
-      const chatFolder = `Chats/${encodeURIComponent(chatId)}`;
+      const chatFolder = `chats/${encodeURIComponent(chatId)}`;
 
       // Check if chat exists in memory or on storage.
       if (chats[chatId]) {
@@ -273,17 +322,18 @@ export default function initMessengerServer() {
 
       // Prepare unread messages based on client provided messageIds.
       const unread = [];
-      for (const msg of chats[chatId].messages) {
-        if (!messageIds[msg.id]) {
-          unread.push(msg);
+      for (const [i, msg] of chats[chatId].messages.entries()) {
+        // Here, the key is the index converted to string.
+        if (!messageIds[String(i)]) {
+          unread.push({ id: String(i), message: msg.message });
         } else {
-          delete messageIds[msg.id];
+          delete messageIds[String(i)];
         }
       }
       const deletedMessages = Object.keys(messageIds);
       if (deletedMessages.length > 0) {
         unread.push({
-          id: 0,
+          id: "0",
           message: "",
           deleted: true,
           deletedMessages,
@@ -303,7 +353,8 @@ export default function initMessengerServer() {
       if (typeof chatId !== "string") return false;
       if (!joinedChats.includes(chatId)) return false;
       if (!chats[chatId]) return false;
-      return chats[chatId].messages;
+      // Return messages with their array index as id.
+      return chats[chatId].messages.map((msg, index) => ({ id: String(index), message: msg.message }));
     });
 
     // Handle exit requests
@@ -372,11 +423,9 @@ export default function initMessengerServer() {
       if (!joinedChats.includes(chatId)) return false;
       if (!chats[chatId]) return false;
 
-      // Delete each message file from persistent storage
-      for (const msg of chats[chatId].messages) {
-        await deleteMessageFile(chatId, msg.id);
-      }
+      // Delete all message files by clearing and re-saving an empty messages folder.
       chats[chatId].messages = [];
+      await reSaveMessages(chatId);
       await updateChatData(chatId, chats[chatId].passwordHashHash, chats[chatId].messages);
 
       send("all-messages-deleted", chatId, 0, 0);
@@ -414,7 +463,7 @@ export default function initMessengerServer() {
         ])
       )
         return false;
-      const { chatId, message, id } = data;
+      const { chatId, message } = data;
       if (!joinedChats.includes(chatId)) return false;
       if (!chats[chatId]) return false;
 
@@ -422,7 +471,9 @@ export default function initMessengerServer() {
       if (message.length > 10000) return false;
 
       // Broadcast the message to other clients
-      send("message", chatId, message, id);
+      // The new message's id is its array index (as a string)
+      const newMessageIndex = chats[chatId].messages.length;
+      send("message", chatId, message, String(newMessageIndex));
 
       // Notify subscriptions
       for (const subscriptionId in chats[chatId].subscriptions) {
@@ -434,8 +485,8 @@ export default function initMessengerServer() {
       }
 
       // Save message in memory and persistent storage
-      chats[chatId].messages.push({ id, message });
-      await saveMessage(chatId, id, message);
+      chats[chatId].messages.push({ message });
+      await saveNewMessage(chatId, message);
       await updateChatData(chatId, chats[chatId].passwordHashHash, chats[chatId].messages);
 
       return true;
@@ -463,9 +514,14 @@ export default function initMessengerServer() {
         }
       }
 
-      // Remove message from memory and persistent storage
-      chats[chatId].messages = chats[chatId].messages.filter(({ id: msgId }) => msgId !== id);
-      await deleteMessageFile(chatId, id);
+      // Remove message from memory by treating the id as an array index.
+      const indexToDelete = parseInt(id);
+      if (isNaN(indexToDelete) || indexToDelete < 0 || indexToDelete >= chats[chatId].messages.length) {
+        return false;
+      }
+      chats[chatId].messages.splice(indexToDelete, 1);
+      // Re-save the messages so that the file names match the new array order.
+      await reSaveMessages(chatId);
       await updateChatData(chatId, chats[chatId].passwordHashHash, chats[chatId].messages);
 
       return true;
@@ -495,16 +551,18 @@ export default function initMessengerServer() {
 
     // Persist chat room data after each client connection
     try {
-      storeAllChatRoomsData();
+      await storeAllChatRoomsData();
     } catch (error) {
       console.error("Error storing all chat room data:", error);
     }
   });
 
   // Persist chat room data when the server starts
-  try {
-    storeAllChatRoomsData();
-  } catch (error) {
-    console.error("Error storing all chat room data:", error);
-  }
+  (async () => {
+    try {
+      await storeAllChatRoomsData();
+    } catch (error) {
+      console.error("Error storing all chat room data:", error);
+    }
+  })();
 }
