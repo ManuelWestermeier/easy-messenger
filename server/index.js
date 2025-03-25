@@ -142,9 +142,7 @@ export async function loadChatRoom(name) {
         try {
           const content = await githubFS.readFile(`${messagesFolder}/${i}.txt`);
           messages.push({ message: content });
-        } catch (err) {
-          console.error("Error reading message file", file.name, err);
-        }
+        } catch (err) {}
       }
     } catch (err) {
       console.error("Error reading messages folder for chat", chatId, err);

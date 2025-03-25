@@ -380,7 +380,7 @@ export default function initMessengerServer() {
         }
         if (chats[chatId].clients.length == 0) {
           if (chats[chatId].hasChanged) {
-            await storeChatRommData();
+            await storeChatRommData(chatId);
             delete chats[chatId];
           }
           delete chats[chatId];
