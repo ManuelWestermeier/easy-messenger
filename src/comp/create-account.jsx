@@ -1,4 +1,10 @@
+import useLocalStorage from "use-local-storage";
+
 export default function CreateAccount({ handleCreateAccount }) {
+  const [darkMode, setDarkmode] = useLocalStorage("use-darkmode", true);
+
+  document.body.classList = darkMode ? "dark-mode" : "light-mode";
+
   return (
     <div className="create-account-wrapper">
       <h1 className="opensource-info">QUATSCHER Messenger</h1>
@@ -31,6 +37,13 @@ export default function CreateAccount({ handleCreateAccount }) {
             />
           </p>
           <p id="error" className="error"></p>
+          <p>
+            <input
+              type="button"
+              onClick={() => setDarkmode((o) => !o)}
+              value={darkMode ? "light mode" : "dark mode"}
+            />
+          </p>
           <button type="submit" className="button">
             Create Account
           </button>
