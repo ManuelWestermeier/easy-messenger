@@ -117,6 +117,7 @@ export async function storeAllChatRoomsData() {
 }
 
 export async function loadChatRoom(name) {
+  if (process.env?.DEBUG) return;
   try {
     const chatId = decodeURIComponent(name);
     const chatFolder = `chats/${encodeURIComponent(chatId)}`;
