@@ -4,7 +4,7 @@ config();
 console.log("initializing...");
 console.clear();
 
-const originalLog = console.log;
+export const originalLog = console.log;
 console.log = function (...args) {
   if (process.env.LOG) {
     originalLog(...args);
@@ -148,7 +148,7 @@ export async function loadChatRoom(name) {
         try {
           const content = await githubFS.readFile(`${messagesFolder}/${i}.txt`);
           messages.push({ message: content });
-        } catch (err) {}
+        } catch (err) { }
       }
     } catch (err) {
       console.error("Error reading messages folder for chat", chatId, err);

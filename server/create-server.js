@@ -29,6 +29,7 @@ import {
   chats,
   githubFS,
   loadChatRoom,
+  originalLog,
   storeAllChatRoomsData,
   storeChatRommData,
 } from "./index.js";
@@ -54,7 +55,7 @@ and contains all the logic for handling client events.
 */
 
 export default function initMessengerServer() {
-  console.log("server started...");
+  originalLog("server started...");
 
   createServer({ port: 8080 }, async (client) => {
     // Keep track of the chats this client has joined
@@ -243,7 +244,7 @@ export default function initMessengerServer() {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}`;
           await githubFS.deleteDir(fileName);
-        } catch (error) {}
+        } catch (error) { }
       }
 
       delete chats[chatId];
@@ -357,12 +358,11 @@ export default function initMessengerServer() {
         try {
           chats[chatId].hasChanged = true;
           await githubFS.deleteFile(
-            `chats/${encodeURIComponent(chatId)}/messages/${
-              prevMessagesLength - 1
+            `chats/${encodeURIComponent(chatId)}/messages/${prevMessagesLength - 1
             }.txt`
           );
           storeAllChatRoomsData();
-        } catch (error) {}
+        } catch (error) { }
 
       return true;
     });
@@ -394,9 +394,9 @@ export default function initMessengerServer() {
     };
     try {
       storeAllChatRoomsData();
-    } catch (error) {}
+    } catch (error) { }
   });
   try {
     storeAllChatRoomsData();
-  } catch (error) {}
+  } catch (error) { }
 }
