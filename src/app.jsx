@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWsClient } from "./hooks/use-ws-client";
 import Mobile from "./mobile";
 import getShareQueryParams from "./utils/share-traget";
@@ -7,9 +7,17 @@ import ShareData from "./comp/share-data";
 import Desktop from "./desktop";
 import "./utils/shortcut";
 
+let lastRecreatedClient = 0;
+
 export default function App({ setData, data }) {
   const [shareData, setShareData] = useState(getShareQueryParams());
   window.setShareData = setShareData;
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener("online", () => setIsOffline(false));
+    window.addEventListener("offline", () => setIsOffline(true));
+  }, []);
 
   const [currentChat, setCurrentChat] = useState(null);
   window.selectedChat = currentChat;
@@ -17,16 +25,10 @@ export default function App({ setData, data }) {
 
   const { client, state, reCreateClient, isClosed } = useWsClient(
     data,
-    setData,
+    setData
   );
 
-  if (state === "failed" || isClosed) {
-    return (
-      <div style={{ margin: "20px" }}>
-        <button onClick={() => reCreateClient()}>Reconnect</button>
-      </div>
-    );
-  }
+  window.reCreateClient = reCreateClient;
 
   if (client == null) return <LoadingState state={state} />;
 
@@ -42,24 +44,51 @@ export default function App({ setData, data }) {
     );
   }
 
-  if (innerWidth > 768)
-    return (
-      <Desktop
-        client={client}
-        currentChat={currentChat}
-        data={data}
-        setCurrentChat={setCurrentChat}
-        setData={setData}
-      />
-    );
-  else
-    return (
-      <Mobile
-        client={client}
-        currentChat={currentChat}
-        data={data}
-        setCurrentChat={setCurrentChat}
-        setData={setData}
-      />
-    );
+  function Content() {
+    if (innerWidth > 768)
+      return (
+        <Desktop
+          client={client}
+          currentChat={currentChat}
+          data={data}
+          setCurrentChat={setCurrentChat}
+          setData={setData}
+        />
+      );
+    else
+      return (
+        <Mobile
+          client={client}
+          currentChat={currentChat}
+          data={data}
+          setCurrentChat={setCurrentChat}
+          setData={setData}
+        />
+      );
+  }
+
+  if (state == "closed" && !isOffline && lastRecreatedClient < 2000) {
+    lastRecreatedClient = Date.now();
+    reCreateClient();
+  }
+
+  return (
+    <div
+      className={
+        isOffline || isClosed || state == "closed" || state == "failed"
+          ? "offline"
+          : "online"
+      }
+    >
+      <Content />
+      <div className="reconnect">
+        <h3>You aren't connected....🛜</h3>
+        <div style={{ margin: "20px" }}>
+          <button className="reconnect-button" onClick={() => reCreateClient()}>
+            Reconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

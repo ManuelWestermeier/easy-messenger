@@ -11,7 +11,7 @@ export function NavigationBar({
     e.preventDefault();
     if (
       !confirm(
-        `Are you sure you want to delte the chat "${chats[chatId]?.chatName}" for all users in the chat with all messages?`,
+        `Are you sure you want to delte the chat "${chats[chatId]?.chatName}" for all users in the chat with all messages?`
       )
     )
       return;
@@ -34,7 +34,7 @@ export function NavigationBar({
     e.preventDefault();
     if (
       !confirm(
-        `are you sure you want to leave chat: "${chats[chatId]?.chatName}"?`,
+        `are you sure you want to leave chat: "${chats[chatId]?.chatName}"?`
       )
     )
       return;
@@ -66,7 +66,7 @@ export function NavigationBar({
       };
     });
     const messageInput = document.querySelector(
-      '.chat-room .message-form input[name="text"]',
+      '.chat-room .message-form input[name="text"]'
     );
     messageInput?.focus?.();
 

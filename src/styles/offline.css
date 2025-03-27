@@ -1,0 +1,33 @@
+.offline input,
+.offline textarea,
+.offline form,
+.offline button:not(.reconnect-button):not([title="Chat Settings"]):not(.qr-code) {
+    pointer-events: none;
+}
+
+.reconnect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 20px;
+
+    background-color: rgb(72, 72, 72);
+    opacity: 0.9;
+
+    backdrop-filter: blur(20px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    pointer-events: none;
+}
+
+.reconnect-button {
+    pointer-events: all;
+}
+
+.online .reconnect {
+    display: none;
+}
