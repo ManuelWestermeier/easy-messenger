@@ -1,8 +1,8 @@
 import { config } from "dotenv";
 config();
+console.clear();
 
 console.log("initializing...");
-console.clear();
 
 export const originalLog = console.log;
 console.log = function (...args) {
@@ -41,6 +41,7 @@ chats[chatId] = {
 export const chats = {};
 
 export async function storeChatRommData(chatId) {
+  if (process.env.DEBUG) return;
   const { messages, passwordHashHash, subscriptions } = chats[chatId];
   const chatFolder = `chats/${encodeURIComponent(chatId)}`;
   try {

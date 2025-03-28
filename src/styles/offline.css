@@ -11,6 +11,8 @@
     bottom: 0;
     height: 20px;
 
+    padding: 0 10px;
+
     border-bottom-right-radius: 10px;
 
     background-color: rgb(72, 72, 72);
@@ -30,6 +32,7 @@
 .reconnect-button {
     pointer-events: all;
     padding: 2px;
+    margin: 0;
 }
 
 .online .reconnect {

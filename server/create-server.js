@@ -88,7 +88,7 @@ export default function initMessengerServer() {
 
       if (joinedChats.includes(chatId)) return false;
 
-      if (!chats[chatId]) await loadChatRoom(chatId);
+      if (!chats[chatId] && !process.env.DEBUG) await loadChatRoom(chatId);
 
       const chat = chats[chatId];
 
@@ -377,7 +377,10 @@ export default function initMessengerServer() {
         ({ id: msgId }) => msgId != id
       );
 
-      if (prevMessagesLength != chats[chatId].messages.length)
+      if (
+        prevMessagesLength != chats[chatId].messages.length &&
+        !process.env.DEBUG
+      )
         try {
           chats[chatId].hasChanged = true;
           await githubFS.deleteFile(

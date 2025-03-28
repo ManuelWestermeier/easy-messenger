@@ -32,7 +32,7 @@ export default async function initClient(
   });
 
   const chats = Object.entries(data);
-  setChatsLoaded(chats.length + 1);
+  setChatsLoaded(chats.length);
 
   // Process each chat concurrently.
   await Promise.all(
