@@ -77,7 +77,6 @@
   font-size: 1rem;
   margin-left: 5px;
   color: var(--text);
-
 }
 
 /* Popup for editing a chat */
@@ -122,7 +121,6 @@
 .nav-bar .rename-form input {
   flex: 1;
   padding: 0.3rem;
-  border: 1px solid #ccc;
   border-radius: 4px;
 }
 
@@ -133,30 +131,17 @@
   cursor: pointer;
 }
 
-.nav-bar .rename-form button[type="submit"] {
-  background-color: var(--primary);
-  color: #fff;
-}
-
-.nav-bar .rename-form button[type="button"] {
-  background-color: #ccc;
-  color: #000;
-}
-
 /* Edit actions buttons for delete and exit */
 .nav-bar .edit-actions {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   gap: 0.5rem;
 }
 
 .row {
   display: flex;
   gap: 10px;
+  justify-content: space-between;
   flex-direction: row;
-}
-
-.nav-bar .edit-actions button:not(.danger) {
-  background-color: #ccc;
-  color: #000;
 }
