@@ -1,10 +1,15 @@
 import Message from "./message";
 import { ChatRoomHeader } from "./chat-room-header";
 import ChatRoomSendForm from "./chat-room-send-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import CallView from "./call-view";
 
 // Component for displaying and sending messages in a chat room
 export function ChatRoom({ chatId, chatData, client, setData, page }) {
+  const [isCalling, setIsCalling] = useState(true);
+
+  window.acceptCall = () => setIsCalling(true);
+
   useEffect(() => {
     if (page === true) {
       return;
@@ -47,6 +52,14 @@ export function ChatRoom({ chatId, chatData, client, setData, page }) {
         setData={setData}
         client={client}
       />
+      {isCalling && (
+        <CallView
+          password={chatData.password}
+          client={client}
+          setIsCalling={setIsCalling}
+          chatId={chatId}
+        />
+      )}
     </div>
   );
 }

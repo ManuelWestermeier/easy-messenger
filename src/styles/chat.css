@@ -1,6 +1,7 @@
 /* chat.css */
 
 .chat-room {
+  position: relative;
   overflow: hidden;
   padding: 0.5rem;
   border-radius: 4px;

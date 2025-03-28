@@ -13,3 +13,4 @@ import "./create-account.css";
 import "./share-data.css";
 import "./ads.css";
 import "./offline.css"
+import "./calls.css"

@@ -1,0 +1,14 @@
+.call-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* height: 60px; */
+    bottom: 0;
+    right: 0;
+    background-color: rebeccapurple;
+    resize: both;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}

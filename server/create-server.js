@@ -180,6 +180,16 @@ export default function initMessengerServer() {
       return chats[chatId].messages;
     });
 
+    client.onGet("messages", (chatId) => {
+      if (typeof chatId != "string") return false;
+
+      if (!joinedChats.includes(chatId)) return false;
+
+      if (!chats[chatId]) return false;
+
+      return chats[chatId].messages;
+    });
+
     // Handle exit requests
     client.onGet("exit", (data) => {
       if (!areSetAndTheSameType(data, [["chatId", "string"]])) return false;
@@ -392,6 +402,16 @@ export default function initMessengerServer() {
         } catch (error) {}
 
       return true;
+    });
+
+    client.onGet("!", (chatId) => {
+      if (typeof chatId != "string") return false;
+
+      if (!joinedChats.includes(chatId)) return false;
+
+      if (!chats[chatId]) return false;
+
+      return chats[chatId].messages;
     });
 
     // Clean up when a client disconnects
