@@ -1,152 +1,325 @@
-Here is the documentation in Markdown for your code:
+# Easy Messenger Documentation
 
-md
+This documentation explains the architecture, configuration, and functionality of the Easy Messenger application. This project provides a real-time messaging server that leverages GitHub for persistent data storage and Web Push for notifications.
 
-Code kopieren
+## Table of Contents
 
-# Messenger Server Documentation This project sets up a real-time messenger server with the ability to handle client connections, send notifications, and store chat data on GitHub. The server is implemented using the `wsnet-server` and `web-push` libraries. ## Environment Setup The application requires the following environment variables to be set: - `WEB_PUSH_PRIVATE_KEY`: Private VAPID key for web push notifications. - `EMAIL`: Email address to be used in the `VAPID` details for web push. - `GITHUB_API_TOKEN`: GitHub API token for accessing the repository. - `ENC_PASSWORD`: Encryption password for storing chat data securely. - `DEBUG` (optional): Enables debug logging when set. Ensure the `.env` file is present in the root directory with the necessary keys. ### Example `.env` file: ```ini WEB_PUSH_PRIVATE_KEY=your-private-key EMAIL=your-email@example.com GITHUB_API_TOKEN=your-github-token ENC_PASSWORD=your-encryption-password DEBUG=true
+*   [Overview](#overview)
+    
+*   [Requirements](#requirements)
+    
+*   [Installation](#installation)
+    
+*   [Configuration](#configuration)
+    
+*   [Core Modules](#core-modules)
+    
+    *   [GitHubFS Chat Storage](#githubfs-chat-storage)
+        
+    *   [Messenger Server](#messenger-server)
+        
+*   [Server Workflow](#server-workflow)
+    
+*   [Client API](#client-api)
+    
+*   [Push Notifications](#push-notifications)
+    
+*   [Data Persistence](#data-persistence)
+    
+*   [Running the Server](#running-the-server)
+    
+*   [Notes and Considerations](#notes-and-considerations)
+    
+*   [License](#license)
+    
 
-## Key Components
+## Overview
 
-### 1\. **Web Push Notifications (`web-push`)**
+Easy Messenger is a WebSocket-based messaging server that:
 
-The `web-push` library is used for sending push notifications to the clients. The public and private VAPID keys are used for the notifications, and the `sendPushNotification` function is used to send notifications to clients.
+*   Uses GitHub (via the [GitHubFS](https://www.npmjs.com/package/gh-fs) library) as a file-based data store for chat data.
+    
+*   Supports real-time messaging between clients.
+    
+*   Provides push notifications for various chat events using [web-push](https://www.npmjs.com/package/web-push).
+    
 
-### 2\. **Messenger Server (`create-server.js`)**
+## Requirements
 
-The server listens on port 8080 and handles various client events related to messaging:
+*   **Node.js** (v14 or later recommended)
+    
+*   A GitHub repository (with an existing branch such as "main") for storing chat data
+    
+*   Valid GitHub API credentials and tokens
+    
+*   Environment variables for configuration
+    
+*   Required npm packages:
+    
+    *   `dotenv`
+        
+    *   `gh-fs`
+        
+    *   `web-push`
+        
+    *   `wsnet-server`
+        
+    *   `are-set`
+        
+    *   `crypto-js`
+        
 
-- **Join Chat**: Clients can join a chat by providing a `chatId`, `author`, `passwordHash`, and a list of `messageIds`.
-- **Send Message**: Clients can send messages to a chat.
-- **Delete Message**: Messages can be deleted from the chat.
-- **Exit Chat**: Clients can exit the chat, which removes them from the list of active clients in the chat.
-- **Delete Chat**: Chats can be deleted, removing all clients and associated data.
-- **Delete All Messages**: All messages in a chat can be deleted.
+## Installation
 
-The server also integrates with GitHub to store chat data securely.
+1.  **Clone the Repository:**
+    
+    bash
+    
+    KopierenBearbeiten
+    
+    `git clone https://github.com/yourusername/easy-messenger.git cd easy-messenger`
+    
+2.  **Install Dependencies:**
+    
+    bash
+    
+    KopierenBearbeiten
+    
+    `npm install`
+    
 
-### 3\. **GitHubFS Integration (`index.js`)**
+## Configuration
 
-GitHubFS is used to store chat data (messages, password hash, subscriptions) in a GitHub repository. The data is stored in JSON files, with each file representing a chat room. The files are stored under the `chats` directory in the GitHub repository.
+Create a `.env` file in the project root with the following required keys:
 
-#### Storing Data
+env
 
-The `storeAllChatRoomsData` function stores all chat rooms' data in the GitHub repository. The data stored includes:
+KopierenBearbeiten
 
-- Messages
-- Password hash
-- Subscriptions
+`# GitHub API configuration GITHUB_API_TOKEN=your_github_api_token ENC_PASSWORD=your_encryption_key  # Web Push configuration WEB_PUSH_PRIVATE_KEY=your_private_vapid_key EMAIL=your_contact_email # Optionally enable logging and debug mode LOG=true DEBUG=false`
 
-#### Fetching Data
+The file `web-push-public-key.js` should export your public VAPID key.
 
-The `fetchAllChatRoomsData` function loads all chat room data from the repository. If the `chats` directory is empty or not present, the function creates it and stores the default chat room.
+## Core Modules
 
-### 4\. **Data Structure**
+### GitHubFS Chat Storage
 
-Chats are stored in memory using the following structure:
+*   **Initialization:**  
+    The application instantiates a `GitHubFS` object to manage read and write operations on the GitHub repository.
+    
+    *   **Parameters:**
+        
+        *   `authToken`: GitHub API token.
+            
+        *   `owner` and `repo`: Define where the chat data is stored.
+            
+        *   `branch`: Must exist in the repository (e.g., `"main"`).
+            
+        *   `defaultCommitter`: Provides commit metadata.
+            
+        *   `encryptionKey`: For data security.
+            
+*   **Data Structure:**  
+    Chat data is structured as follows:
+    
+    *   A primary JSON file per chat room in the `chats` directory (e.g., `chats/{encodedChatId}.json`) containing metadata such as:
+        
+        *   `passwordHashHash`
+            
+        *   `subscriptions`
+            
+        *   `messagesLength`
+            
+    *   Individual message files (e.g., `chats/{encodedChatId}-message-{index}.json`) store each message.
+        
 
-js
+### Messenger Server
 
-Code kopieren
+*   **Initialization:**  
+    The server is bootstrapped via a call to `initMessengerServer()`, which:
+    
+    *   Starts a WebSocket server (using `wsnet-server`).
+        
+    *   Registers event handlers for various client events (join, exit, send, delete, etc.).
+        
+    *   Ensures that every client interaction (e.g., message sending, deleting) is appropriately handled and broadcast.
+        
+*   **Data Storage Routine:**  
+    The function `storeAllChatRoomsData()` is responsible for periodically persisting chat room data to GitHub. This includes:
+    
+    *   Writing/updating the main chat room file.
+        
+    *   Creating/updating individual message files.
+        
+    *   Cleaning up outdated or extra message files if messages are removed.
+        
 
-`chats[chatId] = {   clients: [{ client, author }],   messages: [{ id, message }],   subscriptions: {},   passwordHashHash: basicHash(passwordHash), };`
+## Server Workflow
 
-### 5\. **Client Events**
+1.  **Startup Sequence:**
+    
+    *   Load environment variables using `dotenv.config()`.
+        
+    *   Override default `console.log` based on the `LOG` environment variable.
+        
+    *   Initialize the GitHubFS instance.
+        
+    *   Fetch all existing chat room data from GitHub. If the `chats` directory or files are missing, a default chat room is created.
+        
+    *   Start the messenger server.
+        
+    *   Set up a periodic task to save all chat rooms (default every 40 seconds or 2 seconds in debug mode).
+        
+2.  **Client Lifecycle:**
+    
+    *   **Join Chat:**  
+        Clients request to join a chat room by providing their `chatId`, `author`, `passwordHash`, and current `messageIds`. If the credentials match (using a basic hash function) and the chat room exists (or is created if not), the client is added and any unread messages are returned.
+        
+    *   **Messaging:**
+        
+        *   **Sending:** A message is sent to the chat room, broadcast to all other connected clients, and stored.
+            
+        *   **Deleting:** Specific messages can be deleted, and the deletion is propagated to subscribers.
+            
+    *   **Exit Chat:**  
+        Clients may exit the chat room. This event removes the client from the room and broadcasts a "user-exited" event.
+        
+    *   **User State Change:**  
+        Clients can signal a state change (e.g., "typing" or "away") to other clients.
+        
 
-The following client events are handled by the server:
+## Client API
 
-#### `join`
+Clients interact with the server using several event types and expected payloads:
 
-- Event sent by the client to join a chat room.
-- Requires the `chatId`, `author`, `passwordHash`, and a list of `messageIds`.
+*   **join**
+    
+    *   **Payload:** `{ chatId: string, author: string, passwordHash: string, messageIds: object, [subscription]: object }`
+        
+    *   **Description:** Join a chat room; authenticate and get any unread messages.
+        
+*   **users**
+    
+    *   **Payload:** `chatId: string`
+        
+    *   **Description:** Get a list of authors in the chat room.
+        
+*   **messages**
+    
+    *   **Payload:** `chatId: string`
+        
+    *   **Description:** Retrieve the entire message history for a chat room.
+        
+*   **exit**
+    
+    *   **Payload:** `{ chatId: string, [subscription]: object }`
+        
+    *   **Description:** Exit a chat room and optionally remove a push notification subscription.
+        
+*   **delete-chat**
+    
+    *   **Payload:** `chatId: string`
+        
+    *   **Description:** Delete an entire chat room and notify all clients and push subscribers.
+        
+*   **delete-all-messages**
+    
+    *   **Payload:** `chatId: string`
+        
+    *   **Description:** Remove all messages from the specified chat room.
+        
+*   **user-state-change**
+    
+    *   **Payload:** `{ chatId: string, message: string }`
+        
+    *   **Description:** Broadcast a user state change to other clients in the chat room.
+        
+*   **send**
+    
+    *   **Payload:** `{ chatId: string, message: string, id: string }`
+        
+    *   **Description:** Send a new message. The server broadcasts the message, notifies push subscribers, and appends it to the chat history.
+        
+*   **delete-message**
+    
+    *   **Payload:** `{ chatId: string, id: string }`
+        
+    *   **Description:** Delete a specific message by ID, update clients, and clean up the storage.
+        
 
-#### `users`
+## Push Notifications
 
-- Event to get the list of users in a chat room.
-- Requires the `chatId`.
+*   **Setup:**  
+    The `webpush` package is used to handle push notifications.
+    
+    *   VAPID keys are set up using:
+        
+        js
+        
+        KopierenBearbeiten
+        
+        ``webpush.setVapidDetails(`mailto:${email}`, publicVapidKey, privateVapidKey);``
+        
+*   **Usage:**
+    
+    *   Push notifications are sent for events like new messages, message deletion, and chat deletion.
+        
+    *   If a push notification fails (e.g., due to an invalid subscription), the subscription is removed.
+        
 
-#### `messages`
+## Data Persistence
 
-- Event to get all messages from a chat room.
-- Requires the `chatId`.
-
-#### `exit`
-
-- Event to exit a chat room.
-- Requires the `chatId`.
-
-#### `delete-chat`
-
-- Event to delete a chat room.
-- Requires the `chatId`.
-
-#### `delete-all-messages`
-
-- Event to delete all messages in a chat room.
-- Requires the `chatId`.
-
-#### `send`
-
-- Event to send a message to a chat room.
-- Requires the `chatId`, `message`, and `id`.
-
-#### `delete-message`
-
-- Event to delete a specific message in a chat room.
-- Requires the `chatId` and `id`.
-
-### 6\. **Periodic Data Storage**
-
-The chat data is periodically stored in the GitHub repository at a defined interval (`storeInterval`). The default interval is 60 seconds, but this can be overridden for debugging.
-
-### 7\. **Push Notification**
-
-When a chat room is deleted or a message is deleted, push notifications are sent to all subscribed clients using the `sendPushNotification` function.
-
-### 8\. **Clean-up on Disconnect**
-
-When a client disconnects, the server cleans up by removing the client from all chat rooms they were part of.
+*   **Storage Process:**  
+    The application periodically invokes `storeAllChatRoomsData()`:
+    
+    *   **Writes Metadata:** Saves the chat room's metadata (excluding active client details) to GitHub.
+        
+    *   **Writes Messages:** Each message is stored as an individual JSON file.
+        
+    *   **Cleanup:** Removes files corresponding to messages that have been deleted.
+        
+*   **On Process Exit:**  
+    The server ensures a final data save when the process exits by binding to the `process.on("exit")` event.
+    
 
 ## Running the Server
 
-To start the server, run the following command:
+Ensure your `.env` file is properly configured, then start the application with:
 
 bash
 
-Code kopieren
+KopierenBearbeiten
 
 `node index.js`
 
-This will:
+The server will:
 
-1.  Initialize the chat rooms by loading existing data from GitHub.
-2.  Start the messenger server on port 8080.
-3.  Periodically store chat data in the GitHub repository.
+*   Initialize chat data (fetch from GitHub or create default).
+    
+*   Start listening for WebSocket connections on the specified port (default is 8080).
+    
+*   Periodically persist chat data to GitHub.
+    
 
-## Functions
+## Notes and Considerations
 
-### `storeAllChatRoomsData()`
-
-Stores all chat room data in the GitHub repository.
-
-### `fetchAllChatRoomsData()`
-
-Fetches all chat room data from the GitHub repository and initializes chat rooms in memory.
-
-### `sendPushNotification(subscription, data)`
-
-Sends a push notification to a client using the `web-push` library.
-
-## GitHub Repository
-
-All chat data is stored in the GitHub repository specified in the `GITHUB_API_TOKEN` and other GitHubFS configuration options. The data is stored under the `chats` directory.
+*   **Debug Mode:**  
+    When `DEBUG` is enabled, data is stored more frequently (every 2 seconds) and additional logging is enabled.
+    
+*   **Security:**
+    
+    *   Use strong tokens and encryption keys.
+        
+    *   Sensitive client connection details are not stored on GitHub.
+        
+*   **Error Handling:**  
+    The server logs errors encountered during data storage and client interaction without interrupting overall service.
+    
 
 ## License
 
-This project is licensed under the MIT License.
+_Include your project's license details here._
 
-arduino
+- - -
 
-Code kopieren
-
-`This documentation provides an overview of your project, including the setup, core components, data structure, client events, and how to run the server.`
+This documentation covers the primary aspects of your codebase. Adjust and expand sections as needed for additional details or future features.
