@@ -8,24 +8,28 @@
 .reconnect {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100dvw;
+    bottom: 0;
     height: 20px;
+
+    border-bottom-right-radius: 10px;
 
     background-color: rgb(72, 72, 72);
     opacity: 0.9;
 
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    pointer-events: none;
+    pointer-events: all;
+    overflow: hidden;
 }
 
 .reconnect-button {
     pointer-events: all;
+    padding: 2px;
 }
 
 .online .reconnect {

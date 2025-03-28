@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import useLocalStorage from "use-local-storage";
 
-export default function LoadingState({ state }) {
+export default function LoadingState({ state, setWaitForServer }) {
   const [ads, setAds] = useLocalStorage("loaded-ads", []);
   const [timePassed, setTimePassed] = useState(0);
   const [speed, setSpeed] = useState(1000);
@@ -22,6 +22,9 @@ export default function LoadingState({ state }) {
 
   return (
     <div style={{ margin: "20px" }}>
+      <button onClick={() => setWaitForServer(true)} type="button">
+        Skip Waiting...
+      </button>
       <p>Loading state: {state}...</p>
       <p>It can't take under a minute... ({timePassed}s)</p>
       <button onClick={() => setSpeed((prev) => prev / 2)}>

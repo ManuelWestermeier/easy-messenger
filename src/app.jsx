@@ -23,14 +23,16 @@ export default function App({ setData, data }) {
   window.selectedChat = currentChat;
   window.setSelectedChat = setCurrentChat;
 
-  const { client, state, reCreateClient, isClosed } = useWsClient(
+  const { client, state, reCreateClient, isClosed, chatsLoaded } = useWsClient(
     data,
     setData
   );
 
   window.reCreateClient = reCreateClient;
 
-  if (client == null) return <LoadingState state={state} />;
+  const [waitForServer, setWaitForServer] = useState(false);
+  if (client == null && isOffline && waitForServer)
+    return <LoadingState setWaitForServer={setWaitForServer} state={state} />;
 
   if (shareData != false) {
     return (
@@ -75,14 +77,23 @@ export default function App({ setData, data }) {
   return (
     <div
       className={
-        isOffline || isClosed || state == "closed" || state == "failed"
+        isOffline ||
+        isClosed ||
+        state == "closed" ||
+        state == "failed" ||
+        chatsLoaded
           ? "offline"
           : "online"
       }
     >
       <Content />
       <div className="reconnect">
-        <h3>You aren't connected....🛜</h3>
+        {!chatsLoaded && <h3>You aren't connected....🛜</h3>}
+        {chatsLoaded && (
+          <span>
+            Chats to have to load: {chatsLoaded}/{Object.keys(data).length + 1}
+          </span>
+        )}
         <div style={{ margin: "20px" }}>
           <button className="reconnect-button" onClick={() => reCreateClient()}>
             Reconnect

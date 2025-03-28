@@ -6,24 +6,37 @@ import CryptoJS from "crypto-js";
 /**
  * @param {Client} client
  */
-export default async function initClient(client, data, setData) {
+export default async function initClient(
+  client,
+  data,
+  setData,
+  setChatsLoaded
+) {
   // Clean up messages: remove "joined" and "exited" types from every chat.
-  setData((oldData) =>
-    Object.keys(oldData).reduce((acc, chatId) => {
+  setData((oldData) => {
+    let messageIds = {};
+
+    return Object.keys(oldData).reduce((acc, chatId) => {
+      messageIds = {};
       acc[chatId] = {
         ...oldData[chatId],
         messages: oldData[chatId].messages.filter(
-          ({ type }) =>
-            !["user-joined", "user-exited", "deleted-messages"].includes(type),
+          ({ type, id }) =>
+            !["user-joined", "user-exited", "deleted-messages"].includes(
+              type
+            ) && !messageIds[id]
         ),
       };
       return acc;
-    }, {}),
-  );
+    }, {});
+  });
+
+  const chats = Object.entries(data);
+  setChatsLoaded(chats.length + 1);
 
   // Process each chat concurrently.
   await Promise.all(
-    Object.entries(data).map(async ([chatId, chatInfo]) => {
+    chats.map(async ([chatId, chatInfo]) => {
       // Build a map of existing message IDs.
       const messageIds = chatInfo.messages.reduce((acc, { id }) => {
         acc[id] = true;
@@ -75,7 +88,7 @@ export default async function initClient(client, data, setData) {
             if (msg.type == "update") {
               const [editMsgId, type, value] = msg.data;
               const editMsgIndex = messages.findIndex(
-                ({ id }) => id == editMsgId,
+                ({ id }) => id == editMsgId
               );
               if (editMsgIndex == -1) continue;
               if (type == "comment") {
@@ -132,8 +145,9 @@ export default async function initClient(client, data, setData) {
       } else
         return alert(
           "Maybe your password is incorct (remove the group from your chats) => group: " +
-            chatId,
+            chatId
         );
-    }),
+      setChatsLoaded((x) => x - 1);
+    })
   );
 }

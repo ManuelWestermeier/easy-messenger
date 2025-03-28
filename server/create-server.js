@@ -116,7 +116,10 @@ export default function initMessengerServer() {
         chat.clients.push({ client, author });
 
         if (subscription && !chat.subscriptions[subscription.endpoint]) {
-          chat.subscriptions[subscription.endpoint] = subscription;
+          chat.subscriptions[subscription.endpoint] = {
+            ...subscription,
+            failureIndex: 0,
+          };
           chats[chatId].hasChanged = true;
         }
 
@@ -231,8 +234,13 @@ export default function initMessengerServer() {
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
         const isSend = await sendPushNotification(subscription, "chat-deleted");
-        if (isSend instanceof Error) {
+        if (
+          isSend instanceof Error &&
+          chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+        ) {
           delete chats[chatId].subscriptions[subscriptionId];
+        } else {
+          chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
         }
       }
 
@@ -244,7 +252,7 @@ export default function initMessengerServer() {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}`;
           await githubFS.deleteDir(fileName);
-        } catch (error) { }
+        } catch (error) {}
       }
 
       delete chats[chatId];
@@ -269,8 +277,13 @@ export default function initMessengerServer() {
           subscription,
           "delete-all-messages"
         );
-        if (isSend instanceof Error) {
+        if (
+          isSend instanceof Error &&
+          chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+        ) {
           delete chats[chatId].subscriptions[subscriptionId];
+          chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+        } else {
         }
       }
 
@@ -312,8 +325,13 @@ export default function initMessengerServer() {
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
         const isSend = await sendPushNotification(subscription, "send");
-        if (isSend instanceof Error) {
+        if (
+          isSend instanceof Error &&
+          chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+        ) {
           delete chats[chatId].subscriptions[subscriptionId];
+          chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+        } else {
         }
       }
 
@@ -344,8 +362,13 @@ export default function initMessengerServer() {
           subscription,
           "message-deleted"
         );
-        if (isSend instanceof Error) {
+        if (
+          isSend instanceof Error &&
+          chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+        ) {
           delete chats[chatId].subscriptions[subscriptionId];
+          chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+        } else {
         }
       }
 
@@ -358,11 +381,12 @@ export default function initMessengerServer() {
         try {
           chats[chatId].hasChanged = true;
           await githubFS.deleteFile(
-            `chats/${encodeURIComponent(chatId)}/messages/${prevMessagesLength - 1
+            `chats/${encodeURIComponent(chatId)}/messages/${
+              prevMessagesLength - 1
             }.txt`
           );
           storeAllChatRoomsData();
-        } catch (error) { }
+        } catch (error) {}
 
       return true;
     });
@@ -394,9 +418,9 @@ export default function initMessengerServer() {
     };
     try {
       storeAllChatRoomsData();
-    } catch (error) { }
+    } catch (error) {}
   });
   try {
     storeAllChatRoomsData();
-  } catch (error) { }
+  } catch (error) {}
 }
