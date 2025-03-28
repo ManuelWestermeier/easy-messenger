@@ -14,6 +14,24 @@
   justify-content: space-between;
 }
 
+.chat-room header .right {
+  margin-left: auto;
+  gap: 5px;
+  display: flex;
+  flex-direction: row;
+}
+
+.chat-room header .right .calling {
+  animation: calling 2s ease-in-out infinite;
+  outline: 2px solid;
+}
+
+@keyframes calling {
+  50% {
+    background-color: rebeccapurple;
+  }
+}
+
 .chat-room header h3 {
   display: flex;
   align-items: center;
@@ -21,7 +39,7 @@
   gap: 10px;
 }
 
-.chat-room .user-states > span {
+.chat-room .user-states>span {
   background-color: var(--primary-hover);
   border-radius: 20px;
   padding: 5px;

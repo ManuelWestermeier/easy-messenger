@@ -1,5 +1,5 @@
 import React from "react";
-import { SettingsIcon } from "./icons";
+import { SettingsIcon, CallIcon } from "./icons";
 import { ChatSettingsForm } from "./chat-settings-form";
 
 export function ChatRoomHeader({ chatId, chatData, setData, client }) {
@@ -38,13 +38,27 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
           ))}
       </div>
 
-      <button
-        type="button"
-        title="Chat Settings"
-        onClick={toggleFormVisibility}
-      >
-        <SettingsIcon />
-      </button>
+      <div className="right">
+        <button
+          className={chatData.isCalling ? "calling" : ""}
+          type="button"
+          title="Chat Settings"
+          onClick={(e) => {
+            e.preventDefault();
+            window?.acceptCall?.(chatId);
+          }}
+        >
+          <CallIcon />
+        </button>
+
+        <button
+          type="button"
+          title="Chat Settings"
+          onClick={toggleFormVisibility}
+        >
+          <SettingsIcon />
+        </button>
+      </div>
 
       <ChatSettingsForm
         chatId={chatId}

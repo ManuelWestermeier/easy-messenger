@@ -10,6 +10,8 @@ import "./utils/shortcut";
 import useOnlineStatus from "./hooks/use-online";
 import useInnerWidth from "./hooks/use-inner-width";
 
+window.acceptCall = () => alert("coming soon");
+
 // Hold the last time we tried recreating the client
 let lastRecreatedClient = 0;
 
