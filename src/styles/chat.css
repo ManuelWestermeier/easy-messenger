@@ -22,7 +22,7 @@
   flex-direction: row;
 }
 
-.chat-room header .right .calling {
+.calling {
   animation: calling 2s ease-in-out infinite;
   outline: 2px solid;
 }

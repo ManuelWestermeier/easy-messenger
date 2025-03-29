@@ -8,9 +8,10 @@ import CallView from "./call-view";
 export function ChatRoom({ chatId, chatData, client, setData, page }) {
   const [isCalling, setIsCalling] = useState(false);
 
-  chatData.isCalling = isCalling;
-
-  window.acceptCall = () => setIsCalling(true);
+  window.acceptCall = () => {
+    setIsCalling(true);
+    client.say("join-call", chatId);
+  };
 
   useEffect(() => {
     if (page === true) {

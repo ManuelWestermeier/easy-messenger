@@ -134,6 +134,7 @@ export default function CallView({ setIsCalling, client, chatId, isCalling }) {
   const handleExit = () => {
     peerConnectionRef?.current?.close?.();
     localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    client.say("exit-call", chatId);
     setIsCalling(false);
   };
 

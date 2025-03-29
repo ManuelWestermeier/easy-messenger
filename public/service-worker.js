@@ -16,7 +16,7 @@ self.addEventListener("install", (event) => {
   console.log("Service Worker Installed!");
   self.skipWaiting(); // Activate immediately
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)),
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
@@ -28,9 +28,9 @@ self.addEventListener("activate", (event) => {
       return Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME) // Remove outdated cache
-          .map((name) => caches.delete(name)),
+          .map((name) => caches.delete(name))
       );
-    }),
+    })
   );
   return self.clients.claim(); // Take control immediately
 });
@@ -45,7 +45,7 @@ self.addEventListener("fetch", (event) => {
           return networkResponse;
         });
       })
-      .catch(() => caches.match(event.request)), // Use cache if offline
+      .catch(() => caches.match(event.request)) // Use cache if offline
   );
 });
 
@@ -58,6 +58,8 @@ self.addEventListener("push", async function (event) {
 
   if (data === "send") {
     message = "A user has sent a message (click to view)!";
+  } else if (data === "call") {
+    message = "You are getting called!";
   } else if (data === "delete-all-messages") {
     message = "All chat messages have been deleted.";
   } else if (data === "message-deleted") {
@@ -75,7 +77,7 @@ self.addEventListener("push", async function (event) {
   });
   const isClientFocused = clients.some((client) => client.focused);
 
-  if (!isClientFocused) {
+  if (!isClientFocused || data == "call") {
     const options = {
       body: message,
       icon: "https://manuelwestermeier.github.io/easy-messenger/img/logo-512.png",
@@ -104,9 +106,9 @@ self.addEventListener("notificationclick", function (event) {
         }
       }
       return clients.openWindow(
-        "https://manuelwestermeier.github.io/easy-messenger/",
+        "https://manuelwestermeier.github.io/easy-messenger/"
       );
-    }),
+    })
   );
 });
 

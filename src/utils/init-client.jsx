@@ -20,6 +20,7 @@ export default async function initClient(
       messageIds = {};
       acc[chatId] = {
         ...oldData[chatId],
+        isCalling: false,
         messages: oldData[chatId].messages.filter(
           ({ type, id }) =>
             !["user-joined", "user-exited", "deleted-messages"].includes(

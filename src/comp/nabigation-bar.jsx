@@ -139,7 +139,7 @@ function ChatItem({
     <li className={isActive ? "active" : ""} onContextMenu={handleContextMenu}>
       <div className="chat-item">
         <button
-          className="chat-select-button"
+          className={"chat-select-button " + (chat.isCalling ? "calling" : "")}
           onClick={() => selectChat(chatId)}
         >
           <span className="chat-name">{chat.chatName}</span>

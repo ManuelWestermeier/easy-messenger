@@ -20,7 +20,7 @@ export default function createClient(setData) {
           if (messageData.type == "update") {
             const [editMsgId, type, value] = messageData.data;
             const editMsgIndex = old[chatId].messages.findIndex(
-              ({ id }) => id == editMsgId,
+              ({ id }) => id == editMsgId
             );
 
             if (editMsgIndex == -1) return old;
@@ -62,7 +62,7 @@ export default function createClient(setData) {
     client.onSay("message-deleted", ({ chatId, messageId }) => {
       setData((old) => {
         let messages = old[chatId].messages.filter(
-          (message) => message.id !== messageId,
+          (message) => message.id !== messageId
         );
         return {
           ...old,
@@ -76,11 +76,11 @@ export default function createClient(setData) {
 
     client.onSay("chat-deleted", ({ chatId }) => {
       window.setSelectedChat(
-        window.selectedChat == chatId ? null : window.selectedChat,
+        window.selectedChat == chatId ? null : window.selectedChat
       );
       setData((old) => {
         alert(
-          `chat "${old[chatId].chatName}" is deleted by an user. it get deleted from your device too`,
+          `chat "${old[chatId].chatName}" is deleted by an user. it get deleted from your device too`
         );
         const newData = { ...old };
         delete newData[chatId];
@@ -192,6 +192,30 @@ export default function createClient(setData) {
             messages: [
               { type: "deleted-messages", data: "all messages deleted" },
             ],
+          },
+        };
+      });
+    });
+
+    client.onSay("start-call", (chatId) => {
+      setData((old) => {
+        return {
+          ...old,
+          [chatId]: {
+            ...old[chatId],
+            isCalling: true,
+          },
+        };
+      });
+    });
+
+    client.onSay("call-removed", (chatId) => {
+      setData((old) => {
+        return {
+          ...old,
+          [chatId]: {
+            ...old[chatId],
+            isCalling: false,
           },
         };
       });

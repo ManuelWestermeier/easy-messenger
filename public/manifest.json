@@ -5,11 +5,15 @@
   "start_url": "/easy-messenger/",
   "display": "standalone",
   "background_color": "#121212",
-  "theme_color": "#ededed",
+  "theme_color": "#121212",
   "id": "/easy-messenger/",
   "orientation": "portrait-primary",
   "scope": "/easy-messenger/",
-  "categories": ["communication", "social", "productivity"],
+  "categories": [
+    "communication",
+    "social",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "/easy-messenger/img/logo-512.png",
