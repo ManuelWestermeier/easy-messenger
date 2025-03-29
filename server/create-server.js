@@ -408,6 +408,7 @@ export default function initMessengerServer() {
     });
 
     client.onSay("call-broadcast", (data) => {
+      originalLog(data);
       if (!areSetAndTheSameType(data, [["chatId", "string"]])) return false;
 
       const { chatId } = data;
@@ -418,7 +419,7 @@ export default function initMessengerServer() {
 
       for (const cli of chats[chatId].call) {
         if (cli != client) {
-          cli.say("borascast-inner-group", data);
+          cli.say("borascast-inner-group", data.data);
         }
       }
     });

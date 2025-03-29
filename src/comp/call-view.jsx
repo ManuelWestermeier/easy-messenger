@@ -6,12 +6,20 @@ export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
   const remoteVideoRef = useRef(null);
   // Store peer connections by peerId
   const peerConnectionsRef = useRef({});
+  // Hold the current local stream in state and in a ref so it's accessible synchronously.
+  const [localStream, setLocalStream] = useState(null);
+  const localStreamRef = useRef(null);
+
   const [selfWatch, setSelfWatch] = useState(true);
   const [muted, setMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
-  const [localStream, setLocalStream] = useState(null);
 
-  // Handle incoming signaling messages with added logs.
+  // Update the localStreamRef whenever localStream changes.
+  useEffect(() => {
+    localStreamRef.current = localStream;
+  }, [localStream]);
+
+  // Handle incoming signaling messages.
   useEffect(() => {
     const handleSignalingData = async (data) => {
       console.log("Received signaling data:", data);
@@ -22,6 +30,14 @@ export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
       const { type, peerId, sdp, candidate } = data;
       if (!peerId) {
         console.warn("No peerId provided in signaling data", data);
+        return;
+      }
+      // If localStream is not yet available, warn and skip processing.
+      if (!localStreamRef.current) {
+        console.warn(
+          "Local stream not available yet; cannot process signaling message for",
+          peerId
+        );
         return;
       }
       let pc = peerConnectionsRef.current[peerId];
@@ -120,10 +136,10 @@ export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
     console.log("Creating RTCPeerConnection for peer:", peerId);
     const pc = new RTCPeerConnection();
 
-    // Add local tracks to the connection.
-    if (localStream) {
-      localStream.getTracks().forEach((track) => {
-        pc.addTrack(track, localStream);
+    // Add local tracks to the connection if available.
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => {
+        pc.addTrack(track, localStreamRef.current);
       });
       console.log("Added local tracks to peer connection for", peerId);
     } else {
@@ -147,9 +163,23 @@ export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
 
     // When a remote track is received, attach it to the remote video element.
     pc.ontrack = (event) => {
-      console.log("Remote track received from", peerId, event.streams);
-      if (remoteVideoRef.current) {
+      console.log("Remote track received from", peerId, event);
+      if (remoteVideoRef.current && event.streams && event.streams[0]) {
         remoteVideoRef.current.srcObject = event.streams[0];
+        console.log("Remote video element updated with new stream.");
+      } else {
+        console.warn("Remote video element not available or stream missing.");
+      }
+    };
+
+    // Fallback for older implementations.
+    pc.onaddstream = (event) => {
+      console.log("Remote stream received via onaddstream from", peerId, event);
+      if (remoteVideoRef.current && event.stream) {
+        remoteVideoRef.current.srcObject = event.stream;
+        console.log(
+          "Remote video element updated with stream via onaddstream."
+        );
       }
     };
 
@@ -171,28 +201,29 @@ export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
     peerConnectionsRef.current = {};
 
     // Stop all local media tracks.
-    if (localStream) {
-      localStream.getTracks().forEach((track) => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => {
         console.log("Stopping track:", track);
         track.stop();
       });
       setLocalStream(null);
+      localStreamRef.current = null;
     }
   };
 
   // Update the enabled state of tracks when mute or camera settings change.
   useEffect(() => {
-    if (localStream) {
-      localStream.getAudioTracks().forEach((track) => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getAudioTracks().forEach((track) => {
         track.enabled = !muted;
         console.log("Audio track enabled:", track.enabled);
       });
-      localStream.getVideoTracks().forEach((track) => {
+      localStreamRef.current.getVideoTracks().forEach((track) => {
         track.enabled = cameraOn;
         console.log("Video track enabled:", track.enabled);
       });
     }
-  }, [muted, cameraOn, localStream]);
+  }, [muted, cameraOn]);
 
   const handleMute = () => {
     console.log("Toggling mute, new state:", !muted);
