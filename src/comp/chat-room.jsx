@@ -6,7 +6,7 @@ import CallView from "./call-view";
 
 // Component for displaying and sending messages in a chat room
 export function ChatRoom({ chatId, chatData, client, setData, page }) {
-  const [isCalling, setIsCalling] = useState(true);
+  const [isCalling, setIsCalling] = useState(false);
 
   window.acceptCall = () => setIsCalling(true);
 

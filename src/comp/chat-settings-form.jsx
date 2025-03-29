@@ -55,22 +55,11 @@ export function ChatSettingsForm({ chatId, chatData, setData, client }) {
       <fieldset>
         <legend>Delete All Messages</legend>
         <button
-          className="danger"
           type="button"
+          className="danger"
           onClick={handleDeleteAllMessages}
         >
           <DeleteIcon /> Delete All Messages
-        </button>
-      </fieldset>
-
-      <fieldset>
-        <legend>Delete Chat</legend>
-        <button
-          title="delete chat"
-          className="danger"
-          onClick={() => window?.deleteChat?.(chatId, handleCloseForm)}
-        >
-          <DeleteChatIcon /> Delete Chat
         </button>
       </fieldset>
 

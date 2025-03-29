@@ -58,6 +58,7 @@ export default function initMessengerServer() {
   originalLog("server started...");
 
   createServer({ port: 8080 }, async (client) => {
+    client.id = Math.random();
     // Keep track of the chats this client has joined
     let joinedChats = [];
 
@@ -404,14 +405,91 @@ export default function initMessengerServer() {
       return true;
     });
 
-    client.onGet("!", (chatId) => {
-      if (typeof chatId != "string") return false;
+    // Handle clients joining a chat
+    client.onGet("offer", (data) => {
+      if (!areSetAndTheSameType(data, [["chatId", "string"]])) return false;
+      const { chatId } = data;
 
       if (!joinedChats.includes(chatId)) return false;
-
       if (!chats[chatId]) return false;
 
-      return chats[chatId].messages;
+      if (!chats[chatId]?.call?.offer) return false;
+      return chats[chatId].call.offer;
+    });
+
+    client.onGet("set-offer", (data) => {
+      if (
+        !areSetAndTheSameType(data, [
+          ["chatId", "string"],
+          ["offer", "object"],
+        ])
+      )
+        return false;
+
+      const { chatId, offer } = data;
+
+      if (!joinedChats.includes(chatId)) return false;
+      if (!chats[chatId]) return false;
+
+      if (!chats[chatId].call) {
+        chats[chatId].call = { offer, answers: {}, candidates: {} };
+      } else {
+        chats[chatId].call.offer = offer;
+      }
+
+      // Broadcast the offer to all clients in the chat
+      for (const client of chats[chatId].clients) {
+        client.say("offer", { chatId, offer });
+      }
+
+      return true;
+    });
+
+    client.onSay("answer", (data) => {
+      if (
+        !areSetAndTheSameType(data, [
+          ["chatId", "string"],
+          ["answer", "object"],
+        ])
+      )
+        return;
+
+      const { chatId, answer } = data;
+
+      if (!joinedChats.includes(chatId)) return false;
+      if (!chats[chatId]) return false;
+
+      // Store the answer and notify other clients
+      chats[chatId].call.answers[client.id] = answer;
+
+      for (const peer of chats[chatId].clients) {
+        if (peer !== client) peer.say("answer", { chatId, answer });
+      }
+    });
+
+    client.onSay("ice-candidate", (data) => {
+      if (
+        !areSetAndTheSameType(data, [
+          ["chatId", "string"],
+          ["candidate", "object"],
+        ])
+      )
+        return;
+
+      const { chatId, candidate } = data;
+
+      if (!joinedChats.includes(chatId)) return false;
+      if (!chats[chatId]) return false;
+
+      // Store ICE candidate and distribute it
+      if (!chats[chatId].call.candidates[client.id]) {
+        chats[chatId].call.candidates[client.id] = [];
+      }
+      chats[chatId].call.candidates[client.id].push(candidate);
+
+      for (const peer of chats[chatId].clients) {
+        if (peer !== client) peer.say("ice-candidate", { chatId, candidate });
+      }
     });
 
     // Clean up when a client disconnects
@@ -438,12 +516,9 @@ export default function initMessengerServer() {
           delete chats[chatId];
         }
       });
+      try {
+        storeAllChatRoomsData();
+      } catch (error) {}
     };
-    try {
-      storeAllChatRoomsData();
-    } catch (error) {}
   });
-  try {
-    storeAllChatRoomsData();
-  } catch (error) {}
 }

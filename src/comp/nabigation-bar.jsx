@@ -169,10 +169,26 @@ function ChatItem({
             </div>
           </form>
           <div className="edit-actions">
-            <button onClick={() => deleteChat(chatId)} className="danger">
+            <button
+              onClick={() =>
+                confirm(
+                  `are you sure you want to delete the chat: "${chat.chatName}"?`
+                ) && deleteChat(chatId)
+              }
+              className="danger"
+            >
               Delete
             </button>
-            <button onClick={() => exitChat(chatId)}>Exit</button>
+            <button
+              onClick={() =>
+                confirm(
+                  `are you sure you want to exit the chat: "${chat.chatName}"?`
+                ) && exitChat(chatId)
+              }
+              className="danger"
+            >
+              Exit
+            </button>
           </div>
         </div>
       )}
