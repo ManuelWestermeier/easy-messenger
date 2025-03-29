@@ -44,7 +44,7 @@ function Content({ client, currentChat, data, setCurrentChat, setData }) {
 function ReconnectBanner({ chatsLoaded, data, reCreateClient }) {
   return (
     <div className="reconnect">
-      {!chatsLoaded ? (
+      {chatsLoaded < 1 ? (
         <>
           <h3>You aren't connected....🛜</h3>
           <div style={{ margin: "20px" }}>
@@ -55,8 +55,7 @@ function ReconnectBanner({ chatsLoaded, data, reCreateClient }) {
         </>
       ) : (
         <span>
-          Chats to have to load: {chatsLoaded + 1}/
-          {Object.keys(data).length + 1}
+          Chats to have to load: {chatsLoaded}/{Object.keys(data).length + 1}
         </span>
       )}
     </div>
@@ -103,7 +102,7 @@ export default function App({ setData, data }) {
   }, [state, isOffline, reCreateClient]);
 
   // If no client is available and we're offline while waiting, show a loading state.
-  if (client == null && isOffline && waitForServer) {
+  if (client == null && !isOffline && waitForServer) {
     return <LoadingState setWaitForServer={setWaitForServer} state={state} />;
   }
 
