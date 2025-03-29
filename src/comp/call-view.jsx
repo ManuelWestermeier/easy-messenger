@@ -1,152 +1,32 @@
+import { areSetAndTheSameType } from "are-set";
 import { useEffect, useRef, useState } from "react";
 
-export default function CallView({ setIsCalling, client, chatId, isCalling }) {
+export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const [selfWatch, setSelfWatch] = useState(true);
   const [muted, setMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
-  const [selfWatch, setSelfWatch] = useState(false);
-  const peerConnectionRef = useRef(null);
-  const localStreamRef = useRef(null);
 
   useEffect(() => {
-    if (!isCalling) return;
-    const configuration = {
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    };
-    const pc = new RTCPeerConnection(configuration);
-    peerConnectionRef.current = pc;
-
-    async function initCall() {
-      try {
-        localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-          video: { height: 200 },
-          audio: true,
-        });
-
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = localStreamRef.current;
-        }
-
-        localStreamRef.current
-          .getTracks()
-          .forEach((track) => pc.addTrack(track, localStreamRef.current));
-
-        // Check if there's an existing offer
-        const storedOffer = await client.get("offer", { chatId });
-        if (storedOffer) {
-          await pc.setRemoteDescription(new RTCSessionDescription(storedOffer));
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          client.say("answer", { answer, chatId });
-        } else {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          client.say("set-offer", { offer, chatId });
-        }
-      } catch (error) {
-        console.error("Error initializing call:", error);
-      }
-    }
-
-    initCall();
-
-    pc.ontrack = (event) => {
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-      }
-    };
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        client.say("ice-candidate", { candidate: event.candidate, chatId });
-      }
-    };
-
-    client.onSay(
-      "offer",
-      async (data) => {
-        if (data.chatId !== chatId) return;
-        try {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          client.say("answer", { answer, chatId });
-        } catch (error) {
-          console.error("Error handling offer:", error);
-        }
-      },
-      true
-    );
-
-    client.onSay(
-      "answer",
-      async (data) => {
-        if (data.chatId !== chatId) return;
-        try {
-          if (!pc.currentRemoteDescription) {
-            await pc.setRemoteDescription(
-              new RTCSessionDescription(data.answer)
-            );
-          }
-        } catch (error) {
-          console.error("Error handling answer:", error);
-        }
-      },
-      true
-    );
-
-    client.onSay(
-      "ice-candidate",
-      async (data) => {
-        if (data.chatId !== chatId) return;
-        try {
-          if (pc.remoteDescription) {
-            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-          }
-        } catch (error) {
-          console.error("Error adding ICE candidate:", error);
-        }
-      },
-      true
-    );
-
-    return () => {
-      pc.close();
-      localStreamRef.current?.getTracks().forEach((track) => track.stop());
-    };
-  }, [client, chatId, isCalling]);
-
-  const handleMute = () => {
-    localStreamRef.current?.getAudioTracks().forEach((track) => {
-      track.enabled = !track.enabled;
+    onBroadCast((data) => {
+      if (!areSetAndTheSameType(data, [["type", "string"]])) return;
     });
-    setMuted((prev) => !prev);
-  };
+  }, [onBroadCast]);
 
-  const handleCamera = () => {
-    localStreamRef.current?.getVideoTracks().forEach((track) => {
-      track.enabled = !track.enabled;
-    });
-    setCameraOn((prev) => !prev);
-  };
+  useEffect(() => {
+    broadcast({ type: "call-started" });
+  }, [broadcast]);
 
-  const handleExit = () => {
-    peerConnectionRef?.current?.close?.();
-    localStreamRef.current?.getTracks().forEach((track) => track.stop());
-    client.say("exit-call", chatId);
-    setIsCalling(false);
-  };
+  const handleMute = () => setMuted((prev) => !prev);
+  const handleCamera = () => setCameraOn((prev) => !prev);
 
   return (
     <div className={"call-view " + (!isCalling ? "hidden-call-view" : "")}>
       <div className="video-container">
         <video
           className={selfWatch ? "big" : "small"}
-          onClick={(e) => {
-            e.preventDefault();
-            setSelfWatch(false);
-          }}
+          onClick={() => setSelfWatch(false)}
           ref={localVideoRef}
           autoPlay
           playsInline
@@ -155,10 +35,7 @@ export default function CallView({ setIsCalling, client, chatId, isCalling }) {
         <video
           tabIndex={-1}
           className={!selfWatch ? "big" : "small"}
-          onClick={(e) => {
-            e.preventDefault();
-            setSelfWatch(true);
-          }}
+          onClick={() => setSelfWatch(true)}
           ref={remoteVideoRef}
           autoFocus
           autoPlay
@@ -166,7 +43,7 @@ export default function CallView({ setIsCalling, client, chatId, isCalling }) {
         />
       </div>
       <div className="content">
-        <button className="danger" onClick={handleExit}>
+        <button className="danger" onClick={() => exit()}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24px"

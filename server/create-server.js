@@ -464,16 +464,16 @@ export default function initMessengerServer() {
 
       if (chats[chatId].call.length == 0) {
         for (const { client: cli } of chats[chatId].clients) {
-          if (cli != client) {
-            cli.say("call-removed", chatId);
-          }
+          cli.say("call-removed", chatId);
         }
+        delete chats[chatId].call;
       }
     });
 
     // Clean up when a client disconnects
     client.onclose = () => {
       joinedChats.forEach(async (chatId) => {
+        if (!chats[chatId]) return;
         let author;
         chats[chatId].clients = chats[chatId].clients.filter(
           ({ client: otherClient, author: auth }) => {
