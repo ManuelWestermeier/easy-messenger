@@ -8,6 +8,8 @@ import CallView from "./call-view";
 export function ChatRoom({ chatId, chatData, client, setData, page }) {
   const [isCalling, setIsCalling] = useState(false);
 
+  chatData.isCalling = isCalling;
+
   window.acceptCall = () => setIsCalling(true);
 
   useEffect(() => {
@@ -52,14 +54,13 @@ export function ChatRoom({ chatId, chatData, client, setData, page }) {
         setData={setData}
         client={client}
       />
-      {isCalling && (
-        <CallView
-          password={chatData.password}
-          client={client}
-          setIsCalling={setIsCalling}
-          chatId={chatId}
-        />
-      )}
+      <CallView
+        isCalling={isCalling}
+        password={chatData.password}
+        client={client}
+        setIsCalling={setIsCalling}
+        chatId={chatId}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function CallView({ setIsCalling, client, chatId }) {
+export default function CallView({ setIsCalling, client, chatId, isCalling }) {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const [muted, setMuted] = useState(false);
@@ -10,6 +10,7 @@ export default function CallView({ setIsCalling, client, chatId }) {
   const localStreamRef = useRef(null);
 
   useEffect(() => {
+    if (!isCalling) return;
     const configuration = {
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     };
@@ -19,7 +20,7 @@ export default function CallView({ setIsCalling, client, chatId }) {
     async function initCall() {
       try {
         localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-          video: { height: 100 },
+          video: { height: 200 },
           audio: true,
         });
 
@@ -114,7 +115,7 @@ export default function CallView({ setIsCalling, client, chatId }) {
       pc.close();
       localStreamRef.current?.getTracks().forEach((track) => track.stop());
     };
-  }, [client, chatId]);
+  }, [client, chatId, isCalling]);
 
   const handleMute = () => {
     localStreamRef.current?.getAudioTracks().forEach((track) => {
@@ -137,7 +138,7 @@ export default function CallView({ setIsCalling, client, chatId }) {
   };
 
   return (
-    <div className="call-view">
+    <div className={"call-view " + (!isCalling ? "hidden-call-view" : "")}>
       <div className="video-container">
         <video
           className={selfWatch ? "big" : "small"}

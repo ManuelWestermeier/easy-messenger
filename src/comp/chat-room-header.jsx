@@ -45,7 +45,7 @@ export function ChatRoomHeader({ chatId, chatData, setData, client }) {
           title="Chat Settings"
           onClick={(e) => {
             e.preventDefault();
-            window?.acceptCall?.(chatId);
+            window?.acceptCall?.();
           }}
         >
           <CallIcon />

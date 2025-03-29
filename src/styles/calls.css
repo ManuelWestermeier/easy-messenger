@@ -16,6 +16,13 @@
     overflow: hidden;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s ease-in-out;
+}
+
+.hidden-call-view {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-100px);
 }
 
 /* Background Video */
@@ -25,7 +32,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
 }
 
 .call-view .video-container video.big {
