@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
+import { randomBytes } from "../utils/crypto";
 
 // --- VideoStream Component ---
-// Uses a ref to set the srcObject on the video element.
+// A simple wrapper that sets the video element's srcObject using a ref.
 function VideoStream({
   stream,
   className,
@@ -113,23 +114,25 @@ export default function CallView({
   const [cameraOn, setCameraOn] = useState(true);
   const [cryptoKey, setCryptoKey] = useState(null);
   const beepAudioRef = useRef(null);
-  const beepIntervalRef = useRef(null);
 
   // Use a constant “big salt” (in production, use a secure, unique salt per session)
-  const SALT = "THIS_IS_A_VERY_BIG_SALT_USED_FOR_ENCRYPTION_1234567890";
+  const SALT = randomBytes(128).toString(CryptoJS.enc.Base64);
 
-  // Derive the encryption key when password changes.
+  // Derive encryption key when password changes.
   useEffect(() => {
     if (password) {
       deriveKey(password, SALT).then(setCryptoKey).catch(console.error);
     }
   }, [password]);
 
-  // Set up the call when isCalling becomes true.
+  // Set up call when isCalling becomes true.
   useEffect(() => {
     if (isCalling) {
       navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
+        .getUserMedia({
+          video: true,
+          audio: true,
+        })
         .then((stream) => {
           localStream.current = stream;
           if (localVideoRef.current) {
@@ -137,7 +140,6 @@ export default function CallView({
           }
           setupPeerConnection(stream);
           startCall();
-          startBeepTone();
         })
         .catch(console.error);
     } else {
@@ -159,7 +161,7 @@ export default function CallView({
       const newStream = event.streams[0];
       setRemoteStreams((prev) => {
         if (prev.find((s) => s.id === newStream.id)) return prev;
-        // Play beep immediately when a new remote stream arrives.
+        // When a new remote stream arrives, play a beep immediately.
         if (beepAudioRef.current) {
           beepAudioRef.current.play().catch(console.error);
         }
@@ -173,7 +175,7 @@ export default function CallView({
     };
   };
 
-  // Secure broadcast: encrypt messages before sending.
+  // Secure broadcast: encrypt message before sending.
   const secureBroadcast = async (msg) => {
     if (!cryptoKey) return;
     try {
@@ -208,12 +210,11 @@ export default function CallView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cryptoKey, onBroadcast]);
 
-  // Process signaling messages with state checks.
+  // Process signaling messages with RTCPeerConnection state checks.
   const handleMessage = async (data) => {
     if (!peerConnection.current) return;
     const signalingState = peerConnection.current.signalingState;
     if (data.type === "offer") {
-      // Only handle offer if connection is not already negotiating.
       if (
         signalingState === "stable" ||
         signalingState === "have-local-offer"
@@ -226,7 +227,6 @@ export default function CallView({
         console.warn("Received offer in state", signalingState, "- ignoring");
       }
     } else if (data.type === "answer") {
-      // Only set answer if we have sent an offer (state must be "have-local-offer").
       if (signalingState === "have-local-offer") {
         await peerConnection.current.setRemoteDescription(data.answer);
       } else {
@@ -241,7 +241,7 @@ export default function CallView({
     }
   };
 
-  // Cleanup when the call ends.
+  // Cleanup function for call end.
   function cleanup() {
     if (localStream.current) {
       localStream.current.getTracks().forEach((track) => track.stop());
@@ -255,10 +255,9 @@ export default function CallView({
       peerConnection.current.close();
       peerConnection.current = null;
     }
-    stopBeepTone();
   }
 
-  // Toggle audio and video tracks.
+  // Toggle audio and video tracks based on mute/camera state.
   useEffect(() => {
     if (localStream.current) {
       localStream.current.getAudioTracks().forEach((track) => {
@@ -270,36 +269,35 @@ export default function CallView({
     }
   }, [muted, cameraOn]);
 
-  // --- Beep Tone Logic ---
-  // Start periodic beep if the user is alone.
-  const startBeepTone = () => {
-    stopBeepTone(); // clear any existing interval
-    if (remoteStreams.length === 0 && beepAudioRef.current) {
-      beepIntervalRef.current = setInterval(() => {
-        beepAudioRef.current.play().catch(console.error);
-      }, 500);
+  // --- Recursive Beep Tone Logic (No Intervals) ---
+  // Function to play the beep if conditions are met.
+  const playContinuousBeep = () => {
+    if (isCalling && remoteStreams.length === 0 && beepAudioRef.current) {
+      beepAudioRef.current.play().catch(console.error);
     }
   };
 
-  const stopBeepTone = () => {
-    if (beepIntervalRef.current) {
-      clearInterval(beepIntervalRef.current);
-      beepIntervalRef.current = null;
-    }
-  };
-
-  // Update beep behavior when remoteStreams change.
+  // Setup the "ended" event listener on the audio element.
   useEffect(() => {
-    if (remoteStreams.length > 0) {
-      stopBeepTone();
-      if (beepAudioRef.current) {
-        beepAudioRef.current.play().catch(console.error);
-      }
-    } else if (isCalling) {
-      startBeepTone();
+    const audioElem = beepAudioRef.current;
+    if (!audioElem) return;
+
+    const handleEnded = () => {
+      // After the beep finishes, play it again if still alone.
+      playContinuousBeep();
+    };
+
+    audioElem.addEventListener("ended", handleEnded);
+
+    // If conditions are met, start the beep.
+    if (isCalling && remoteStreams.length === 0) {
+      playContinuousBeep();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remoteStreams]);
+
+    return () => {
+      audioElem.removeEventListener("ended", handleEnded);
+    };
+  }, [isCalling, remoteStreams]);
 
   return (
     <div className={"call-view " + (!isCalling ? "hidden-call-view" : "")}>
@@ -316,7 +314,7 @@ export default function CallView({
           playsInline
           muted
         />
-        {/* Remote videos using the VideoStream component */}
+        {/* Remote videos rendered with VideoStream */}
         {remoteStreams.map((stream) => (
           <VideoStream
             key={stream.id}
@@ -331,7 +329,7 @@ export default function CallView({
             tabIndex={-1}
           />
         ))}
-        {/* Beep tone overlay */}
+        {/* Div for the beep tone overlay */}
         <div
           className="beep-overlay"
           style={{
