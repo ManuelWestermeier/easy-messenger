@@ -1,239 +1,102 @@
-import { areSetAndTheSameType } from "are-set";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
+export default function CallView({ isCalling, broadcast, onBroadcast, exit }) {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
-  // Store peer connections by peerId
-  const peerConnectionsRef = useRef({});
-  // Hold the current local stream in state and in a ref so it's accessible synchronously.
-  const [localStream, setLocalStream] = useState(null);
-  const localStreamRef = useRef(null);
+  const peerConnection = useRef(null);
+  const localStream = useRef(null);
 
-  const [selfWatch, setSelfWatch] = useState(true);
+  const [selfWatch, setSelfWatch] = useState(false);
   const [muted, setMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
 
-  // Update the localStreamRef whenever localStream changes.
   useEffect(() => {
-    localStreamRef.current = localStream;
-  }, [localStream]);
-
-  // Handle incoming signaling messages.
-  useEffect(() => {
-    const handleSignalingData = async (data) => {
-      console.log("Received signaling data:", data);
-      if (!areSetAndTheSameType(data, [["type", "string"]])) {
-        console.warn("Invalid signaling data", data);
-        return;
-      }
-      const { type, peerId, sdp, candidate } = data;
-      if (!peerId) {
-        console.warn("No peerId provided in signaling data", data);
-        return;
-      }
-      // If localStream is not yet available, warn and skip processing.
-      if (!localStreamRef.current) {
-        console.warn(
-          "Local stream not available yet; cannot process signaling message for",
-          peerId
-        );
-        return;
-      }
-      let pc = peerConnectionsRef.current[peerId];
-
-      if (type === "offer") {
-        console.log("Received offer from peer:", peerId);
-        // If we don’t have a connection for this peer, create one.
-        if (!pc) {
-          pc = createPeerConnection(peerId);
-          peerConnectionsRef.current[peerId] = pc;
-          console.log("Created new peer connection for", peerId);
-        }
-        try {
-          await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-          console.log("Set remote description for", peerId);
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          console.log("Created and set local answer for", peerId);
-          broadcast({
-            type: "answer",
-            peerId,
-            sdp: pc.localDescription,
-          });
-          console.log("Broadcasted answer for", peerId);
-        } catch (error) {
-          console.error("Error handling offer from", peerId, error);
-        }
-      } else if (type === "answer") {
-        console.log("Received answer from peer:", peerId);
-        if (pc) {
-          try {
-            await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-            console.log("Set remote description for answer from", peerId);
-          } catch (error) {
-            console.error("Error handling answer from", peerId, error);
-          }
-        } else {
-          console.warn("No peer connection for answer from", peerId);
-        }
-      } else if (type === "candidate") {
-        console.log("Received ICE candidate from peer:", peerId);
-        if (pc && candidate) {
-          try {
-            await pc.addIceCandidate(new RTCIceCandidate(candidate));
-            console.log("Added ICE candidate for", peerId);
-          } catch (error) {
-            console.error("Error adding ICE candidate from", peerId, error);
-          }
-        }
-      }
-    };
-
-    onBroadCast(handleSignalingData);
-  }, [onBroadCast, broadcast]);
-
-  // When isCalling becomes true, get local media and start signaling.
-  useEffect(() => {
-    let active = true;
-    const startCall = async () => {
-      console.log("Starting call, requesting media...");
-      try {
-        // Request both audio and video.
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: true,
-        });
-        if (!active) return;
-        setLocalStream(stream);
-        console.log("Local media stream obtained:", stream);
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
-        // Notify others that we started the call.
-        broadcast({ type: "call-started", peerId: "local" });
-        console.log("Broadcasted call-started");
-      } catch (error) {
-        console.error("Error accessing media devices.", error);
-      }
-    };
-
     if (isCalling) {
-      startCall();
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then((stream) => {
+          localStream.current = stream;
+          if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+          setupPeerConnection(stream);
+          startCall();
+        })
+        .catch(console.error);
     } else {
-      console.log("Not calling. Cleaning up connections and streams.");
       cleanup();
     }
+    return cleanup;
+  }, [isCalling]);
 
-    return () => {
-      active = false;
-      cleanup();
-    };
-  }, [isCalling, broadcast]);
-
-  // Create a new RTCPeerConnection for a given peerId.
-  const createPeerConnection = (peerId) => {
-    console.log("Creating RTCPeerConnection for peer:", peerId);
-    const pc = new RTCPeerConnection();
-
-    // Add local tracks to the connection if available.
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => {
-        pc.addTrack(track, localStreamRef.current);
-      });
-      console.log("Added local tracks to peer connection for", peerId);
-    } else {
-      console.warn(
-        "No local stream available when creating connection for",
-        peerId
-      );
-    }
-
-    // Send any ICE candidates to the remote peer.
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        console.log("ICE candidate generated for", peerId, event.candidate);
-        broadcast({
-          type: "candidate",
-          peerId,
-          candidate: event.candidate,
-        });
-      }
-    };
-
-    // When a remote track is received, attach it to the remote video element.
-    pc.ontrack = (event) => {
-      console.log("Remote track received from", peerId, event);
-      if (remoteVideoRef.current && event.streams && event.streams[0]) {
+  const setupPeerConnection = (stream) => {
+    peerConnection.current = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    });
+    stream
+      .getTracks()
+      .forEach((track) => peerConnection.current.addTrack(track, stream));
+    peerConnection.current.ontrack = (event) => {
+      if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
-        console.log("Remote video element updated with new stream.");
-      } else {
-        console.warn("Remote video element not available or stream missing.");
       }
     };
+    peerConnection.current.onicecandidate = (event) => {
+      if (event.candidate)
+        broadcast({ type: "candidate", candidate: event.candidate });
+    };
+  };
 
-    // Fallback for older implementations.
-    pc.onaddstream = (event) => {
-      console.log("Remote stream received via onaddstream from", peerId, event);
-      if (remoteVideoRef.current && event.stream) {
-        remoteVideoRef.current.srcObject = event.stream;
-        console.log(
-          "Remote video element updated with stream via onaddstream."
+  const startCall = async () => {
+    if (!peerConnection.current) return;
+    const offer = await peerConnection.current.createOffer();
+    await peerConnection.current.setLocalDescription(offer);
+    broadcast({ type: "offer", offer });
+  };
+
+  useEffect(() => {
+    onBroadcast(async (data) => {
+      if (!peerConnection.current) return;
+      if (data.type === "offer") {
+        await peerConnection.current.setRemoteDescription(
+          new RTCSessionDescription(data.offer)
+        );
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
+        broadcast({ type: "answer", answer });
+      } else if (data.type === "answer") {
+        await peerConnection.current.setRemoteDescription(
+          new RTCSessionDescription(data.answer)
+        );
+      } else if (data.type === "candidate") {
+        await peerConnection.current.addIceCandidate(
+          new RTCIceCandidate(data.candidate)
         );
       }
-    };
-
-    pc.onconnectionstatechange = () => {
-      console.log("Connection state change for", peerId, pc.connectionState);
-    };
-
-    return pc;
-  };
-
-  // Cleanup all peer connections and stop the local media stream.
-  const cleanup = () => {
-    console.log("Cleaning up all peer connections and local stream");
-    // Close all peer connections.
-    Object.values(peerConnectionsRef.current).forEach((pc) => {
-      console.log("Closing connection", pc);
-      pc.close();
     });
-    peerConnectionsRef.current = {};
+  }, [onBroadcast]);
 
-    // Stop all local media tracks.
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => {
-        console.log("Stopping track:", track);
-        track.stop();
-      });
-      setLocalStream(null);
-      localStreamRef.current = null;
+  function cleanup() {
+    if (localStream.current) {
+      localStream.current.getTracks().forEach((track) => track.stop());
+      localStream.current = null;
     }
-  };
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
+  }
 
-  // Update the enabled state of tracks when mute or camera settings change.
   useEffect(() => {
-    if (localStreamRef.current) {
-      localStreamRef.current.getAudioTracks().forEach((track) => {
+    if (localStream.current) {
+      localStream.current.getAudioTracks().forEach((track) => {
         track.enabled = !muted;
-        console.log("Audio track enabled:", track.enabled);
       });
-      localStreamRef.current.getVideoTracks().forEach((track) => {
+      localStream.current.getVideoTracks().forEach((track) => {
         track.enabled = cameraOn;
-        console.log("Video track enabled:", track.enabled);
       });
     }
   }, [muted, cameraOn]);
-
-  const handleMute = () => {
-    console.log("Toggling mute, new state:", !muted);
-    setMuted((prev) => !prev);
-  };
-
-  const handleCamera = () => {
-    console.log("Toggling camera, new state:", !cameraOn);
-    setCameraOn((prev) => !prev);
-  };
 
   return (
     <div className={"call-view " + (!isCalling ? "hidden-call-view" : "")}>
@@ -281,7 +144,7 @@ export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
             <path d="m136-304-92-90q-12-12-12-28t12-28q88-95 203-142.5T480-640q118 0 232.5 47.5T916-450q12 12 12 28t-12 28l-92 90q-11 11-25.5 12t-26.5-8l-116-88q-8-6-12-14t-4-18v-114q-38-12-78-19t-82-7q-42 0-82 7t-78 19v114q0 10-4 18t-12 14l-116 88q-12 9-26.5 8T136-304Zm104-198q-29 15-56 34.5T128-424l40 40 72-56v-62Zm480 2v60l72 56 40-38q-29-26-56-45t-56-33Zm-480-2Zm480 2Z" />
           </svg>
         </button>
-        <button onClick={handleMute}>
+        <button onClick={() => setMuted((o) => !o)}>
           {muted ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -304,7 +167,7 @@ export default function CallView({ isCalling, broadcast, onBroadCast, exit }) {
             </svg>
           )}
         </button>
-        <button onClick={handleCamera}>
+        <button onClick={() => setCameraOn((o) => !o)}>
           {cameraOn ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"

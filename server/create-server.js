@@ -408,7 +408,6 @@ export default function initMessengerServer() {
     });
 
     client.onSay("call-broadcast", (data) => {
-      originalLog(data);
       if (!areSetAndTheSameType(data, [["chatId", "string"]])) return false;
 
       const { chatId } = data;

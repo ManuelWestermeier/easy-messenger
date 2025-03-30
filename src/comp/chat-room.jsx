@@ -54,9 +54,8 @@ export function ChatRoom({ chatId, chatData, client, setData, page }) {
         client={client}
       />
       <CallView
-        onBroadCast={(fn) => client.onSay("borascast-inner-group", fn, true)}
+        onBroadcast={(fn) => client.onSay("borascast-inner-group", fn, true)}
         broadcast={(data) => {
-          console.log(data);
           client.say("call-broadcast", { chatId, data });
         }}
         exit={() => {
