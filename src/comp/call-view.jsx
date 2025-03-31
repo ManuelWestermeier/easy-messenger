@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { basicHash } from "../utils/crypto";
 
 // --- VideoStream Component ---
 // Uses a ref to set the srcObject on the video element.
@@ -115,10 +116,8 @@ export default function CallView({
   const beepAudioRef = useRef(null);
   const beepIntervalRef = useRef(null);
 
-  // Use a constant “big salt” (in production, use a secure, unique salt per session)
-  const SALT = "THIS_IS_A_VERY_BIG_SALT_USED_FOR_ENCRYPTION_1234567890";
+  const SALT = basicHash(new Date().toLocaleDateString("de"));
 
-  // Derive the encryption key when password changes.
   useEffect(() => {
     if (password) {
       deriveKey(password, SALT).then(setCryptoKey).catch(console.error);
@@ -169,6 +168,14 @@ export default function CallView({
     peerConnection.current.onicecandidate = (event) => {
       if (event.candidate) {
         secureBroadcast({ type: "candidate", candidate: event.candidate });
+      }
+    };
+    peerConnection.current.onconnectionstatechange = (e) => {
+      console.log(e);
+      if (e.failed) {
+        setRemoteStreams((prev) => {
+          return prev.filter((s) => s.id === e.streams[0].id);
+        });
       }
     };
   };
