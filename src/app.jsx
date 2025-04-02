@@ -1,4 +1,3 @@
-// App.js
 import { useEffect, useState } from "react";
 import { useWsClient } from "./hooks/use-ws-client";
 import Mobile from "./mobile";
@@ -87,7 +86,7 @@ export default function App({ setData, data }) {
   window.reCreateClient = reCreateClient;
 
   // Manage waiting state for the server connection.
-  const [waitForServer, setWaitForServer] = useState(false);
+  const [waitForServer, setWaitForServer] = useState(true);
 
   // Attempt to reconnect if the client is closed (and not offline)
   useEffect(() => {
@@ -102,7 +101,8 @@ export default function App({ setData, data }) {
   }, [state, isOffline, reCreateClient]);
 
   // If no client is available and we're offline while waiting, show a loading state.
-  if (client == null && !isOffline && waitForServer) {
+  const notLoaded = client == null && !isOffline
+  if (notLoaded && waitForServer || (shareData !== false && notLoaded)) {
     return <LoadingState setWaitForServer={setWaitForServer} state={state} />;
   }
 
@@ -123,10 +123,10 @@ export default function App({ setData, data }) {
     <div
       className={
         isOffline ||
-        isClosed ||
-        state === "closed" ||
-        state === "failed" ||
-        chatsLoaded
+          isClosed ||
+          state === "closed" ||
+          state === "failed" ||
+          chatsLoaded
           ? "offline"
           : "online"
       }

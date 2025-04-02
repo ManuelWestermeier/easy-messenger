@@ -22,7 +22,7 @@ export default function LoadingState({ state, setWaitForServer }) {
 
   return (
     <div style={{ margin: "20px" }}>
-      <button onClick={() => setWaitForServer(true)} type="button">
+      <button onClick={() => setWaitForServer(false)} type="button">
         Skip Waiting...
       </button>
       <p>Loading state: {state}...</p>
