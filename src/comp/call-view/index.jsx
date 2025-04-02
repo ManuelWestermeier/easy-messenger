@@ -18,10 +18,17 @@ export default function CallView({
   const [muted, setMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
   const [cryptoKey, setCryptoKey] = useState(null);
-  const joinSent = useRef(false); // tracks if join has been sent
+  const joinSent = useRef(false);
 
-  // Generate a unique client ID
-  const [clientId] = useState(() => Math.random().toString(36).substring(2, 15));
+  // Use persistent clientId stored in localStorage so that it remains constant across sessions.
+  const [clientId] = useState(() => {
+    let id = localStorage.getItem("clientId");
+    if (!id) {
+      id = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem("clientId", id);
+    }
+    return id;
+  });
 
   // Securely broadcast a message (with optional target field)
   const secureBroadcast = async (msg) => {
@@ -35,7 +42,7 @@ export default function CallView({
     }
   };
 
-  // Derive the crypto key using a constant salt when password is provided.
+  // Derive the crypto key using a constant salt when a password is provided.
   useEffect(() => {
     if (password) {
       deriveKey(password, "default-salt")
@@ -70,7 +77,7 @@ export default function CallView({
     }
   }, [isCalling, cryptoKey]);
 
-  // Add remote stream from a specific peer.
+  // Add remote stream for a specific peer.
   const addRemoteStream = (peerId, stream) => {
     setRemoteStreams((prev) => {
       if (prev.find((r) => r.id === peerId)) return prev;
@@ -80,19 +87,28 @@ export default function CallView({
 
   // Create or get an RTCPeerConnection for a given peer.
   const getOrCreatePeerConnection = (peerId) => {
+    // If a connection exists, use it.
     if (peerConnections.current[peerId]) return peerConnections.current[peerId];
+
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
+
+    // Add local tracks.
     if (localStream.current) {
       localStream.current.getTracks().forEach((track) =>
         pc.addTrack(track, localStream.current)
       );
     }
+
+    // When a remote track is received, add the stream.
     pc.ontrack = (event) => {
       const newStream = event.streams[0];
+      console.log("Received remote stream from", peerId, newStream);
       addRemoteStream(peerId, newStream);
     };
+
+    // ICE candidate exchange.
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         secureBroadcast({
@@ -102,18 +118,29 @@ export default function CallView({
         });
       }
     };
+
+    // If connection fails or closes, remove it.
     pc.onconnectionstatechange = () => {
       if (["failed", "closed"].includes(pc.connectionState)) {
-        delete peerConnections.current[peerId];
-        setRemoteStreams((prev) => prev.filter((r) => r.id !== peerId));
+        if (peerConnections.current[peerId]) {
+          peerConnections.current[peerId].close();
+          delete peerConnections.current[peerId];
+          setRemoteStreams((prev) => prev.filter((r) => r.id !== peerId));
+        }
       }
     };
+
     peerConnections.current[peerId] = pc;
     return pc;
   };
 
   // Create and send an offer for a new peer.
   const createAndSendOffer = async (peerId) => {
+    // If a connection already exists, close it to use the latest one.
+    if (peerConnections.current[peerId]) {
+      peerConnections.current[peerId].close();
+      delete peerConnections.current[peerId];
+    }
     const pc = getOrCreatePeerConnection(peerId);
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
@@ -122,30 +149,35 @@ export default function CallView({
 
   // Handle incoming decrypted signaling messages.
   const handleMessage = async (data) => {
-    if (data.sender === clientId) return; // ignore self
-    const target = data.target;
-    if (target && target !== clientId) return; // not for us
+    // Ignore our own messages.
+    if (data.sender === clientId) return;
+    // If a message is targeted to another client, ignore it.
+    if (data.target && data.target !== clientId) return;
 
     if (data.type === "join") {
-      if (!peerConnections.current[data.sender]) {
-        createAndSendOffer(data.sender);
+      // On join, always close any existing connection for that peer and create a new one.
+      if (peerConnections.current[data.sender]) {
+        peerConnections.current[data.sender].close();
+        delete peerConnections.current[data.sender];
       }
+      createAndSendOffer(data.sender);
     } else if (data.type === "offer") {
-      const pc = getOrCreatePeerConnection(data.sender);
-      if (pc.signalingState === "stable") {
-        await pc.setRemoteDescription(data.offer);
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        secureBroadcast({ type: "answer", answer, target: data.sender });
-      } else {
-        console.warn("Received offer in state", pc.signalingState, "- ignoring");
+      // On receiving an offer, always close any existing connection to use the latest offer.
+      if (peerConnections.current[data.sender]) {
+        peerConnections.current[data.sender].close();
+        delete peerConnections.current[data.sender];
       }
+      const pc = getOrCreatePeerConnection(data.sender);
+      await pc.setRemoteDescription(data.offer);
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      secureBroadcast({ type: "answer", answer, target: data.sender });
     } else if (data.type === "answer") {
       const pc = peerConnections.current[data.sender];
       if (pc && pc.signalingState === "have-local-offer") {
         await pc.setRemoteDescription(data.answer);
       } else {
-        console.warn("Received answer in state", pc ? pc.signalingState : "N/A", "- ignoring");
+        console.warn("Received answer in state", pc ? pc.signalingState : "N/A");
       }
     } else if (data.type === "candidate") {
       const pc = peerConnections.current[data.sender];
@@ -153,7 +185,7 @@ export default function CallView({
         try {
           await pc.addIceCandidate(data.candidate);
         } catch (error) {
-          console.error("Error adding received candidate", error);
+          console.error("Error adding candidate from", data.sender, error);
         }
       }
     } else if (data.type === "exit") {
@@ -240,7 +272,6 @@ export default function CallView({
             exit();
           }}
         >
-          {/* Exit icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24px"
