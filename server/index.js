@@ -150,7 +150,7 @@ export async function loadChatRoom(name) {
         try {
           const content = await githubFS.readFile(`${messagesFolder}/${i}.txt`);
           messages.push({ message: content });
-        } catch (err) {}
+        } catch (err) { }
       }
     } catch (err) {
       console.error("Error reading messages folder for chat", chatId, err);
@@ -227,7 +227,7 @@ async function initialize() {
     console.log("update:", new Date().toLocaleDateString("de"));
     try {
       await storeAllChatRoomsData();
-      if (process.env.DEBUG) console.log("Current chats:", chats);
+      // if (process.env.DEBUG) console.log("Current chats:", chats);
       console.log(
         "amount of clients: ",
         (() => {

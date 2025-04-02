@@ -265,7 +265,7 @@ export default function initMessengerServer() {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}`;
           await githubFS.deleteDir(fileName);
-        } catch (error) {}
+        } catch (error) { }
       }
 
       delete chats[chatId];
@@ -397,12 +397,11 @@ export default function initMessengerServer() {
         try {
           chats[chatId].hasChanged = true;
           await githubFS.deleteFile(
-            `chats/${encodeURIComponent(chatId)}/messages/${
-              prevMessagesLength - 1
+            `chats/${encodeURIComponent(chatId)}/messages/${prevMessagesLength - 1
             }.txt`
           );
           storeAllChatRoomsData();
-        } catch (error) {}
+        } catch (error) { }
 
       return true;
     });
@@ -509,7 +508,7 @@ export default function initMessengerServer() {
       });
       try {
         storeAllChatRoomsData();
-      } catch (error) {}
+      } catch (error) { }
     };
   });
 }

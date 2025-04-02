@@ -58,6 +58,7 @@ export function ChatRoom({ chatId, chatData, client, setData, page }) {
         onBroadcast={(fn) => client.onSay("borascast-inner-group", fn, true)}
         broadcast={(data) => {
           client.say("call-broadcast", { chatId, data });
+          console.log(data);
         }}
         exit={() => {
           client.say("exit-call", chatId);
