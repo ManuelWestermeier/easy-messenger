@@ -1,57 +1,130 @@
 import React, { useEffect, useRef, useState } from "react";
-import VideoStream from "./video-stream";
-import { deriveKey, encryptData, decryptData } from "./encryption";
+import { basicHash } from "../../utils/crypto";
 
+// --- VideoStream Component ---
+// Uses a ref to set the srcObject on the video element.
+function VideoStream({
+  stream,
+  className,
+  onClick,
+  autoPlay,
+  playsInline,
+  muted,
+  tabIndex,
+}) {
+  const videoRef = useRef(null);
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
+  return (
+    <video
+      ref={videoRef}
+      className={className}
+      onClick={onClick}
+      autoPlay={autoPlay}
+      playsInline={playsInline}
+      muted={muted}
+      tabIndex={tabIndex}
+    />
+  );
+}
+
+// --- Encryption Helpers ---
+async function deriveKey(password, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
+  );
+  return window.crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: enc.encode(salt),
+      iterations: 100000,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return window.btoa(binary);
+}
+
+function base64ToArrayBuffer(base64) {
+  const binary = window.atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+async function encryptData(data, key) {
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(JSON.stringify(data));
+  const cipherBuffer = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    encoded
+  );
+  return {
+    iv: arrayBufferToBase64(iv.buffer),
+    data: arrayBufferToBase64(cipherBuffer),
+  };
+}
+
+async function decryptData(payload, key) {
+  const iv = new Uint8Array(base64ToArrayBuffer(payload.iv));
+  const cipherBuffer = base64ToArrayBuffer(payload.data);
+  const decrypted = await window.crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    cipherBuffer
+  );
+  const dec = new TextDecoder();
+  return JSON.parse(dec.decode(decrypted));
+}
+
+// --- CallView Component ---
 export default function CallView({
   isCalling,
-  broadcast,    // function to send signaling data to the server/broadcast to peers
-  onBroadcast,  // callback for incoming signaling data (receives a data object)
+  broadcast, // function to send signaling data
+  onBroadcast, // callback for incoming signaling data
   exit,
   password,
 }) {
-  // Refs and state
   const localVideoRef = useRef(null);
-  const [remoteStreams, setRemoteStreams] = useState([]); // { id, stream }
-  const peerConnections = useRef({}); // { peerId: RTCPeerConnection }
+  const [remoteStreams, setRemoteStreams] = useState([]);
+  const peerConnection = useRef(null);
   const localStream = useRef(null);
   const [selfWatch, setSelfWatch] = useState(false);
   const [muted, setMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
   const [cryptoKey, setCryptoKey] = useState(null);
-  const joinSent = useRef(false);
+  const beepAudioRef = useRef(null);
+  const beepIntervalRef = useRef(null);
 
-  // Use persistent clientId stored in localStorage so that it remains constant across sessions.
-  const [clientId] = useState(() => {
-    let id = localStorage.getItem("clientId");
-    if (!id) {
-      id = Math.random().toString(36).substring(2, 15);
-      localStorage.setItem("clientId", id);
-    }
-    return id;
-  });
+  const SALT = basicHash(new Date().toLocaleDateString("de"));
 
-  // Securely broadcast a message (with optional target field)
-  const secureBroadcast = async (msg) => {
-    if (!cryptoKey) return;
-    try {
-      const payload = { sender: clientId, ...msg };
-      const encrypted = await encryptData(payload, cryptoKey);
-      broadcast({ encrypted });
-    } catch (error) {
-      console.error("Encryption error:", error);
-    }
-  };
-
-  // Derive the crypto key using a constant salt when a password is provided.
   useEffect(() => {
     if (password) {
-      deriveKey(password, "default-salt")
-        .then(setCryptoKey)
-        .catch(console.error);
+      deriveKey(password, SALT).then(setCryptoKey).catch(console.error);
     }
   }, [password]);
 
-  // Get local media stream and set it on the video element.
+  // Set up the call when isCalling becomes true.
   useEffect(() => {
     if (isCalling) {
       navigator.mediaDevices
@@ -61,143 +134,72 @@ export default function CallView({
           if (localVideoRef.current) {
             localVideoRef.current.srcObject = stream;
           }
+          setupPeerConnection(stream);
+          startCall();
+          startBeepTone();
         })
         .catch(console.error);
     } else {
       cleanup();
     }
     return cleanup;
-  }, [isCalling]);
-
-  // Auto-send join message once cryptoKey is available and call is active.
-  useEffect(() => {
-    if (isCalling && cryptoKey && !joinSent.current) {
-      secureBroadcast({ type: "join" });
-      joinSent.current = true;
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCalling, cryptoKey]);
 
-  // Add remote stream for a specific peer.
-  const addRemoteStream = (peerId, stream) => {
-    setRemoteStreams((prev) => {
-      if (prev.find((r) => r.id === peerId)) return prev;
-      return [...prev, { id: peerId, stream }];
-    });
-  };
-
-  // Create or get an RTCPeerConnection for a given peer.
-  const getOrCreatePeerConnection = (peerId) => {
-    // If a connection exists, use it.
-    if (peerConnections.current[peerId]) return peerConnections.current[peerId];
-
-    const pc = new RTCPeerConnection({
+  // Setup RTCPeerConnection and add tracks.
+  const setupPeerConnection = (stream) => {
+    peerConnection.current = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
-
-    // Add local tracks.
-    if (localStream.current) {
-      localStream.current.getTracks().forEach((track) =>
-        pc.addTrack(track, localStream.current)
-      );
-    }
-
-    // When a remote track is received, add the stream.
-    pc.ontrack = (event) => {
+    stream
+      .getTracks()
+      .forEach((track) => peerConnection.current.addTrack(track, stream));
+    peerConnection.current.ontrack = (event) => {
       const newStream = event.streams[0];
-      console.log("Received remote stream from", peerId, newStream);
-      addRemoteStream(peerId, newStream);
+      setRemoteStreams((prev) => {
+        if (prev.find((s) => s.id === newStream.id)) return prev;
+        // Play beep immediately when a new remote stream arrives.
+        if (beepAudioRef.current) {
+          beepAudioRef.current.play().catch(console.error);
+        }
+        return [...prev, newStream];
+      });
     };
-
-    // ICE candidate exchange.
-    pc.onicecandidate = (event) => {
+    peerConnection.current.onicecandidate = (event) => {
       if (event.candidate) {
-        secureBroadcast({
-          type: "candidate",
-          candidate: event.candidate,
-          target: peerId,
+        secureBroadcast({ type: "candidate", candidate: event.candidate });
+      }
+    };
+    peerConnection.current.onconnectionstatechange = (e) => {
+      console.log(e);
+      if (e.failed) {
+        setRemoteStreams((prev) => {
+          return prev.filter((s) => s.id === e.streams[0].id);
         });
       }
     };
-
-    // If connection fails or closes, remove it.
-    pc.onconnectionstatechange = () => {
-      if (["failed", "closed"].includes(pc.connectionState)) {
-        if (peerConnections.current[peerId]) {
-          peerConnections.current[peerId].close();
-          delete peerConnections.current[peerId];
-          setRemoteStreams((prev) => prev.filter((r) => r.id !== peerId));
-        }
-      }
-    };
-
-    peerConnections.current[peerId] = pc;
-    return pc;
   };
 
-  // Create and send an offer for a new peer.
-  const createAndSendOffer = async (peerId) => {
-    // If a connection already exists, close it to use the latest one.
-    if (peerConnections.current[peerId]) {
-      peerConnections.current[peerId].close();
-      delete peerConnections.current[peerId];
-    }
-    const pc = getOrCreatePeerConnection(peerId);
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    secureBroadcast({ type: "offer", offer, target: peerId });
-  };
-
-  // Handle incoming decrypted signaling messages.
-  const handleMessage = async (data) => {
-    // Ignore our own messages.
-    if (data.sender === clientId) return;
-    // If a message is targeted to another client, ignore it.
-    if (data.target && data.target !== clientId) return;
-
-    if (data.type === "join") {
-      // On join, always close any existing connection for that peer and create a new one.
-      if (peerConnections.current[data.sender]) {
-        peerConnections.current[data.sender].close();
-        delete peerConnections.current[data.sender];
-      }
-      createAndSendOffer(data.sender);
-    } else if (data.type === "offer") {
-      // On receiving an offer, always close any existing connection to use the latest offer.
-      if (peerConnections.current[data.sender]) {
-        peerConnections.current[data.sender].close();
-        delete peerConnections.current[data.sender];
-      }
-      const pc = getOrCreatePeerConnection(data.sender);
-      await pc.setRemoteDescription(data.offer);
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      secureBroadcast({ type: "answer", answer, target: data.sender });
-    } else if (data.type === "answer") {
-      const pc = peerConnections.current[data.sender];
-      if (pc && pc.signalingState === "have-local-offer") {
-        await pc.setRemoteDescription(data.answer);
-      } else {
-        console.warn("Received answer in state", pc ? pc.signalingState : "N/A");
-      }
-    } else if (data.type === "candidate") {
-      const pc = peerConnections.current[data.sender];
-      if (pc) {
-        try {
-          await pc.addIceCandidate(data.candidate);
-        } catch (error) {
-          console.error("Error adding candidate from", data.sender, error);
-        }
-      }
-    } else if (data.type === "exit") {
-      if (peerConnections.current[data.sender]) {
-        peerConnections.current[data.sender].close();
-        delete peerConnections.current[data.sender];
-        setRemoteStreams((prev) => prev.filter((r) => r.id !== data.sender));
-      }
+  // Secure broadcast: encrypt messages before sending.
+  const secureBroadcast = async (msg) => {
+    if (!cryptoKey) return;
+    try {
+      const encrypted = await encryptData(msg, cryptoKey);
+      broadcast({ encrypted });
+    } catch (error) {
+      console.error("Encryption error:", error);
     }
   };
 
-  // Listen for incoming signaling messages.
+  // Start the call by creating and sending an offer.
+  const startCall = async () => {
+    if (!peerConnection.current) return;
+    const offer = await peerConnection.current.createOffer();
+    await peerConnection.current.setLocalDescription(offer);
+    secureBroadcast({ type: "offer", offer });
+  };
+
+  // Decrypt and handle incoming broadcast messages.
   useEffect(() => {
     onBroadcast(async (data) => {
       if (!cryptoKey) return;
@@ -210,9 +212,43 @@ export default function CallView({
         console.error("Decryption error:", error);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cryptoKey, onBroadcast]);
 
-  // Cleanup: stop local stream and close connections.
+  // Process signaling messages with state checks.
+  const handleMessage = async (data) => {
+    if (!peerConnection.current) return;
+    const signalingState = peerConnection.current.signalingState;
+    if (data.type === "offer") {
+      // Only handle offer if connection is not already negotiating.
+      if (
+        signalingState === "stable" ||
+        signalingState === "have-local-offer"
+      ) {
+        await peerConnection.current.setRemoteDescription(data.offer);
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
+        secureBroadcast({ type: "answer", answer });
+      } else {
+        console.warn("Received offer in state", signalingState, "- ignoring");
+      }
+    } else if (data.type === "answer") {
+      // Only set answer if we have sent an offer (state must be "have-local-offer").
+      if (signalingState === "have-local-offer") {
+        await peerConnection.current.setRemoteDescription(data.answer);
+      } else {
+        console.warn("Received answer in state", signalingState, "- ignoring");
+      }
+    } else if (data.type === "candidate") {
+      try {
+        await peerConnection.current.addIceCandidate(data.candidate);
+      } catch (error) {
+        console.error("Error adding received candidate", error);
+      }
+    }
+  };
+
+  // Cleanup when the call ends.
   function cleanup() {
     if (localStream.current) {
       localStream.current.getTracks().forEach((track) => track.stop());
@@ -221,13 +257,15 @@ export default function CallView({
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = null;
     }
-    Object.values(peerConnections.current).forEach((pc) => pc.close());
-    peerConnections.current = {};
     setRemoteStreams([]);
-    joinSent.current = false;
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
+    stopBeepTone();
   }
 
-  // Toggle audio/video tracks.
+  // Toggle audio and video tracks.
   useEffect(() => {
     if (localStream.current) {
       localStream.current.getAudioTracks().forEach((track) => {
@@ -239,6 +277,37 @@ export default function CallView({
     }
   }, [muted, cameraOn]);
 
+  // --- Beep Tone Logic ---
+  // Start periodic beep if the user is alone.
+  const startBeepTone = () => {
+    stopBeepTone(); // clear any existing interval
+    if (remoteStreams.length === 0 && beepAudioRef.current) {
+      beepIntervalRef.current = setInterval(() => {
+        beepAudioRef.current.play().catch(console.error);
+      }, 500);
+    }
+  };
+
+  const stopBeepTone = () => {
+    if (beepIntervalRef.current) {
+      clearInterval(beepIntervalRef.current);
+      beepIntervalRef.current = null;
+    }
+  };
+
+  // Update beep behavior when remoteStreams change.
+  useEffect(() => {
+    if (remoteStreams.length > 0) {
+      stopBeepTone();
+      if (beepAudioRef.current) {
+        beepAudioRef.current.play().catch(console.error);
+      }
+    } else if (isCalling) {
+      startBeepTone();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remoteStreams]);
+
   return (
     <div className={"call-view " + (!isCalling ? "hidden-call-view" : "")}>
       <div className="video-container" style={{ position: "relative" }}>
@@ -246,28 +315,47 @@ export default function CallView({
         <video
           ref={localVideoRef}
           className={selfWatch ? "big" : "small"}
-          onClick={() => setSelfWatch((o) => !o)}
+          onClick={() => {
+            console.log("Switching self-watch off");
+            setSelfWatch((o) => !o);
+          }}
           autoPlay
           playsInline
           muted
         />
-        {/* Remote videos */}
-        {remoteStreams.map(({ id, stream }) => (
+        {/* Remote videos using the VideoStream component */}
+        {remoteStreams.map((stream) => (
           <VideoStream
-            key={id}
+            key={stream.id}
             stream={stream}
             className={!selfWatch ? "big" : "small"}
-            onClick={() => setSelfWatch((o) => !o)}
+            onClick={() => {
+              console.log("Switching self-watch on");
+              setSelfWatch((o) => !o);
+            }}
             autoPlay
             playsInline
             tabIndex={-1}
           />
         ))}
+        {/* Beep tone overlay */}
+        <div
+          className="beep-overlay"
+          style={{
+            position: "absolute",
+            bottom: "10px",
+            right: "10px",
+            zIndex: 10,
+          }}
+        >
+          <audio ref={beepAudioRef} src="/easy-messenger/sounds/beep.mp3" />
+        </div>
       </div>
       <div className="content">
         <button
           className="danger"
           onClick={() => {
+            console.log("Exit button clicked");
             cleanup();
             exit();
           }}
