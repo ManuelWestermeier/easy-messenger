@@ -5,7 +5,7 @@
   --error: red;
 
   /* Backgrounds */
-  --bg: #121212;
+  --bg: rgb(17, 24, 39);
   --select-chat-bg: #575757;
   --bg-light: #1e1e1e;
   --input-bg: #222;

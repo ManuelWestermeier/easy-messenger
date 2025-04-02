@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./app.jsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useLocalStorage from "use-local-storage";
 import { decrypt, encrypt } from "./utils/crypto.jsx";
 import "./styles/import.jsx";
@@ -13,79 +13,66 @@ function Main() {
   useEffect(installApp, []);
 
   const [password, setPassword] = useState(null);
-  const [data, setData] = useLocalStorage("enc-chat-data", null);
+  const [storedData, setStoredData] = useLocalStorage("enc-chat-data", null);
   const [isAuth, setIsAuth] = useState(false);
+  const [decryptedData, setDecryptedData] = useState(null);
 
-  // Handler for creating an account
+  useEffect(() => {
+    if (password && storedData) {
+      try {
+        const decrypted = decrypt(password, storedData);
+        setDecryptedData(JSON.parse(decrypted));
+      } catch {
+        alert("Incorrect password");
+        setIsAuth(false);
+      }
+    }
+  }, [password, storedData]);
+
   const handleCreateAccount = (e) => {
     e.preventDefault();
     const inputPassword = e.target.password.value;
     const inputPassword2 = e.target.password2.value;
-    if (!inputPassword || !inputPassword2) return; // Optionally display an error
-    if (inputPassword != inputPassword2) {
+    if (!inputPassword || !inputPassword2) return;
+    if (inputPassword !== inputPassword2) {
       e.target.reset();
-      return alert("wrong password");
+      return alert("Wrong password");
     }
     setPassword(inputPassword);
-    // Encrypt an empty JSON string to start with
     const encryptedData = encrypt(inputPassword, "{}");
-    setData(encryptedData);
+    setStoredData(encryptedData);
+    setDecryptedData({});
     setIsAuth(true);
   };
 
-  // Handler for logging in
   const handleLogin = (e) => {
     e.preventDefault();
     const inputPassword = e.target.password.value;
     if (!inputPassword) return alert("Incorrect password");
     try {
-      // Attempt to decrypt stored data using the provided password.
-      const decryptedData = decrypt(inputPassword, data);
-      // Validate that the decrypted data is valid JSON.
-      JSON.parse(decryptedData);
-    } catch (error) {
+      const decrypted = decrypt(inputPassword, storedData);
+      setPassword(inputPassword);
+      setDecryptedData(JSON.parse(decrypted));
+      setIsAuth(true);
+    } catch {
       alert("Incorrect password");
-      return;
-    }
-    setPassword(inputPassword);
-    setIsAuth(true);
-  };
-
-  // A wrapper to update the data and automatically encrypt the new value.
-  const updateData = (newData) => {
-    if (typeof newData === "function") {
-      setData((prevData) =>
-        encrypt(
-          password,
-          JSON.stringify(newData(JSON.parse(decrypt(password, prevData)))),
-        ),
-      );
-    } else {
-      setData(encrypt(password, JSON.stringify(newData)));
     }
   };
 
-  // Define a reusable login form.
-  const loginHtml = <Login handleLogin={handleLogin} />;
+  const updateData = useCallback((newData) => {
+    setDecryptedData((prevData) => {
+      const updatedData = typeof newData === "function" ? newData(prevData) : newData;
+      if (JSON.stringify(updatedData) !== JSON.stringify(prevData)) {
+        setStoredData(encrypt(password, JSON.stringify(updatedData)));
+      }
+      return updatedData;
+    });
+  }, [password]);
 
-  // Define a reusable create account form.
-  const createAccountHtml = (
-    <CreateAccount handleCreateAccount={handleCreateAccount} />
-  );
+  if (storedData === null) return <CreateAccount handleCreateAccount={handleCreateAccount} />;
+  if (!isAuth) return <Login handleLogin={handleLogin} />;
 
-  // If no account exists, show the create account form.
-  if (data === null) {
-    return createAccountHtml;
-  }
-
-  // If the user exists but is not authenticated, show the login form.
-  if (!isAuth) {
-    return loginHtml;
-  }
-
-  const dataString = decrypt(password, data);
-  // If authenticated, render the main app.
-  return <App data={JSON.parse(dataString)} setData={updateData} />;
+  return <App data={decryptedData} setData={updateData} />;
 }
 
 createRoot(document.getElementById("root")).render(<Main />);
