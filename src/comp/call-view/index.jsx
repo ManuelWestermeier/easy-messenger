@@ -3,47 +3,33 @@ import { basicHash } from "../../utils/crypto";
 import VideoStream from "./video-stream";
 import { deriveKey, encryptData, decryptData } from "./encryption";
 
-// This helper creates a random salt (hex string)
-const generateSalt = () => {
-  const array = new Uint8Array(16);
-  window.crypto.getRandomValues(array);
-  return Array.from(array)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-};
-
 export default function CallView({
   isCalling,
-  broadcast, // function to send signaling data to all peers
+  broadcast, // function to send signaling data
   onBroadcast, // callback for incoming signaling data
   exit,
   password,
-  localPeerId, // unique identifier for this peer (e.g. UUID)
 }) {
-  // Refs and state for video, connections, and chat.
   const localVideoRef = useRef(null);
-  const [remoteStreams, setRemoteStreams] = useState([]); // Array of MediaStreams from remote peers
-  const peerConnectionsRef = useRef({}); // { [peerId]: RTCPeerConnection }
+  const [remoteStreams, setRemoteStreams] = useState([]);
+  const peerConnection = useRef(null);
   const localStream = useRef(null);
   const [selfWatch, setSelfWatch] = useState(false);
   const [muted, setMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
   const [cryptoKey, setCryptoKey] = useState(null);
-  const [salt, setSalt] = useState(null);
-  const [chatMessages, setChatMessages] = useState([]); // { sender, text }
-  const chatInputRef = useRef(null);
   const beepAudioRef = useRef(null);
   const beepIntervalRef = useRef(null);
 
-  // Derive cryptoKey when both password and salt are available.
-  useEffect(() => {
-    if (password && salt) {
-      deriveKey(password, salt).then(setCryptoKey).catch(console.error);
-    }
-  }, [password, salt]);
+  const SALT = basicHash(new Date().toLocaleDateString("de"));
 
-  // When starting the call, get media, set up local video,
-  // generate and broadcast salt (if not already set), and notify others.
+  useEffect(() => {
+    if (password) {
+      deriveKey(password, SALT).then(setCryptoKey).catch(console.error);
+    }
+  }, [password]);
+
+  // Set up the call when isCalling becomes true.
   useEffect(() => {
     if (isCalling) {
       navigator.mediaDevices
@@ -53,21 +39,8 @@ export default function CallView({
           if (localVideoRef.current) {
             localVideoRef.current.srcObject = stream;
           }
-          // If we have not yet set a salt, generate and broadcast it.
-          if (!salt) {
-            const newSalt = generateSalt();
-            setSalt(newSalt);
-            broadcast({
-              sender: localPeerId,
-              type: "salt",
-              salt: newSalt,
-            });
-          }
-          // Broadcast a join message so that other peers know we’re here.
-          broadcast({
-            sender: localPeerId,
-            type: "join",
-          });
+          setupPeerConnection(stream);
+          startCall();
           startBeepTone();
         })
         .catch(console.error);
@@ -76,50 +49,43 @@ export default function CallView({
     }
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCalling]);
+  }, [isCalling, cryptoKey]);
 
-  // Function to get or create an RTCPeerConnection for a given remote peer.
-  const getOrCreateConnection = (remotePeerId) => {
-    if (peerConnectionsRef.current[remotePeerId]) {
-      return peerConnectionsRef.current[remotePeerId];
-    }
-    const pc = new RTCPeerConnection({
+  // Setup RTCPeerConnection and add tracks.
+  const setupPeerConnection = (stream) => {
+    peerConnection.current = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
-    // Add local tracks to the new connection.
-    if (localStream.current) {
-      localStream.current.getTracks().forEach((track) => {
-        pc.addTrack(track, localStream.current);
-      });
-    }
-    // When remote track arrives, add its stream.
-    pc.ontrack = (event) => {
+    stream
+      .getTracks()
+      .forEach((track) => peerConnection.current.addTrack(track, stream));
+    peerConnection.current.ontrack = (event) => {
       const newStream = event.streams[0];
       setRemoteStreams((prev) => {
         if (prev.find((s) => s.id === newStream.id)) return prev;
-        // Play a beep when a new remote stream arrives.
+        // Play beep immediately when a new remote stream arrives.
         if (beepAudioRef.current) {
           beepAudioRef.current.play().catch(console.error);
         }
         return [...prev, newStream];
       });
     };
-    // When ICE candidate is generated, send it.
-    pc.onicecandidate = (event) => {
+    peerConnection.current.onicecandidate = (event) => {
       if (event.candidate) {
-        secureBroadcast({
-          sender: localPeerId,
-          target: remotePeerId,
-          type: "candidate",
-          candidate: event.candidate,
+        secureBroadcast({ type: "candidate", candidate: event.candidate });
+      }
+    };
+    peerConnection.current.onconnectionstatechange = (e) => {
+      console.log(e);
+      if (e.failed) {
+        setRemoteStreams((prev) => {
+          return prev.filter((s) => s.id === e.streams[0].id);
         });
       }
     };
-    peerConnectionsRef.current[remotePeerId] = pc;
-    return pc;
   };
 
-  // Encrypt a message and broadcast it.
+  // Secure broadcast: encrypt messages before sending.
   const secureBroadcast = async (msg) => {
     if (!cryptoKey) return;
     try {
@@ -130,18 +96,15 @@ export default function CallView({
     }
   };
 
-  // Chat message send function.
-  const sendChatMessage = async () => {
-    if (!cryptoKey || !chatInputRef.current.value) return;
-    const text = chatInputRef.current.value;
-    const msg = { type: "chat", sender: localPeerId, text };
-    await secureBroadcast(msg);
-    // Also add our own message locally.
-    setChatMessages((prev) => [...prev, { sender: "me", text }]);
-    chatInputRef.current.value = "";
+  // Start the call by creating and sending an offer.
+  const startCall = async () => {
+    if (!peerConnection.current) return;
+    const offer = await peerConnection.current.createOffer();
+    await peerConnection.current.setLocalDescription(offer);
+    secureBroadcast({ type: "offer", offer });
   };
 
-  // Listen for incoming broadcast messages.
+  // Decrypt and handle incoming broadcast messages.
   useEffect(() => {
     onBroadcast(async (data) => {
       if (!cryptoKey) return;
@@ -157,136 +120,55 @@ export default function CallView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cryptoKey, onBroadcast]);
 
-  // Handle incoming signaling and chat messages.
+  // Process signaling messages with state checks.
   const handleMessage = async (data) => {
-    // Ignore our own messages.
-    if (data.sender === localPeerId) return;
-
-    switch (data.type) {
-      case "salt":
-        // If we receive a salt and we haven't set one, use it.
-        if (!salt && data.salt) {
-          setSalt(data.salt);
-        }
-        break;
-      case "join":
-        // A new peer joined. Create a connection and, if we are the older peer,
-        // initiate an offer.
-        if (data.sender) {
-          const pc = getOrCreateConnection(data.sender);
-          // If we haven’t already started negotiation for this peer, send an offer.
-          if (
-            pc.signalingState === "stable" ||
-            pc.signalingState === "closed"
-          ) {
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            secureBroadcast({
-              sender: localPeerId,
-              target: data.sender,
-              type: "offer",
-              offer,
-            });
-          }
-        }
-        break;
-      case "offer": {
-        // Offer received from a remote peer.
-        if (data.sender && data.offer) {
-          const pc = getOrCreateConnection(data.sender);
-          // Only process if in a state to accept an offer.
-          if (
-            pc.signalingState === "stable" ||
-            pc.signalingState === "have-local-offer"
-          ) {
-            await pc.setRemoteDescription(data.offer);
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            secureBroadcast({
-              sender: localPeerId,
-              target: data.sender,
-              type: "answer",
-              answer,
-            });
-          } else {
-            console.warn("Offer received in invalid state:", pc.signalingState);
-          }
-        }
-        break;
+    if (!peerConnection.current) return;
+    const signalingState = peerConnection.current.signalingState;
+    if (data.type === "offer") {
+      // Only handle offer if connection is not already negotiating.
+      if (
+        signalingState === "stable" ||
+        signalingState === "have-local-offer"
+      ) {
+        await peerConnection.current.setRemoteDescription(data.offer);
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
+        secureBroadcast({ type: "answer", answer });
+      } else {
+        console.warn("Received offer in state", signalingState, "- ignoring");
       }
-      case "answer": {
-        // Answer received for an offer we sent.
-        if (data.sender && data.answer) {
-          const pc = getOrCreateConnection(data.sender);
-          // Only accept answer if we have sent an offer.
-          if (pc.signalingState === "have-local-offer") {
-            await pc.setRemoteDescription(data.answer);
-          } else {
-            console.warn(
-              "Answer received in invalid state:",
-              pc.signalingState
-            );
-          }
-        }
-        break;
+    } else if (data.type === "answer") {
+      // Only set answer if we have sent an offer (state must be "have-local-offer").
+      if (signalingState === "have-local-offer") {
+        await peerConnection.current.setRemoteDescription(data.answer);
+      } else {
+        console.warn("Received answer in state", signalingState, "- ignoring");
       }
-      case "candidate": {
-        // ICE candidate from a remote peer.
-        if (data.sender && data.candidate) {
-          const pc = getOrCreateConnection(data.sender);
-          try {
-            await pc.addIceCandidate(data.candidate);
-          } catch (error) {
-            console.error("Error adding received candidate", error);
-          }
-        }
-        break;
+    } else if (data.type === "candidate") {
+      try {
+        await peerConnection.current.addIceCandidate(data.candidate);
+      } catch (error) {
+        console.error("Error adding received candidate", error);
       }
-      case "chat": {
-        // Chat message received.
-        if (data.sender && data.text) {
-          setChatMessages((prev) => [
-            ...prev,
-            { sender: data.sender, text: data.text },
-          ]);
-        }
-        break;
-      }
-      default:
-        console.warn("Unknown message type:", data.type);
     }
   };
 
-  // Stop the beep tone.
-  const stopBeepTone = () => {
-    if (beepIntervalRef.current) {
-      clearInterval(beepIntervalRef.current);
-      beepIntervalRef.current = null;
+  // Cleanup when the call ends.
+  function cleanup() {
+    if (localStream.current) {
+      localStream.current.getTracks().forEach((track) => track.stop());
+      localStream.current = null;
     }
-  };
-
-  // Start periodic beep if no remote streams are present.
-  const startBeepTone = () => {
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+    setRemoteStreams([]);
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
     stopBeepTone();
-    if (remoteStreams.length === 0 && beepAudioRef.current) {
-      beepIntervalRef.current = setInterval(() => {
-        beepAudioRef.current.play().catch(console.error);
-      }, 500);
-    }
-  };
-
-  // Update beep behavior when remote streams change.
-  useEffect(() => {
-    if (remoteStreams.length > 0) {
-      stopBeepTone();
-      if (beepAudioRef.current) {
-        beepAudioRef.current.play().catch(console.error);
-      }
-    } else if (isCalling) {
-      startBeepTone();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remoteStreams]);
+  }
 
   // Toggle audio and video tracks.
   useEffect(() => {
@@ -300,20 +182,36 @@ export default function CallView({
     }
   }, [muted, cameraOn]);
 
-  // Cleanup: stop local tracks and close all peer connections.
-  const cleanup = () => {
-    if (localStream.current) {
-      localStream.current.getTracks().forEach((track) => track.stop());
-      localStream.current = null;
+  // --- Beep Tone Logic ---
+  // Start periodic beep if the user is alone.
+  const startBeepTone = () => {
+    stopBeepTone(); // clear any existing interval
+    if (remoteStreams.length === 0 && beepAudioRef.current) {
+      beepIntervalRef.current = setInterval(() => {
+        beepAudioRef.current.play().catch(console.error);
+      }, 500);
     }
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = null;
-    }
-    setRemoteStreams([]);
-    Object.values(peerConnectionsRef.current).forEach((pc) => pc.close());
-    peerConnectionsRef.current = {};
-    stopBeepTone();
   };
+
+  const stopBeepTone = () => {
+    if (beepIntervalRef.current) {
+      clearInterval(beepIntervalRef.current);
+      beepIntervalRef.current = null;
+    }
+  };
+
+  // Update beep behavior when remoteStreams change.
+  useEffect(() => {
+    if (remoteStreams.length > 0) {
+      stopBeepTone();
+      if (beepAudioRef.current) {
+        beepAudioRef.current.play().catch(console.error);
+      }
+    } else if (isCalling) {
+      startBeepTone();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remoteStreams]);
 
   return (
     <div className={"call-view " + (!isCalling ? "hidden-call-view" : "")}>
@@ -323,8 +221,8 @@ export default function CallView({
           ref={localVideoRef}
           className={selfWatch ? "big" : "small"}
           onClick={() => {
-            console.log("Switching self-watch");
-            setSelfWatch((prev) => !prev);
+            console.log("Switching self-watch off");
+            setSelfWatch((o) => !o);
           }}
           autoPlay
           playsInline
@@ -337,8 +235,8 @@ export default function CallView({
             stream={stream}
             className={!selfWatch ? "big" : "small"}
             onClick={() => {
-              console.log("Switching self-watch");
-              setSelfWatch((prev) => !prev);
+              console.log("Switching self-watch on");
+              setSelfWatch((o) => !o);
             }}
             autoPlay
             playsInline
@@ -358,31 +256,6 @@ export default function CallView({
           <audio ref={beepAudioRef} src="/easy-messenger/sounds/beep.mp3" />
         </div>
       </div>
-
-      {/* Chat UI */}
-      <div className="chat-container">
-        <div
-          className="chat-log"
-          style={{ maxHeight: "200px", overflowY: "auto" }}
-        >
-          {chatMessages.map((msg, index) => (
-            <div key={index}>
-              <strong>{msg.sender === "me" ? "You" : msg.sender}:</strong>{" "}
-              {msg.text}
-            </div>
-          ))}
-        </div>
-        <div className="chat-input">
-          <input
-            type="text"
-            ref={chatInputRef}
-            placeholder="Type a message..."
-          />
-          <button onClick={sendChatMessage}>Send</button>
-        </div>
-      </div>
-
-      {/* Control buttons */}
       <div className="content">
         <button
           className="danger"
@@ -402,7 +275,7 @@ export default function CallView({
             <path d="m136-304-92-90q-12-12-12-28t12-28q88-95 203-142.5T480-640q118 0 232.5 47.5T916-450q12 12 12 28t-12 28l-92 90q-11 11-25.5 12t-26.5-8l-116-88q-8-6-12-14t-4-18v-114q-38-12-78-19t-82-7q-42 0-82 7t-78 19v114q0 10-4 18t-12 14l-116 88q-12 9-26.5 8T136-304Z" />
           </svg>
         </button>
-        <button onClick={() => setMuted((prev) => !prev)}>
+        <button onClick={() => setMuted((o) => !o)}>
           {muted ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -425,7 +298,7 @@ export default function CallView({
             </svg>
           )}
         </button>
-        <button onClick={() => setCameraOn((prev) => !prev)}>
+        <button onClick={() => setCameraOn((o) => !o)}>
           {cameraOn ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
