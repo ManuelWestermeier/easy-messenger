@@ -265,7 +265,7 @@ export default function initMessengerServer() {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}`;
           await githubFS.deleteDir(fileName);
-        } catch (error) { }
+        } catch (error) {}
       }
 
       delete chats[chatId];
@@ -397,11 +397,12 @@ export default function initMessengerServer() {
         try {
           chats[chatId].hasChanged = true;
           await githubFS.deleteFile(
-            `chats/${encodeURIComponent(chatId)}/messages/${prevMessagesLength - 1
+            `chats/${encodeURIComponent(chatId)}/messages/${
+              prevMessagesLength - 1
             }.txt`
           );
           storeAllChatRoomsData();
-        } catch (error) { }
+        } catch (error) {}
 
       return true;
     });
@@ -411,9 +412,9 @@ export default function initMessengerServer() {
 
       const { chatId } = data;
 
-      if (!joinedChats.includes(chatId) || !chats[chatId].call) {
-        return;
-      }
+      if (!joinedChats.includes(chatId)) return;
+
+      if (!chats[chatId].call) return;
 
       for (const cli of chats[chatId].call) {
         if (cli != client) {
@@ -425,9 +426,9 @@ export default function initMessengerServer() {
     client.onSay("join-call", async (chatId) => {
       if (typeof chatId != "string") return;
 
-      if (!joinedChats.includes(chatId) || !chats[chatId]) {
-        return;
-      }
+      if (!joinedChats.includes(chatId)) return;
+
+      if (!chats[chatId]) return;
 
       if (!chats[chatId].call) {
         for (const { client } of chats[chatId].clients) {
@@ -455,9 +456,9 @@ export default function initMessengerServer() {
     client.onSay("exit-call", async (chatId) => {
       if (typeof chatId != "string") return;
 
-      if (!joinedChats.includes(chatId) || !chats[chatId].call) {
-        return;
-      }
+      if (!joinedChats.includes(chatId)) return;
+
+      if (!chats?.[chatId]?.call) return;
 
       chats[chatId].call = chats[chatId].call.filter((cli) => cli != client);
 
@@ -508,7 +509,7 @@ export default function initMessengerServer() {
       });
       try {
         storeAllChatRoomsData();
-      } catch (error) { }
+      } catch (error) {}
     };
   });
 }
