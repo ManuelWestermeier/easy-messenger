@@ -162,9 +162,33 @@ function ChatItem({
               autoFocus
             />
             <div className="row">
-              <button type="submit">Save</button>
-              <button type="button" onClick={() => setEditingChat(null)}>
+              <button type="submit" title="Save">
+                Save
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#e8eaed"
+                >
+                  <path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160Zm-80 34L646-760H200v560h560v-446ZM480-240q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM240-560h360v-160H240v160Zm-40-86v446-560 114Z" />
+                </svg>
+              </button>
+              <button
+                title="Cancel"
+                type="button"
+                onClick={() => setEditingChat(null)}
+              >
                 Cancel
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#e8eaed"
+                >
+                  <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                </svg>
               </button>
             </div>
           </form>
@@ -176,8 +200,18 @@ function ChatItem({
                 ) && deleteChat(chatId)
               }
               className="danger"
+              title="Delete"
             >
               Delete
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e8eaed"
+              >
+                <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+              </svg>
             </button>
             <button
               onClick={() =>
@@ -185,9 +219,19 @@ function ChatItem({
                   `are you sure you want to exit the chat: "${chat.chatName}"?`
                 ) && exitChat(chatId)
               }
+              title="Exit"
               className="danger"
             >
               Exit
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e8eaed"
+              >
+                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
+              </svg>
             </button>
           </div>
         </div>
