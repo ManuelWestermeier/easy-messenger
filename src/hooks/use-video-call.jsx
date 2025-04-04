@@ -14,7 +14,8 @@ export default function useVideoCall({
 }) {
   const localVideoRef = useRef(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
-  const peerConnection = useRef(null);
+  // Instead of a single peerConnection, we now keep an object of connections.
+  const connections = useRef({});
   const localStream = useRef(null);
   const [selfWatch, setSelfWatch] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -31,37 +32,18 @@ export default function useVideoCall({
     }
   }, [password]);
 
-  // Set up the call when isCalling becomes true.
-  useEffect(() => {
-    if (isCalling) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          localStream.current = stream;
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = stream;
-          }
-          setupPeerConnection(stream);
-          startCall();
-          startBeepTone();
-        })
-        .catch(console.error);
-    } else {
-      cleanup();
-    }
-    return cleanup;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCalling, cryptoKey]);
-
-  // Setup RTCPeerConnection and add tracks.
-  const setupPeerConnection = (stream) => {
-    peerConnection.current = new RTCPeerConnection({
+  // Function to create a new RTCPeerConnection and store it in our connections object.
+  const createPeerConnection = (stream) => {
+    const connection = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
-    stream
-      .getTracks()
-      .forEach((track) => peerConnection.current.addTrack(track, stream));
-    peerConnection.current.ontrack = (event) => {
+    // Create a unique id for the connection.
+    connection.id = Date.now() + Math.random().toString();
+    connections.current[connection.id] = connection;
+
+    stream.getTracks().forEach((track) => connection.addTrack(track, stream));
+
+    connection.ontrack = (event) => {
       const newStream = event.streams[0];
       setRemoteStreams((prev) => {
         if (prev.find((s) => s.id === newStream.id)) return prev;
@@ -72,20 +54,54 @@ export default function useVideoCall({
         return [...prev, newStream];
       });
     };
-    peerConnection.current.onicecandidate = (event) => {
+
+    connection.onicecandidate = (event) => {
       if (event.candidate) {
-        secureBroadcast({ type: "candidate", candidate: event.candidate });
-      }
-    };
-    peerConnection.current.onconnectionstatechange = (e) => {
-      console.log(e);
-      if (e.failed) {
-        setRemoteStreams((prev) => {
-          return prev.filter((s) => s.id === e.streams[0].id);
+        // Optionally, include the connection id in your signaling data.
+        secureBroadcast({
+          type: "candidate",
+          candidate: event.candidate,
+          connectionId: connection.id,
         });
       }
     };
+
+    connection.onconnectionstatechange = () => {
+      // If the connection is closed, failed, or disconnected, remove it.
+      if (
+        connection.connectionState === "closed" ||
+        connection.connectionState === "failed" ||
+        connection.connectionState === "disconnected"
+      ) {
+        delete connections.current[connection.id];
+      }
+    };
+
+    return connection;
   };
+
+  // Set up the call when isCalling becomes true.
+  useEffect(() => {
+    if (isCalling) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then((stream) => {
+          localStream.current = stream;
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = stream;
+          }
+          // Create and store a new connection.
+          const connection = createPeerConnection(stream);
+          startCall(connection);
+          startBeepTone();
+        })
+        .catch(console.error);
+    } else {
+      cleanup();
+    }
+    return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCalling, cryptoKey]);
 
   // Secure broadcast: encrypt messages before sending.
   const secureBroadcast = async (msg) => {
@@ -98,12 +114,16 @@ export default function useVideoCall({
     }
   };
 
-  // Start the call by creating and sending an offer.
-  const startCall = async () => {
-    if (!peerConnection.current) return;
-    const offer = await peerConnection.current.createOffer();
-    await peerConnection.current.setLocalDescription(offer);
-    secureBroadcast({ type: "offer", offer });
+  // Start the call by creating and sending an offer on the provided connection.
+  const startCall = async (connection) => {
+    if (!connection) return;
+    try {
+      const offer = await connection.createOffer();
+      await connection.setLocalDescription(offer);
+      secureBroadcast({ type: "offer", offer, connectionId: connection.id });
+    } catch (error) {
+      console.error("Error starting call:", error);
+    }
   };
 
   // Decrypt and handle incoming broadcast messages.
@@ -122,33 +142,45 @@ export default function useVideoCall({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cryptoKey, onBroadcast]);
 
-  // Process signaling messages with state checks.
+  // Process signaling messages.
   const handleMessage = async (data) => {
-    if (!peerConnection.current) return;
-    const signalingState = peerConnection.current.signalingState;
+    // Use connectionId from the signaling data if provided.
+    let connection;
+    if (data.connectionId && connections.current[data.connectionId]) {
+      connection = connections.current[data.connectionId];
+    } else {
+      // If no valid connectionId is provided, select the first active connection.
+      connection = Object.values(connections.current)[0];
+    }
+    if (!connection) return;
+
+    const signalingState = connection.signalingState;
     if (data.type === "offer") {
-      // Only handle offer if connection is not already negotiating.
+      // Only handle offer if connection is in a valid state.
       if (
         signalingState === "stable" ||
         signalingState === "have-local-offer"
       ) {
-        await peerConnection.current.setRemoteDescription(data.offer);
-        const answer = await peerConnection.current.createAnswer();
-        await peerConnection.current.setLocalDescription(answer);
-        secureBroadcast({ type: "answer", answer });
+        await connection.setRemoteDescription(data.offer);
+        const answer = await connection.createAnswer();
+        await connection.setLocalDescription(answer);
+        secureBroadcast({
+          type: "answer",
+          answer,
+          connectionId: connection.id,
+        });
       } else {
         console.warn("Received offer in state", signalingState, "- ignoring");
       }
     } else if (data.type === "answer") {
-      // Only set answer if we have sent an offer (state must be "have-local-offer").
       if (signalingState === "have-local-offer") {
-        await peerConnection.current.setRemoteDescription(data.answer);
+        await connection.setRemoteDescription(data.answer);
       } else {
         console.warn("Received answer in state", signalingState, "- ignoring");
       }
     } else if (data.type === "candidate") {
       try {
-        await peerConnection.current.addIceCandidate(data.candidate);
+        await connection.addIceCandidate(data.candidate);
       } catch (error) {
         console.error("Error adding received candidate", error);
       }
@@ -165,10 +197,9 @@ export default function useVideoCall({
       localVideoRef.current.srcObject = null;
     }
     setRemoteStreams([]);
-    if (peerConnection.current) {
-      peerConnection.current.close();
-      peerConnection.current = null;
-    }
+    // Close all connections and clear the object.
+    Object.values(connections.current).forEach((conn) => conn.close());
+    connections.current = {};
     stopBeepTone();
   }
 
