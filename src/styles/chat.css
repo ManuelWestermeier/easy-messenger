@@ -5,7 +5,6 @@
   overflow: hidden;
   padding: 0.5rem;
   border-radius: 4px;
-  /* fixed box-shadow rgba syntax */
   background: linear-gradient(135deg, var(--primary) 20%, var(--bg) 100%);
 }
 
@@ -63,9 +62,7 @@
   position: fixed;
   z-index: 10000000000;
   height: 100vh;
-  /* Adjust to use viewport height in a better way */
   width: 100vw;
-  /* Adjust to use viewport width in a better way */
   left: 0;
   top: 0;
   background-color: var(--text-light);
@@ -77,14 +74,12 @@
   justify-content: center;
   align-items: center;
   overflow: auto;
-  /* Allows scrolling */
 }
 
 /* Ensure the fieldset width is controlled */
 .chat-room header #chat-data-form fieldset {
   min-width: 60vmin;
   overflow: auto;
-  /* Prevents overflow inside fieldset */
 }
 
 /* Full width for input and button elements */
@@ -110,12 +105,33 @@
 .chat-room header .qr-code:focus {
   position: absolute;
   top: calc(50vh - 50vmin);
-  /* Center the QR code in the viewport */
   left: calc(50vw - 50vmin);
-  /* Center the QR code in the viewport */
   z-index: 10000000001;
   height: 100vmin;
   width: 100vmin;
   outline: none;
   box-shadow: 10px 10px 100px 10px var(--bg);
+}
+
+/* New styles for scroll snap container for remote streams */
+.scroll-snap-container {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0;
+}
+
+.scroll-snap-container>* {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  /* Optionally, set a width so each video takes the viewport width */
+  width: 100%;
+}
+
+/* Apply object-fit: contain to all video elements */
+.video-container video,
+.scroll-snap-container video {
+  object-fit: contain;
 }

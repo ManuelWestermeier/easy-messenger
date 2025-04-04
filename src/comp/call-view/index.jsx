@@ -42,21 +42,25 @@ export default function CallView({
           playsInline
           muted
         />
-        {/* Remote videos using the VideoStream component */}
-        {remoteStreams.map((stream) => (
-          <VideoStream
-            key={stream.id}
-            stream={stream}
-            className={!selfWatch ? "big" : "small"}
-            onClick={() => {
-              console.log("Switching self-watch on");
-              setSelfWatch((o) => !o);
-            }}
-            autoPlay
-            playsInline
-            tabIndex={-1}
-          />
-        ))}
+        
+        {/* Remote videos in a scroll snap container */}
+        <div className="scroll-snap-container">
+          {remoteStreams.map((stream) => (
+            <VideoStream
+              key={stream.id}
+              stream={stream}
+              className={!selfWatch ? "big" : "small"}
+              onClick={() => {
+                console.log("Switching self-watch on");
+                setSelfWatch((o) => !o);
+              }}
+              autoPlay
+              playsInline
+              tabIndex={-1}
+            />
+          ))}
+        </div>
+        
         {/* Beep tone overlay */}
         <div
           className="beep-overlay"
@@ -137,5 +141,5 @@ export default function CallView({
         </button>
       </div>
     </div>
-  );
+  );  
 }
