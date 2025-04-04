@@ -40,7 +40,7 @@ export default async function initClient(
     chats.map(async ([chatId, chatInfo]) => {
       // Build a map of existing message IDs.
       const messageIds = chatInfo.messages.reduce((acc, { id }) => {
-        acc[id] = true;
+        acc[id] = 1;
         return acc;
       }, {});
 
@@ -52,6 +52,8 @@ export default async function initClient(
         messageIds,
         subscription: window.notificationSubscription,
       });
+
+      console.log("joinRes", joinRes);
 
       if (joinRes) {
         setData((old) => {
@@ -146,7 +148,7 @@ export default async function initClient(
       } else
         return alert(
           "Maybe your password is incorct (remove the group from your chats) => group: " +
-            chatId
+            chatInfo.chatName
         );
       setChatsLoaded((x) => x - 1);
     })
