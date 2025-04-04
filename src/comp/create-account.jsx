@@ -2,6 +2,7 @@ import useLocalStorage from "use-local-storage";
 
 export default function CreateAccount({ handleCreateAccount }) {
   const [darkMode, setDarkmode] = useLocalStorage("use-darkmode", true);
+  const [useAudio, setUseAudio] = useLocalStorage("use-entry-audio", true);
 
   document.body.classList = darkMode ? "dark-mode" : "light-mode";
 
@@ -37,6 +38,13 @@ export default function CreateAccount({ handleCreateAccount }) {
             />
           </p>
           <p id="error" className="error"></p>
+          <p>
+            <input
+              type="button"
+              onClick={() => setUseAudio((o) => !o)}
+              value={useAudio ? "don't play entry audio" : "play entry audio"}
+            />
+          </p>
           <p>
             <input
               type="button"
