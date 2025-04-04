@@ -485,10 +485,18 @@ export default function initMessengerServer() {
           }
         );
 
-        if (chats[chatId].call)
+        if (chats[chatId]?.call) {
           chats[chatId].call = chats[chatId].call.filter(
             (cli) => cli != client
           );
+
+          if (chats[chatId].call.length == 0) {
+            for (const { client: cli } of chats[chatId].clients) {
+              cli.say("call-removed", chatId);
+            }
+            delete chats[chatId].call;
+          }
+        }
 
         if (chats[chatId].clients.length == 0) {
           if (chats[chatId].hasChanged) {
