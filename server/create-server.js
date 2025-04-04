@@ -57,6 +57,10 @@ and contains all the logic for handling client events.
 export default function initMessengerServer() {
   originalLog("server started...");
 
+  if (process.env.KEEP_ALIVE + "" == "true") {
+    new WebSocket("wss://lockchat-github-io.onrender.com");
+  }
+
   createServer({ port: 8080 }, async (client) => {
     // Keep track of the chats this client has joined
     let joinedChats = [];

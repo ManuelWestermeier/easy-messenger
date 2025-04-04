@@ -4,7 +4,7 @@ const remoteServerURL = "wss://easy-messenger.onrender.com";
 const localHostURL = "ws://localhost:8080";
 
 export const serverURL = document.location.origin.includes("lockchat.github.io")
-  ? "https://lockchat-github-io.onrender.com"
+  ? "wss://lockchat-github-io.onrender.com"
   : document.location.protocol == "http:"
   ? localHostURL
   : remoteServerURL;
