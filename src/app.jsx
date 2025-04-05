@@ -54,7 +54,7 @@ function ReconnectBanner({ chatsLoaded, data, reCreateClient }) {
         </>
       ) : (
         <span>
-          Chats to have to load: {chatsLoaded}/{Object.keys(data).length + 1}
+          Chats to have to load: {chatsLoaded}/{Object.keys(data).length}
         </span>
       )}
     </div>

@@ -12,7 +12,6 @@ export default async function initClient(
   setData,
   setChatsLoaded
 ) {
-  // Clean up messages: remove "joined" and "exited" types from every chat.
   setData((oldData) => {
     let messageIds = {};
 
@@ -100,12 +99,14 @@ export default async function initClient(
             }
           }
 
+          const usedMsgIds = {};
+
           return {
             ...old,
             [chatId]: {
               ...old[chatId],
               unread: joinRes.length,
-              messages,
+              messages: messages.filter(msg => !usedMsgIds[msg.id]),
             },
           };
         });
@@ -148,7 +149,7 @@ export default async function initClient(
       } else
         return alert(
           "Maybe your password is incorct (remove the group from your chats) => group: " +
-            chatInfo.chatName
+          chatInfo.chatName
         );
       setChatsLoaded((x) => x - 1);
     })
