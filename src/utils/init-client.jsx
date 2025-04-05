@@ -100,6 +100,7 @@ export default async function initClient(
           }
 
           const usedMsgIds = {};
+          console.log("messages", messages);
 
           return {
             ...old,
