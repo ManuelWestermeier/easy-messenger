@@ -3,6 +3,7 @@ import useLocalStorage from "use-local-storage";
 export default function CreateAccount({ handleCreateAccount }) {
   const [darkMode, setDarkmode] = useLocalStorage("use-darkmode", true);
   const [useAudio, setUseAudio] = useLocalStorage("use-entry-audio", true);
+  const [lastUserName, setLastUserName] = useLocalStorage("last-username", "");
 
   document.body.classList = darkMode ? "dark-mode" : "light-mode";
 
@@ -15,12 +16,23 @@ export default function CreateAccount({ handleCreateAccount }) {
         </legend>
         <form onSubmit={handleCreateAccount} className="form">
           <p>
+            Username:
+            <input
+              type="text"
+              autoFocus
+              placeholder="Enter Username..."
+              name="username"
+              className="input"
+              value={lastUserName}
+              onInput={e => setLastUserName(e.target.value)}
+            />
+          </p>
+          <p>
             Password:
             <input
               type="password"
               placeholder="Enter password..."
               name="password"
-              autoFocus
               className="input"
               required
               autoComplete="new-password"

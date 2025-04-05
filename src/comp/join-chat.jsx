@@ -43,7 +43,7 @@ export function JoinChat({
       subscription: window.notificationSubscription,
     });
 
-    if (data == false) {
+    if (data === false) {
       alert("Your password is incorrect!");
       return;
     }

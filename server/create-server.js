@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config(); // Load environment variables
 
+const sendFailureTreshhold = parseInt(process.env.SEND_FAILURE_TRESHHOLD ?? 10);
+
 import webpush from "web-push";
 import WEB_PUSH_PUBLIC_KEY from "../web-push-public-key.js";
 
@@ -111,7 +113,6 @@ export default function initMessengerServer() {
 
       if (chat) {
         if (chat.passwordHashHash != passwordHashHash) {
-          delete chats[chatId];
           return false;
         }
 
@@ -132,6 +133,7 @@ export default function initMessengerServer() {
         if (chat?.call && chat?.call?.length != 0)
           client.say("start-call", chatId);
       } else {
+        console.log(chat);
         joinedChats.push(chatId);
 
         chats[chatId] = {
@@ -253,7 +255,7 @@ export default function initMessengerServer() {
         const isSend = await sendPushNotification(subscription, "chat-deleted");
         if (
           isSend instanceof Error &&
-          chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+          chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
         ) {
           delete chats[chatId].subscriptions[subscriptionId];
         } else {
@@ -269,7 +271,7 @@ export default function initMessengerServer() {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}`;
           await githubFS.deleteDir(fileName);
-        } catch (error) {}
+        } catch (error) { }
       }
 
       delete chats[chatId];
@@ -296,7 +298,7 @@ export default function initMessengerServer() {
         );
         if (
           isSend instanceof Error &&
-          chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+          chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
         ) {
           delete chats[chatId].subscriptions[subscriptionId];
           chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
@@ -344,7 +346,7 @@ export default function initMessengerServer() {
         const isSend = await sendPushNotification(subscription, "send");
         if (
           isSend instanceof Error &&
-          chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+          chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
         ) {
           delete chats[chatId].subscriptions[subscriptionId];
           chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
@@ -381,7 +383,7 @@ export default function initMessengerServer() {
         );
         if (
           isSend instanceof Error &&
-          chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+          chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
         ) {
           delete chats[chatId].subscriptions[subscriptionId];
           chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
@@ -401,12 +403,11 @@ export default function initMessengerServer() {
         try {
           chats[chatId].hasChanged = true;
           await githubFS.deleteFile(
-            `chats/${encodeURIComponent(chatId)}/messages/${
-              prevMessagesLength - 1
+            `chats/${encodeURIComponent(chatId)}/messages/${prevMessagesLength - 1
             }.txt`
           );
           storeAllChatRoomsData();
-        } catch (error) {}
+        } catch (error) { }
 
       return true;
     });
@@ -445,7 +446,7 @@ export default function initMessengerServer() {
           const isSend = await sendPushNotification(subscription, "call");
           if (
             isSend instanceof Error &&
-            chats[chatId].subscriptions[subscriptionId].failureIndex++ > 5
+            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
           ) {
             delete chats[chatId].subscriptions[subscriptionId];
             chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
@@ -521,7 +522,7 @@ export default function initMessengerServer() {
       });
       try {
         storeAllChatRoomsData();
-      } catch (error) {}
+      } catch (error) { }
     };
   });
 }

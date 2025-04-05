@@ -4,6 +4,7 @@ import useLocalStorage from "use-local-storage";
 export default function Login({ handleLogin }) {
   const [useAudio, setUseAudio] = useLocalStorage("use-entry-audio", true);
   const [darkMode, setDarkmode] = useLocalStorage("use-darkmode", true);
+  const [lastUserName, setLastUserName] = useLocalStorage("last-username", "");
 
   document.body.classList = darkMode ? "dark-mode" : "light-mode";
 
@@ -16,10 +17,21 @@ export default function Login({ handleLogin }) {
         </legend>
         <form onSubmit={handleLogin} className="form">
           <p>
+            Username:
+            <input
+              type="text"
+              autoFocus
+              placeholder="Enter Username..."
+              name="username"
+              className="input"
+              value={lastUserName}
+              onInput={e => setLastUserName(e.target.value)}
+            />
+          </p>
+          <p>
             Password:
             <input
               type="password"
-              autoFocus
               placeholder="Enter password..."
               name="password"
               className="input"

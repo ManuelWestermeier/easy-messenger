@@ -5,66 +5,88 @@ import useLocalStorage from "use-local-storage";
 import App from "./app.jsx";
 import CreateAccount from "./comp/create-account.jsx";
 import Login from "./comp/login.jsx";
-import { decrypt, encrypt } from "./utils/crypto.jsx";
+import { basicHash, decrypt, encrypt } from "./utils/crypto.jsx";
 import installApp from "./utils/pwa.jsx";
 
 import "./styles/import.jsx";
 import "./utils/pwa.jsx";
 
+const bc = new BroadcastChannel("LOCAL_STORAGE_SYNC");
+
 function Main() {
   useEffect(installApp, []);
 
+  const [username] = useLocalStorage("last-username", "admin");
   const [auth, setAuth] = useState({ password: null, isAuth: false });
-  const [encryptedData, setEncryptedData] = useLocalStorage("enc-chat-data", null);
-  const [decryptedData, setDecryptedData] = useState(null);
+  const [data, setData] = useState(null);
 
-  const handleAuth = (password, decrypted) => {
-    setAuth({ password, isAuth: true });
-    setDecryptedData(decrypted);
-  };
+  const storageKey = username ? `enc-chat-data-${basicHash(username)}` : null;
 
   const handleCreateAccount = (e) => {
     e.preventDefault();
-    const { password, password2 } = e.target;
+    const { username, password, password2 } = e.target;
+    if (!username.value && storageKey) {
+      return alert("Username is required");
+    }
     if (!password.value || password.value !== password2.value) {
       e.target.reset();
       return alert("Passwords do not match");
     }
-
-    const initialData = {};
-    const encrypted = encrypt(password.value, JSON.stringify(initialData));
-    setEncryptedData(encrypted);
-    handleAuth(password.value, initialData);
+    const encrypted = encrypt(password.value, JSON.stringify({}));
+    setData({});
+    localStorage.setItem(storageKey, encrypted);
+    setAuth({ password: password.value, isAuth: true });
   };
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const { password } = e.target;
-    if (!password.value) return alert("Incorrect password");
+    const { username, password } = e.target;
+    if (!username.value || !password.value) {
+      return alert("Please fill in all fields");
+    }
+    const storedEncryptedData = localStorage.getItem(storageKey);
+    if (!storedEncryptedData) {
+      return handleCreateAccount(e);
+    }
 
     try {
-      const decrypted = JSON.parse(decrypt(password.value, encryptedData));
-      handleAuth(password.value, decrypted);
+      const decrypted = JSON.parse(decrypt(password.value, storedEncryptedData));
+      setData(decrypted);
+      setAuth({
+        isAuth: true,
+        password: password.value,
+      });
     } catch {
       alert("Incorrect password");
     }
   };
 
-  const updateData = useCallback(
-    (newData) => {
-      setDecryptedData((prev) => {
-        const updatedData = typeof newData === "function" ? newData(prev) : newData;
-        setEncryptedData(encrypt(auth.password, JSON.stringify(updatedData)));
-        return updatedData;
-      });
-    },
-    [auth.password, setEncryptedData]
-  );
+  const updateData = (newData) => {
+    setData((prev) => {
+      const updatedData = typeof newData === "function" ? newData(prev) : newData;
 
-  if (encryptedData === null) return <CreateAccount handleCreateAccount={handleCreateAccount} />;
-  if (!auth.isAuth) return <Login handleLogin={handleLogin} />;
+      const encrypted = encrypt(auth.password, JSON.stringify(updatedData));
+      localStorage.setItem(storageKey, encrypted);
+      bc.postMessage(updatedData);
 
-  return <App data={decryptedData} setData={updateData} />;
+      return updatedData;
+    });
+  };
+
+  bc.onmessage = e => {
+    setData(e.data);
+  }
+
+  // if the key isnt set in local storage
+  if (!Object.prototype.hasOwnProperty.call(localStorage, storageKey)) {
+    return <CreateAccount handleCreateAccount={handleCreateAccount} />;
+  }
+
+  if (!auth.isAuth || !data) {
+    return <Login handleLogin={handleLogin} />;
+  }
+
+  return <App data={data} setData={updateData} />;
 }
 
 createRoot(document.getElementById("root")).render(<Main />);
