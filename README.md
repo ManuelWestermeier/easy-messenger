@@ -1,12 +1,12 @@
 # QUATSCHER
 
-![Logo](https://manuelwestermeier.github.io/easy-messenger/img/logo-128.png)
+![Logo](https://lockchat.github.io/easy-messenger/img/logo-128.png)
 
 **QUATSCHER** is a basic end-to-end encrypted messenger. All data is encrypted on the client side so that sensitive information never leaves your device. The project is fully open source, providing complete transparency into its inner workings.
 
 ## Hosted preview
 
-[https://manuelwestermeier.github.io/easy-messenger/](https://manuelwestermeier.github.io/easy-messenger/)
+[https://lockchat.github.io/easy-messenger/](https://lockchat.github.io/easy-messenger/)
 
 ## Source Code
 
