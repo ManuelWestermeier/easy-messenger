@@ -1,6 +1,9 @@
 import React from "react";
+import useLocalStorage from "use-local-storage";
 
 export function ManualJoinForm({ handleJoin, setScanQrCode, defaultPassword }) {
+  const [defaultAuth, setDefaultAuth] = useLocalStorage("default-auth-", "");
+
   return (
     <form onSubmit={handleJoin} className="join-form">
       <input
@@ -28,7 +31,14 @@ export function ManualJoinForm({ handleJoin, setScanQrCode, defaultPassword }) {
           e.target.type = "password";
         }}
       />
-      <input type="text" name="author" placeholder="Your name..." required />
+      <input
+        type="text"
+        name="author"
+        defaultValue={defaultAuth}
+        onChange={e => setDefaultAuth(e.target.value)}
+        placeholder="Your name..."
+        required
+      />
       <button type="submit">Join Chat</button>
       <button
         type="button"

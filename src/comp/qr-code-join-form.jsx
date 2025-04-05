@@ -1,5 +1,6 @@
 import React from "react";
 import Html5QrcodePlugin from "./qr-code-scanner";
+import useLocalStorage from "use-local-storage";
 
 export function QRCodeJoinForm({
   handleJoin,
@@ -7,6 +8,7 @@ export function QRCodeJoinForm({
   setChatData,
   chatData,
 }) {
+  const [defaultAuth, setDefaultAuth] = useLocalStorage("default-auth-", "");
   // chatData is expected to be an array: [chatId, password]
   return (
     <form onSubmit={handleJoin} className="join-form qr-code-form">
@@ -55,6 +57,8 @@ export function QRCodeJoinForm({
         name="author"
         id="author-input"
         placeholder="Your name..."
+        defaultValue={defaultAuth}
+        onChange={e => setDefaultAuth(e.target.value)}
         required
       />
       <button type="submit">Join Chat</button>
