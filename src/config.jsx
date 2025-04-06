@@ -9,5 +9,5 @@ export const serverURL = document.location.origin.includes("privuschat.github.io
     ? localHostURL
     : remoteServerURL;
 
-const ws = new WebSocket(remoteServerURL);
+const ws = new WebSocket(serverURL);
 ws.onopen = () => ws.close(1000);
