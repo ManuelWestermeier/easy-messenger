@@ -31,7 +31,7 @@ export default function CallView({
 
   return (
     <div className={"call-view " + (!isCalling ? "hidden-call-view" : "")}>
-      <div className="video-container" style={{ position: "relative" }}>
+      <div className="video-container">
         {/* Local video */}
         <video
           ref={localVideoRef}
