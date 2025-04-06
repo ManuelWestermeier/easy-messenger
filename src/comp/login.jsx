@@ -20,7 +20,6 @@ export default function Login({ handleLogin }) {
             Username:
             <input
               type="text"
-              autoFocus
               placeholder="Enter Username..."
               name="username"
               className="input"
@@ -36,6 +35,7 @@ export default function Login({ handleLogin }) {
               name="password"
               className="input"
               autoComplete="current-password"
+              autoFocus
             />
           </p>
           <p>

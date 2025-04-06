@@ -15,7 +15,7 @@ export default async function initClient(
   setData((oldData) => {
     let messageIds = {};
 
-    return Object.keys(oldData).reduce((acc, chatId) => {
+    data = Object.keys(oldData).reduce((acc, chatId) => {
       messageIds = {};
       acc[chatId] = {
         ...oldData[chatId],
@@ -29,6 +29,8 @@ export default async function initClient(
       };
       return acc;
     }, {});
+
+    return data;
   });
 
   const chats = Object.entries(data);
@@ -52,14 +54,19 @@ export default async function initClient(
         subscription: window.notificationSubscription,
       });
 
-      console.log("joinRes", joinRes);
+      let unread = joinRes.length;
+
+      console.log("joinRes", JSON.stringify(joinRes, null, 5));
 
       if (joinRes) {
         setData((old) => {
           let messages = old[chatId].messages;
 
-          if (joinRes[joinRes.length - 1]?.deleted) {
+          if (joinRes?.[joinRes.length - 1]?.deleted === true) {
             const toDelete = {};
+
+            unread += joinRes[joinRes.length - 1].deletedMessages.length;
+
             for (const id of joinRes[joinRes.length - 1].deletedMessages) {
               toDelete[id] = true;
             }
@@ -84,7 +91,8 @@ export default async function initClient(
             }
           });
 
-          messages = [...messages, ...joinRes];
+          const usedMsgIds = {};
+          messages = [...messages, ...joinRes].filter(msg => !usedMsgIds[msg.id]);
 
           for (const msg of joinRes) {
             if (msg.type == "update") {
@@ -99,15 +107,14 @@ export default async function initClient(
             }
           }
 
-          const usedMsgIds = {};
-          console.log("messages", messages);
+          console.log("messages", JSON.stringify(messages, null, 5));
 
           return {
             ...old,
             [chatId]: {
               ...old[chatId],
-              unread: joinRes.length,
-              messages: messages.filter(msg => !usedMsgIds[msg.id]),
+              unread,
+              messages,
             },
           };
         });

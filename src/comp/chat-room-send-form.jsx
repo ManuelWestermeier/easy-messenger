@@ -40,12 +40,12 @@ export default function ChatRoomSendForm({
       react:
         reactId && reactMessageCt
           ? [
-              reactId,
-              {
-                author: reactMessageCt.author,
-                data: reactMessageCt.data,
-              },
-            ]
+            reactId,
+            {
+              author: reactMessageCt.author,
+              data: reactMessageCt.data,
+            },
+          ]
           : false,
     };
 
@@ -66,14 +66,6 @@ export default function ChatRoomSendForm({
     setLastWroteText("");
     localStorage.setItem(chatInputTextKey, encrypt(chatData.password, ""));
 
-    const isSent = await client.get("send", {
-      chatId,
-      message: encrypt(chatData.password, JSON.stringify(message)),
-      ...messagePublic,
-    });
-    if (!isSent) {
-      alert("A send error occurred. Your message isnt send!");
-    }
     setReactId(false);
 
     const messagesDiv = document.querySelector(".messages");
@@ -91,6 +83,16 @@ export default function ChatRoomSendForm({
         JSON.stringify({ author: chatData?.author, state: "idle" }),
       ),
     });
+
+    const isSent = await client.get("send", {
+      chatId,
+      message: encrypt(chatData.password, JSON.stringify(message)),
+      ...messagePublic,
+    });
+
+    if (!isSent) {
+      alert("A send error occurred. Your message isnt send!");
+    }
   };
 
   return (

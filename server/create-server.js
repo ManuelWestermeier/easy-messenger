@@ -133,7 +133,6 @@ export default function initMessengerServer() {
         if (chat?.call && chat?.call?.length != 0)
           client.say("start-call", chatId);
       } else {
-        console.log(chat);
         joinedChats.push(chatId);
 
         chats[chatId] = {

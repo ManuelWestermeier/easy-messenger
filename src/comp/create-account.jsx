@@ -161,7 +161,7 @@ export default function CreateAccount({ handleCreateAccount }) {
       <audio
         src="https://manuelwestermeier.github.io/easy-messenger/sounds/messager-ringtone.mp3"
         style={{ display: "none" }}
-        autoPlay
+        autoPlay={useAudio}
       ></audio>
     </div>
   );
