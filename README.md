@@ -1,8 +1,8 @@
-# QUATSCHER
+# PrivusChat
 
 ![Logo](https://raw.githubusercontent.com/ManuelWestermeier/easy-messenger/refs/heads/main/docs/img/logo-192.png)
 
-**QUATSCHER** is a basic end-to-end encrypted messenger. All data is encrypted on the client side so that sensitive information never leaves your device. The project is fully open source, providing complete transparency into its inner workings.
+**PrivusChat** is a basic end-to-end encrypted messenger. All data is encrypted on the client side so that sensitive information never leaves your device. The project is fully open source, providing complete transparency into its inner workings.
 
 ## Hosted preview
 
@@ -72,7 +72,7 @@ node ./server/
 
 5. On some points in the code you have to change the frontent location
 
-Enjoy using QUATSCHER – the secure and open source encrypted messenger!
+Enjoy using PrivusChat – the secure and open source encrypted messenger!
 
 ### 5,826 lines usercode
 
