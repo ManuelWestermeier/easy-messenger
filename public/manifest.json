@@ -1,7 +1,7 @@
 {
-  "name": "LockChat - Secure Messenger",
-  "short_name": "LockChat",
-  "description": "LockChat is an open-source, ultra-secure messenger with end-to-end encryption.",
+  "name": "PrivusChat - Secure Messenger",
+  "short_name": "PrivusChat",
+  "description": "PrivusChat is an open-source, ultra-secure messenger with end-to-end encryption.",
   "start_url": "/easy-messenger/",
   "display": "standalone",
   "background_color": "rgb(17, 24, 39)",

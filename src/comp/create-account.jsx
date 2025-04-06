@@ -12,7 +12,7 @@ export default function CreateAccount({ handleCreateAccount }) {
       <div className="opensource-info">
         <h1>
           <b>
-            LockChat
+            PrivusChat
           </b>
         </h1>
         <h3>
