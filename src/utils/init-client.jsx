@@ -56,8 +56,6 @@ export default async function initClient(
 
       let unread = joinRes.length;
 
-      console.log("joinRes", JSON.stringify(joinRes, null, 5));
-
       if (joinRes) {
         setData((old) => {
           let messages = old[chatId].messages;
@@ -106,8 +104,6 @@ export default async function initClient(
               }
             }
           }
-
-          console.log("messages", JSON.stringify(messages, null, 5));
 
           return {
             ...old,

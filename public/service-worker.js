@@ -51,8 +51,6 @@ self.addEventListener("fetch", (event) => {
 
 // Push notification event
 self.addEventListener("push", async function (event) {
-  console.log("Push notification received:", event);
-
   const data = event.data ? event.data.text() : "send";
   let message = "'_'";
 

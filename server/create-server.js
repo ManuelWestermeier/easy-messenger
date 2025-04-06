@@ -71,7 +71,7 @@ export default function initMessengerServer() {
       joinedChats = joinedChats.filter((chat) => chat != chatId);
     };
 
-    function send(type = "message", chatId, message, messageId) {
+    async function send(type = "message", chatId, message, messageId) {
       for (const { client: otherClient } of chats[chatId].clients) {
         if (otherClient != client) {
           otherClient.say(type, { chatId, message, messageId });
@@ -188,16 +188,6 @@ export default function initMessengerServer() {
       return chats[chatId].messages;
     });
 
-    client.onGet("messages", (chatId) => {
-      if (typeof chatId != "string") return false;
-
-      if (!joinedChats.includes(chatId)) return false;
-
-      if (!chats[chatId]) return false;
-
-      return chats[chatId].messages;
-    });
-
     // Handle exit requests
     client.onGet("exit", (data) => {
       if (!areSetAndTheSameType(data, [["chatId", "string"]])) return false;
@@ -251,15 +241,16 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        const isSend = await sendPushNotification(subscription, "chat-deleted");
-        if (
-          isSend instanceof Error &&
-          chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
-        ) {
-          delete chats[chatId].subscriptions[subscriptionId];
-        } else {
-          chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
-        }
+        sendPushNotification(subscription, "chat-deleted").then(isSend => {
+          if (
+            isSend instanceof Error &&
+            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+          ) {
+            delete chats[chatId].subscriptions[subscriptionId];
+          } else {
+            chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+          }
+        });
       }
 
       chats[chatId].clients.forEach(({ client }) => {
@@ -291,18 +282,18 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        const isSend = await sendPushNotification(
+        sendPushNotification(
           subscription,
           "delete-all-messages"
-        );
-        if (
-          isSend instanceof Error &&
-          chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
-        ) {
-          delete chats[chatId].subscriptions[subscriptionId];
-          chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
-        } else {
-        }
+        ).then(isSend => {
+          if (
+            isSend instanceof Error &&
+            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+          ) {
+            delete chats[chatId].subscriptions[subscriptionId];
+            chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+          }
+        })
       }
 
       return true;
@@ -342,15 +333,18 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        const isSend = await sendPushNotification(subscription, "send");
-        if (
-          isSend instanceof Error &&
-          chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
-        ) {
-          delete chats[chatId].subscriptions[subscriptionId];
-          chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
-        } else {
-        }
+        sendPushNotification(
+          subscription,
+          "send"
+        ).then(isSend => {
+          if (
+            isSend instanceof Error &&
+            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+          ) {
+            delete chats[chatId].subscriptions[subscriptionId];
+            chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+          }
+        })
       }
 
       chats[chatId].messages.push({ id, message });
@@ -376,18 +370,19 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        const isSend = await sendPushNotification(
+
+        sendPushNotification(
           subscription,
           "message-deleted"
-        );
-        if (
-          isSend instanceof Error &&
-          chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
-        ) {
-          delete chats[chatId].subscriptions[subscriptionId];
-          chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
-        } else {
-        }
+        ).then(isSend => {
+          if (
+            isSend instanceof Error &&
+            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+          ) {
+            delete chats[chatId].subscriptions[subscriptionId];
+            chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+          }
+        })
       }
 
       const prevMessagesLength = chats[chatId].messages.length;
@@ -401,11 +396,10 @@ export default function initMessengerServer() {
       )
         try {
           chats[chatId].hasChanged = true;
-          await githubFS.deleteFile(
+          githubFS.deleteFile(
             `chats/${encodeURIComponent(chatId)}/messages/${prevMessagesLength - 1
             }.txt`
-          );
-          storeAllChatRoomsData();
+          ).then(storeAllChatRoomsData);
         } catch (error) { }
 
       return true;
@@ -442,15 +436,18 @@ export default function initMessengerServer() {
 
         for (const subscriptionId in chats[chatId].subscriptions) {
           const subscription = chats[chatId].subscriptions[subscriptionId];
-          const isSend = await sendPushNotification(subscription, "call");
-          if (
-            isSend instanceof Error &&
-            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
-          ) {
-            delete chats[chatId].subscriptions[subscriptionId];
-            chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
-          } else {
-          }
+          sendPushNotification(
+            subscription,
+            "call"
+          ).then(isSend => {
+            if (
+              isSend instanceof Error &&
+              chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+            ) {
+              delete chats[chatId].subscriptions[subscriptionId];
+              chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+            }
+          })
         }
       }
 
