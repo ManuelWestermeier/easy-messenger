@@ -27,6 +27,8 @@ export default function CallView({
     password,
   });
 
+  window.isCalling = isCalling;
+
   return (
     <div className={"call-view " + (!isCalling ? "hidden-call-view" : "")}>
       <div className="video-container" style={{ position: "relative" }}>

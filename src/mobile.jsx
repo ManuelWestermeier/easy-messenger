@@ -31,8 +31,10 @@ export default function Mobile({
       }
     };
 
-    window.addEventListener("touchstart", handleTouchStart);
-    window.addEventListener("touchend", handleTouchEnd);
+    if (window.isCalling) {
+      window.addEventListener("touchstart", handleTouchStart);
+      window.addEventListener("touchend", handleTouchEnd);
+    }
 
     return () => {
       window.removeEventListener("touchstart", handleTouchStart);
