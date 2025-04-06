@@ -1,12 +1,12 @@
 # QUATSCHER
 
-![Logo](https://lockchat.github.io/easy-messenger/img/logo-128.png)
+![Logo](https://raw.githubusercontent.com/ManuelWestermeier/easy-messenger/refs/heads/main/docs/img/logo-192.png)
 
 **QUATSCHER** is a basic end-to-end encrypted messenger. All data is encrypted on the client side so that sensitive information never leaves your device. The project is fully open source, providing complete transparency into its inner workings.
 
 ## Hosted preview
 
-[https://lockchat.github.io/easy-messenger/](https://lockchat.github.io/easy-messenger/)
+[https://privuschat.github.io/easy-messenger/](https://privuschat.github.io/easy-messenger/)
 
 ## Source Code
 
@@ -18,8 +18,12 @@ View and contribute to the project on GitHub:
 Before running the project, create a `.env` file in the root directory and fill in the following tokens:
 
 ```env
-GITHUB_API_TOKEN=your_github_api_token
-ENC_PASSWORD=your_encryption_password
+DEBUG=true/false
+WEB_PUSH_PRIVATE_KEY=
+EMAIL=
+LOG=true/false
+ENC_PASSWORD=
+GITHUB_API_TOKEN=
 ```
 
 If you prefer to only store data in memory and log it every 2 seconds, add this line to your .env file:
@@ -70,6 +74,6 @@ node ./server/
 
 Enjoy using QUATSCHER – the secure and open source encrypted messenger!
 
-### 4,454 lines usercode
+### 5,826 lines usercode
 
-### 1,668,110 lines full code
+### 1,670,130 lines full code
