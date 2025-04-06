@@ -13,7 +13,7 @@ export default async function initClient(
 ) {
   // Initial cleanup: remove duplicate messages and unwanted types for all chats.
   setData((oldData) => {
-    const cleaned = Object.keys(oldData).reduce((acc, chatId) => {
+    data = Object.keys(oldData).reduce((acc, chatId) => {
       const seenIds = {};
       acc[chatId] = {
         ...oldData[chatId],
@@ -28,7 +28,7 @@ export default async function initClient(
       };
       return acc;
     }, {});
-    return cleaned;
+    return data;
   });
 
   const chats = Object.entries(data);
