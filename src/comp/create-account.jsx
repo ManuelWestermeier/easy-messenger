@@ -9,7 +9,16 @@ export default function CreateAccount({ handleCreateAccount }) {
 
   return (
     <div className="create-account-wrapper">
-      <h1 className="opensource-info">QUATSCHER Messenger</h1>
+      <div className="opensource-info">
+        <h1>
+          <b>
+            LockChat
+          </b>
+        </h1>
+        <h3>
+          The secure Messenger.
+        </h3>
+      </div>
       <fieldset className="login">
         <legend>
           <h1>Create Account</h1>

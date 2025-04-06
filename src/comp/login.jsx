@@ -10,7 +10,16 @@ export default function Login({ handleLogin }) {
 
   return (
     <>
-      <h1 className="opensource-info">QUATSCHER Messenger</h1>
+      <div className="opensource-info">
+        <h1>
+          <b>
+            LockChat
+          </b>
+        </h1>
+        <h3>
+          The secure Messenger.
+        </h3>
+      </div>
       <fieldset className="login">
         <legend>
           <h1>Login {document.location.hash == "#share" ? "=> Share" : ""}</h1>
