@@ -42,10 +42,10 @@ export default function CallView({
           playsInline
           muted
         />
-        
+
         {/* Remote videos in a scroll snap container */}
         <div className="scroll-snap-container">
-          {remoteStreams.map((stream) => (
+          {remoteStreams.map((stream) => (stream &&
             <VideoStream
               key={stream.id}
               stream={stream}
@@ -60,7 +60,7 @@ export default function CallView({
             />
           ))}
         </div>
-        
+
         {/* Beep tone overlay */}
         <div
           className="beep-overlay"
@@ -141,5 +141,5 @@ export default function CallView({
         </button>
       </div>
     </div>
-  );  
+  );
 }

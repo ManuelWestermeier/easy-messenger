@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { deriveKey, encryptData, decryptData } from "../comp/call-view/encryption";
 
 export default function useVideoCall({
@@ -8,9 +8,10 @@ export default function useVideoCall({
   password,
 }) {
   const localVideoRef = useRef(null);
-  const [remoteStreams, setRemoteStreams] = useState([]);
+  const [participants, setParticipants] = useState({});
   const connections = useRef({});
   const localStream = useRef(null);
+  const userId = useRef(null);
   const [selfWatch, setSelfWatch] = useState(false);
   const [muted, setMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
@@ -18,30 +19,28 @@ export default function useVideoCall({
   const beepAudioRef = useRef(null);
   const beepIntervalRef = useRef(null);
 
+  const remoteStreams = useMemo(() =>
+    Object.values(participants).filter(stream => stream !== null),
+    [participants]
+  );
+
   useEffect(() => {
     if (password) {
       deriveKey(password).then(setCryptoKey).catch(console.error);
     }
   }, [password]);
 
-  const createPeerConnection = (stream) => {
+  const createPeerConnection = (targetUserId) => {
     const connection = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
-    connection.id = Date.now() + Math.random().toString();
-    connections.current[connection.id] = connection;
 
-    stream.getTracks().forEach((track) => connection.addTrack(track, stream));
+    connections.current[targetUserId] = connection;
 
     connection.ontrack = (event) => {
       const newStream = event.streams[0];
-      setRemoteStreams((prev) => {
-        if (prev.find((s) => s.id === newStream.id)) return prev;
-        if (beepAudioRef.current) {
-          beepAudioRef.current.play().catch(console.error);
-        }
-        return [...prev, newStream];
-      });
+      setParticipants(prev => ({ ...prev, [targetUserId]: newStream }));
+      if (beepAudioRef.current) beepAudioRef.current.play().catch(console.error);
     };
 
     connection.onicecandidate = (event) => {
@@ -49,36 +48,40 @@ export default function useVideoCall({
         secureBroadcast({
           type: "candidate",
           candidate: event.candidate,
-          connectionId: connection.id,
+          from: userId.current,
+          dest: targetUserId
         });
       }
     };
 
     connection.onconnectionstatechange = () => {
-      if (
-        connection.connectionState === "closed" ||
-        connection.connectionState === "failed" ||
-        connection.connectionState === "disconnected"
-      ) {
-        delete connections.current[connection.id];
+      if (["closed", "failed", "disconnected"].includes(connection.connectionState)) {
+        delete connections.current[targetUserId];
+        setParticipants(prev => {
+          const updated = { ...prev };
+          delete updated[targetUserId];
+          return updated;
+        });
       }
     };
+
+    localStream.current?.getTracks().forEach(track => {
+      connection.addTrack(track, localStream.current);
+    });
 
     return connection;
   };
 
   useEffect(() => {
     if (isCalling) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
-        .then((stream) => {
+      userId.current = crypto.randomUUID();
+
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
           localStream.current = stream;
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = stream;
-          }
-          const connection = createPeerConnection(stream);
-          startCall(connection);
+          if (localVideoRef.current) localVideoRef.current.srcObject = stream;
           startBeepTone();
+          secureBroadcast({ type: "join", userId: userId.current });
         })
         .catch(console.error);
     } else {
@@ -97,24 +100,21 @@ export default function useVideoCall({
     }
   };
 
-  const startCall = async (connection) => {
-    if (!connection) return;
-    try {
-      const offer = await connection.createOffer();
-      await connection.setLocalDescription(offer);
-      secureBroadcast({ type: "offer", offer, connectionId: connection.id });
-    } catch (error) {
-      console.error("Error starting call:", error);
-    }
-  };
-
   useEffect(() => {
     onBroadcast(async (data) => {
       if (!cryptoKey) return;
       try {
-        if (data.encrypted) {
-          const decrypted = await decryptData(data.encrypted, cryptoKey);
-          await handleMessage(decrypted);
+        const decrypted = await decryptData(data.encrypted, cryptoKey);
+        if (decrypted.dest && decrypted.dest !== userId.current) return;
+
+        if (decrypted.type === "join") {
+          handleJoin(decrypted.userId);
+        } else if (decrypted.type === "offer") {
+          handleOffer(decrypted);
+        } else if (decrypted.type === "answer") {
+          handleAnswer(decrypted);
+        } else if (decrypted.type === "candidate") {
+          handleCandidate(decrypted);
         }
       } catch (error) {
         console.error("Decryption error:", error);
@@ -122,67 +122,60 @@ export default function useVideoCall({
     });
   }, [cryptoKey, onBroadcast]);
 
-  const handleMessage = async (data) => {
-    let connection;
-    if (data.connectionId && connections.current[data.connectionId]) {
-      connection = connections.current[data.connectionId];
-    } else {
-      connection = Object.values(connections.current)[0];
-    }
-    if (!connection) return;
+  const handleJoin = (newUserId) => {
+    if (newUserId === userId.current || connections.current[newUserId]) return;
 
-    const signalingState = connection.signalingState;
-    if (data.type === "offer") {
-      if (
-        signalingState === "stable" ||
-        signalingState === "have-local-offer"
-      ) {
-        await connection.setRemoteDescription(data.offer);
-        const answer = await connection.createAnswer();
-        await connection.setLocalDescription(answer);
-        secureBroadcast({
-          type: "answer",
-          answer,
-          connectionId: connection.id,
-        });
-      }
-    } else if (data.type === "answer") {
-      if (signalingState === "have-local-offer") {
-        await connection.setRemoteDescription(data.answer);
-      }
-    } else if (data.type === "candidate") {
-      try {
-        await connection.addIceCandidate(data.candidate);
-      } catch (error) {
-        console.error("Error adding received candidate", error);
-      }
+    setParticipants(prev => ({ ...prev, [newUserId]: null }));
+    const connection = createPeerConnection(newUserId);
+    createOffer(connection, newUserId);
+  };
+
+  const createOffer = async (connection, targetUserId) => {
+    try {
+      const offer = await connection.createOffer();
+      await connection.setLocalDescription(offer);
+      secureBroadcast({
+        type: "offer",
+        offer,
+        from: userId.current,
+        dest: targetUserId
+      });
+    } catch (error) {
+      console.error("Offer error:", error);
     }
   };
 
-  function cleanup() {
-    if (localStream.current) {
-      localStream.current.getTracks().forEach((track) => track.stop());
-      localStream.current = null;
-    }
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = null;
-    }
-    setRemoteStreams([]);
-    Object.values(connections.current).forEach((conn) => conn.close());
-    connections.current = {};
-    stopBeepTone();
-  }
+  const handleOffer = async ({ offer, from }) => {
+    if (connections.current[from]) return;
 
-  useEffect(() => {
-    if (localStream.current) {
-      localStream.current.getAudioTracks().forEach((track) => {
-        track.enabled = !muted;
-      });
-      localStream.current.getVideoTracks().forEach((track) => {
-        track.enabled = cameraOn;
-      });
+    const connection = createPeerConnection(from);
+    try {
+      await connection.setRemoteDescription(offer);
+      const answer = await connection.createAnswer();
+      await connection.setLocalDescription(answer);
+      secureBroadcast({ type: "answer", answer, from: userId.current, dest: from });
+    } catch (error) {
+      console.error("Answer error:", error);
     }
-  }, [muted, cameraOn]);
+  };
+
+  const handleAnswer = async ({ answer, from }) => {
+    const connection = connections.current[from];
+    if (connection?.signalingState === "have-local-offer") {
+      await connection.setRemoteDescription(answer);
+    }
+  };
+
+  const handleCandidate = async ({ candidate, from }) => {
+    const connection = connections.current[from];
+    if (connection) {
+      try {
+        await connection.addIceCandidate(candidate);
+      } catch (error) {
+        console.error("Candidate error:", error);
+      }
+    }
+  };
 
   const startBeepTone = () => {
     stopBeepTone();
@@ -203,13 +196,33 @@ export default function useVideoCall({
   useEffect(() => {
     if (remoteStreams.length > 0) {
       stopBeepTone();
-      if (beepAudioRef.current) {
-        beepAudioRef.current.play().catch(console.error);
-      }
-    } else if (isCalling) {
-      startBeepTone();
-    }
+      if (beepAudioRef.current) beepAudioRef.current.play().catch(console.error);
+    } else if (isCalling) startBeepTone();
   }, [remoteStreams]);
+
+  const cleanup = () => {
+    if (localStream.current) {
+      localStream.current.getTracks().forEach(track => track.stop());
+      localStream.current = null;
+    }
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    Object.values(connections.current).forEach(conn => conn.close());
+    connections.current = {};
+    setParticipants({});
+    stopBeepTone();
+    userId.current = null;
+  };
+
+  useEffect(() => {
+    if (localStream.current) {
+      localStream.current.getAudioTracks().forEach(track => {
+        track.enabled = !muted;
+      });
+      localStream.current.getVideoTracks().forEach(track => {
+        track.enabled = cameraOn;
+      });
+    }
+  }, [muted, cameraOn]);
 
   return {
     selfWatch,
