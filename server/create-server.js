@@ -96,6 +96,9 @@ export default function initMessengerServer() {
 
       if (!chats[chatId] && !process.env.DEBUG) await loadChatRoom(chatId);
 
+      if (chats[chatId]?.deleteTimeout)
+        clearTimeout(chats[chatId].deleteTimeout);
+
       const chat = chats[chatId];
 
       const passwordHashHash = basicHash(passwordHash).slice(0, 12);
@@ -280,7 +283,7 @@ export default function initMessengerServer() {
               delete chats[chatId].subscriptions[subscriptionId];
               chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
             }
-          },
+          }
         );
       }
 
@@ -376,7 +379,7 @@ export default function initMessengerServer() {
 
       const prevMessagesLength = chats[chatId].messages.length;
       chats[chatId].messages = chats[chatId].messages.filter(
-        ({ id: msgId }) => msgId != id,
+        ({ id: msgId }) => msgId != id
       );
 
       if (
@@ -389,7 +392,7 @@ export default function initMessengerServer() {
             .deleteFile(
               `chats/${encodeURIComponent(chatId)}/messages/${
                 prevMessagesLength - 1
-              }.txt`,
+              }.txt`
             )
             .then(storeAllChatRoomsData);
         } catch (error) {}
@@ -463,6 +466,7 @@ export default function initMessengerServer() {
 
     async function closeChat(chatId) {
       if (!chats[chatId]) return;
+
       let author;
       chats[chatId].clients = chats[chatId].clients.filter(
         ({ client: otherClient, author: auth }) => {
@@ -471,7 +475,7 @@ export default function initMessengerServer() {
             return false; // Client entfernen
           }
           return true;
-        },
+        }
       );
 
       if (chats[chatId]?.call) {
@@ -489,7 +493,11 @@ export default function initMessengerServer() {
         if (chats[chatId].hasChanged) {
           await storeChatRommData(chatId);
         }
-        delete chats[chatId];
+        if (chats[chatId].deleteTimeout)
+          clearTimeout(chats[chatId].deleteTimeout);
+        chats[chatId].deleteTimeout = setTimeout(() => {
+          if (chats[chatId]) delete chats[chatId];
+        }, 60_000); //60 s
       } else if (author) {
         send("user-exited", chatId, author, 0);
         if (chats[chatId]?.call?.length == 0) {
