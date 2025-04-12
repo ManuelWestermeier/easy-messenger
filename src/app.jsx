@@ -81,7 +81,7 @@ export default function App({ setData, data }) {
   // Initialize WebSocket client.
   const { client, state, reCreateClient, isClosed, chatsLoaded } = useWsClient(
     data,
-    setData
+    setData,
   );
   window.reCreateClient = reCreateClient;
 
@@ -101,8 +101,8 @@ export default function App({ setData, data }) {
   }, [state, isOffline, reCreateClient]);
 
   // If no client is available and we're offline while waiting, show a loading state.
-  const notLoaded = client == null && !isOffline
-  if (notLoaded && waitForServer || (shareData !== false && notLoaded)) {
+  const notLoaded = client == null && !isOffline;
+  if ((notLoaded && waitForServer) || (shareData !== false && notLoaded)) {
     return <LoadingState setWaitForServer={setWaitForServer} state={state} />;
   }
 
@@ -123,10 +123,10 @@ export default function App({ setData, data }) {
     <div
       className={
         isOffline ||
-          isClosed ||
-          state === "closed" ||
-          state === "failed" ||
-          chatsLoaded
+        isClosed ||
+        state === "closed" ||
+        state === "failed" ||
+        chatsLoaded
           ? "offline"
           : "online"
       }

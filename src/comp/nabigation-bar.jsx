@@ -68,7 +68,7 @@ export function NavigationBar({
       },
     }));
     const messageInput = document.querySelector(
-      '.chat-room .message-form input[name="text"]'
+      '.chat-room .message-form input[name="text"]',
     );
     messageInput?.focus?.();
     const chatElem = document.querySelector(".chat-room");
@@ -196,7 +196,7 @@ function ChatItem({
             <button
               onClick={() =>
                 confirm(
-                  `are you sure you want to delete the chat: "${chat.chatName}"?`
+                  `are you sure you want to delete the chat: "${chat.chatName}"?`,
                 ) && deleteChat(chatId)
               }
               className="danger"
@@ -216,7 +216,7 @@ function ChatItem({
             <button
               onClick={() =>
                 confirm(
-                  `are you sure you want to exit the chat: "${chat.chatName}"?`
+                  `are you sure you want to exit the chat: "${chat.chatName}"?`,
                 ) && exitChat(chatId)
               }
               title="Exit"

@@ -198,18 +198,6 @@ export default function initMessengerServer() {
         ? data?.subscription
         : false;
 
-      let author;
-      // Hier: Entferne den aktuellen Client aus der Liste
-      chats[chatId].clients = chats[chatId].clients.filter(
-        ({ client: otherClient, author: auth }) => {
-          if (otherClient === client) {
-            author = auth;
-            return false; // Client entfernen
-          }
-          return true;
-        }
-      );
-
       if (subscription) {
         try {
           new URL(subscription.endpoint);
@@ -224,7 +212,7 @@ export default function initMessengerServer() {
 
       if (!author) return false;
 
-      send("user-exited", chatId, author, 0);
+      closeChat(chatId);
 
       return true;
     });
@@ -241,10 +229,11 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        sendPushNotification(subscription, "chat-deleted").then(isSend => {
+        sendPushNotification(subscription, "chat-deleted").then((isSend) => {
           if (
             isSend instanceof Error &&
-            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+            chats[chatId].subscriptions[subscriptionId].failureIndex++ >
+              sendFailureTreshhold
           ) {
             delete chats[chatId].subscriptions[subscriptionId];
           } else {
@@ -260,8 +249,8 @@ export default function initMessengerServer() {
       if (!process.env.DEBUG) {
         try {
           const fileName = `chats/${encodeURIComponent(chatId)}`;
-          await githubFS.deleteDir(fileName);
-        } catch (error) { }
+          githubFS.deleteDir(fileName);
+        } catch (error) {}
       }
 
       delete chats[chatId];
@@ -269,7 +258,6 @@ export default function initMessengerServer() {
       return true;
     });
 
-    // Handle sending messages
     client.onGet("delete-all-messages", async (chatId) => {
       if (typeof chatId !== "string") return false;
       if (!joinedChats.includes(chatId)) return false;
@@ -282,18 +270,25 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        sendPushNotification(
-          subscription,
-          "delete-all-messages"
-        ).then(isSend => {
-          if (
-            isSend instanceof Error &&
-            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
-          ) {
-            delete chats[chatId].subscriptions[subscriptionId];
-            chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
-          }
-        })
+        sendPushNotification(subscription, "delete-all-messages").then(
+          (isSend) => {
+            if (
+              isSend instanceof Error &&
+              chats[chatId].subscriptions[subscriptionId].failureIndex++ >
+                sendFailureTreshhold
+            ) {
+              delete chats[chatId].subscriptions[subscriptionId];
+              chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
+            }
+          },
+        );
+      }
+
+      if (!process.env.DEBUG) {
+        try {
+          const fileName = `chats/${encodeURIComponent(chatId)}/messages`;
+          githubFS.deleteDir(fileName);
+        } catch (error) {}
       }
 
       return true;
@@ -315,7 +310,6 @@ export default function initMessengerServer() {
       send("user-state-change", chatId, message);
     });
 
-    // Handle sending messages
     client.onGet("send", async (data) => {
       if (
         !areSetAndTheSameType(data, [
@@ -333,18 +327,16 @@ export default function initMessengerServer() {
 
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
-        sendPushNotification(
-          subscription,
-          "send"
-        ).then(isSend => {
+        sendPushNotification(subscription, "send").then((isSend) => {
           if (
             isSend instanceof Error &&
-            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+            chats[chatId].subscriptions[subscriptionId].failureIndex++ >
+              sendFailureTreshhold
           ) {
             delete chats[chatId].subscriptions[subscriptionId];
             chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
           }
-        })
+        });
       }
 
       chats[chatId].messages.push({ id, message });
@@ -353,7 +345,6 @@ export default function initMessengerServer() {
       return true;
     });
 
-    // Handle sending messages
     client.onGet("delete-message", async (data) => {
       if (
         !areSetAndTheSameType(data, [
@@ -371,23 +362,21 @@ export default function initMessengerServer() {
       for (const subscriptionId in chats[chatId].subscriptions) {
         const subscription = chats[chatId].subscriptions[subscriptionId];
 
-        sendPushNotification(
-          subscription,
-          "message-deleted"
-        ).then(isSend => {
+        sendPushNotification(subscription, "message-deleted").then((isSend) => {
           if (
             isSend instanceof Error &&
-            chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+            chats[chatId].subscriptions[subscriptionId].failureIndex++ >
+              sendFailureTreshhold
           ) {
             delete chats[chatId].subscriptions[subscriptionId];
             chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
           }
-        })
+        });
       }
 
       const prevMessagesLength = chats[chatId].messages.length;
       chats[chatId].messages = chats[chatId].messages.filter(
-        ({ id: msgId }) => msgId != id
+        ({ id: msgId }) => msgId != id,
       );
 
       if (
@@ -396,11 +385,14 @@ export default function initMessengerServer() {
       )
         try {
           chats[chatId].hasChanged = true;
-          githubFS.deleteFile(
-            `chats/${encodeURIComponent(chatId)}/messages/${prevMessagesLength - 1
-            }.txt`
-          ).then(storeAllChatRoomsData);
-        } catch (error) { }
+          githubFS
+            .deleteFile(
+              `chats/${encodeURIComponent(chatId)}/messages/${
+                prevMessagesLength - 1
+              }.txt`,
+            )
+            .then(storeAllChatRoomsData);
+        } catch (error) {}
 
       return true;
     });
@@ -436,18 +428,16 @@ export default function initMessengerServer() {
 
         for (const subscriptionId in chats[chatId].subscriptions) {
           const subscription = chats[chatId].subscriptions[subscriptionId];
-          sendPushNotification(
-            subscription,
-            "call"
-          ).then(isSend => {
+          sendPushNotification(subscription, "call").then((isSend) => {
             if (
               isSend instanceof Error &&
-              chats[chatId].subscriptions[subscriptionId].failureIndex++ > sendFailureTreshhold
+              chats[chatId].subscriptions[subscriptionId].failureIndex++ >
+                sendFailureTreshhold
             ) {
               delete chats[chatId].subscriptions[subscriptionId];
               chats[chatId].subscriptions[subscriptionId].failureIndex = 0;
             }
-          })
+          });
         }
       }
 
@@ -471,53 +461,53 @@ export default function initMessengerServer() {
       }
     });
 
-    // Clean up when a client disconnects
-    client.onclose = () => {
-      joinedChats.forEach(async (chatId) => {
-        if (!chats[chatId]) return;
-        let author;
-        chats[chatId].clients = chats[chatId].clients.filter(
-          ({ client: otherClient, author: auth }) => {
-            if (otherClient === client) {
-              author = auth;
-              return false; // Client entfernen
-            }
-            return true;
+    async function closeChat(chatId) {
+      if (!chats[chatId]) return;
+      let author;
+      chats[chatId].clients = chats[chatId].clients.filter(
+        ({ client: otherClient, author: auth }) => {
+          if (otherClient === client) {
+            author = auth;
+            return false; // Client entfernen
           }
-        );
+          return true;
+        },
+      );
 
-        if (chats[chatId]?.call) {
-          chats[chatId].call = chats[chatId].call.filter(
-            (cli) => cli != client
-          );
+      if (chats[chatId]?.call) {
+        chats[chatId].call = chats[chatId].call.filter((cli) => cli != client);
 
-          if (chats[chatId].call.length == 0) {
-            for (const { client: cli } of chats[chatId].clients) {
+        if (chats[chatId].call.length == 0) {
+          for (const { client: cli } of chats[chatId].clients) {
+            cli.say("call-removed", chatId);
+          }
+          delete chats[chatId].call;
+        }
+      }
+
+      if (chats[chatId].clients.length == 0) {
+        if (chats[chatId].hasChanged) {
+          await storeChatRommData(chatId);
+        }
+        delete chats[chatId];
+      } else if (author) {
+        send("user-exited", chatId, author, 0);
+        if (chats[chatId]?.call?.length == 0) {
+          for (const { client: cli } of chats[chatId].clients) {
+            if (cli != client) {
               cli.say("call-removed", chatId);
             }
-            delete chats[chatId].call;
           }
         }
+      }
+    }
 
-        if (chats[chatId].clients.length == 0) {
-          if (chats[chatId].hasChanged) {
-            await storeChatRommData(chatId);
-          }
-          delete chats[chatId];
-        } else if (author) {
-          send("user-exited", chatId, author, 0);
-          if (chats[chatId]?.call?.length == 0) {
-            for (const { client: cli } of chats[chatId].clients) {
-              if (cli != client) {
-                cli.say("call-removed", chatId);
-              }
-            }
-          }
-        }
-      });
+    // Clean up when a client disconnects
+    client.onclose = () => {
+      joinedChats.forEach(closeChat);
       try {
         storeAllChatRoomsData();
-      } catch (error) { }
+      } catch (error) {}
     };
   });
 }

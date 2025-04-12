@@ -9,7 +9,7 @@ export default async function initClient(
   client,
   data,
   setData,
-  setChatsLoaded
+  setChatsLoaded,
 ) {
   // Initial cleanup: remove duplicate messages and unwanted types for all chats.
   setData((oldData) => {
@@ -143,7 +143,7 @@ export default async function initClient(
 
       // Decrement the number of chats left to load.
       setChatsLoaded((x) => x - 1);
-    })
+    }),
   );
 
   // Finally, update all chats with one setData call.

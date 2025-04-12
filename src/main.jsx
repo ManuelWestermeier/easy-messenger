@@ -50,7 +50,9 @@ function Main() {
     }
 
     try {
-      const decrypted = JSON.parse(decrypt(password.value, storedEncryptedData));
+      const decrypted = JSON.parse(
+        decrypt(password.value, storedEncryptedData),
+      );
       setData(decrypted);
       setAuth({
         isAuth: true,
@@ -63,7 +65,8 @@ function Main() {
 
   const updateData = (newData) => {
     setData((prev) => {
-      const updatedData = typeof newData === "function" ? newData(prev) : newData;
+      const updatedData =
+        typeof newData === "function" ? newData(prev) : newData;
 
       const encrypted = encrypt(auth.password, JSON.stringify(updatedData));
       localStorage.setItem(storageKey, encrypted);
@@ -73,9 +76,9 @@ function Main() {
     });
   };
 
-  bc.onmessage = e => {
+  bc.onmessage = (e) => {
     setData(e.data);
-  }
+  };
 
   // if the key isnt set in local storage
   if (!Object.prototype.hasOwnProperty.call(localStorage, storageKey)) {

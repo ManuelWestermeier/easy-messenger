@@ -35,7 +35,7 @@ export function ManualJoinForm({ handleJoin, setScanQrCode, defaultPassword }) {
         type="text"
         name="author"
         defaultValue={defaultAuth}
-        onChange={e => setDefaultAuth(e.target.value)}
+        onChange={(e) => setDefaultAuth(e.target.value)}
         placeholder="Your name..."
         required
       />

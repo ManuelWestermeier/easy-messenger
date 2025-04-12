@@ -39,7 +39,7 @@
   gap: 10px;
 }
 
-.chat-room .user-states>span {
+.chat-room .user-states > span {
   background-color: var(--primary-hover);
   border-radius: 20px;
   padding: 5px;
@@ -123,7 +123,7 @@
   padding: 0.5rem 0;
 }
 
-.scroll-snap-container>* {
+.scroll-snap-container > * {
   scroll-snap-align: start;
   flex-shrink: 0;
   /* Optionally, set a width so each video takes the viewport width */

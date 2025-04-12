@@ -27,7 +27,7 @@ export function JoinChat({
 
     if (!chatIdHashed || !passwordHashed) {
       return alert(
-        "Please scan QR code first or switch to input mode and input the group id and password."
+        "Please scan QR code first or switch to input mode and input the group id and password.",
       );
     }
 

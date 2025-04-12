@@ -58,7 +58,7 @@ export function QRCodeJoinForm({
         id="author-input"
         placeholder="Your name..."
         defaultValue={defaultAuth}
-        onChange={e => setDefaultAuth(e.target.value)}
+        onChange={(e) => setDefaultAuth(e.target.value)}
         required
       />
       <button type="submit">Join Chat</button>

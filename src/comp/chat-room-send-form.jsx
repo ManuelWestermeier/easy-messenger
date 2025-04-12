@@ -40,12 +40,12 @@ export default function ChatRoomSendForm({
       react:
         reactId && reactMessageCt
           ? [
-            reactId,
-            {
-              author: reactMessageCt.author,
-              data: reactMessageCt.data,
-            },
-          ]
+              reactId,
+              {
+                author: reactMessageCt.author,
+                data: reactMessageCt.data,
+              },
+            ]
           : false,
     };
 

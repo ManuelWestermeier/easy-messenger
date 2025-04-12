@@ -51,7 +51,7 @@ export async function storeChatRommData(chatId) {
       `${chatFolder}/data.data`,
       dataContent,
       new Date().toString(),
-      { branch: "main" }
+      { branch: "main" },
     );
 
     // Update subscriptions file: delete if exists first to avoid conflicts
@@ -59,14 +59,14 @@ export async function storeChatRommData(chatId) {
     if (await githubFS.exists(subsPath)) {
       await githubFS.deleteFile(
         subsPath,
-        `Delete old subscriptions file for ${chatId}`
+        `Delete old subscriptions file for ${chatId}`,
       );
     }
     await githubFS.writeFile(
       subsPath,
       JSON.stringify(subscriptions),
       `Update subscriptions for ${chatId}`,
-      { branch: "main" }
+      { branch: "main" },
     );
 
     // Save each message in the messages folder
@@ -76,7 +76,7 @@ export async function storeChatRommData(chatId) {
         `${messagesFolder}/${index}.txt`,
         messages[index].message,
         `Save message ${index} for ${chatId}`,
-        { branch: "main" }
+        { branch: "main" },
       );
     }
 
@@ -87,7 +87,7 @@ export async function storeChatRommData(chatId) {
       if (await githubFS.exists(messageFileName)) {
         await githubFS.deleteFile(
           messageFileName,
-          `Delete extra message file ${index} for ${chatId}`
+          `Delete extra message file ${index} for ${chatId}`,
         );
         index++;
       } else {
@@ -135,7 +135,7 @@ export async function loadChatRoom(name) {
     let subscriptions = {};
     try {
       const subsContent = await githubFS.readFile(
-        `${chatFolder}/subscriptions.txt`
+        `${chatFolder}/subscriptions.txt`,
       );
       subscriptions = JSON.parse(subsContent);
     } catch (e) {
@@ -150,7 +150,7 @@ export async function loadChatRoom(name) {
         try {
           const content = await githubFS.readFile(`${messagesFolder}/${i}.txt`);
           messages.push({ message: content });
-        } catch (err) { }
+        } catch (err) {}
       }
     } catch (err) {
       console.error("Error reading messages folder for chat", chatId, err);
@@ -163,7 +163,7 @@ export async function loadChatRoom(name) {
       if (await githubFS.exists(messageFileName)) {
         await githubFS.deleteFile(
           messageFileName,
-          `Delete extra message file ${index} for ${chatId}`
+          `Delete extra message file ${index} for ${chatId}`,
         );
         index++;
       } else {
@@ -239,7 +239,7 @@ async function initialize() {
             }
           }
           return clientsSet.size;
-        })()
+        })(),
       );
     } catch (error) {
       console.error("Error during periodic store:", error);

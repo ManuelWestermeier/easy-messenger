@@ -1,102 +1,102 @@
 .call-view {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100dvw;
-    /* changed from 100dvw */
-    height: 100dvh;
-    /* changed from 100dvh */
-    background-color: rgba(20, 20, 20, 0.95);
-    gap: 15px;
-    z-index: 1000;
-    overflow: hidden;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: all 0.3s ease-in-out;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100dvw;
+  /* changed from 100dvw */
+  height: 100dvh;
+  /* changed from 100dvh */
+  background-color: rgba(20, 20, 20, 0.95);
+  gap: 15px;
+  z-index: 1000;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.3s ease-in-out;
 }
 
 .hidden-call-view {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-100px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100px);
 }
 
 .video-container {
-    position: relative;
-    width: 100dvw;
-    height: 100dvh;
-    top: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: relative;
+  width: 100dvw;
+  height: 100dvh;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .video-container video.big {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 6px;
-    background-color: black;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  background-color: black;
 }
 
 .video-container video.small {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    height: 50px;
-    width: auto;
-    max-width: 100px;
-    border-radius: 6px;
-    background: black;
-    object-fit: contain;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  height: 50px;
+  width: auto;
+  max-width: 100px;
+  border-radius: 6px;
+  background: black;
+  object-fit: contain;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* Scroll Snap Container for Remote Videos */
 .scroll-snap-container {
-    position: absolute;
-    bottom: 80px;
-    /* space above controls */
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 10px;
-    scroll-snap-type: x mandatory;
-    z-index: 2;
+  position: absolute;
+  bottom: 80px;
+  /* space above controls */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px;
+  scroll-snap-type: x mandatory;
+  z-index: 2;
 }
 
-.scroll-snap-container>* {
-    scroll-snap-align: center;
+.scroll-snap-container > * {
+  scroll-snap-align: center;
 }
 
 /* Beep Tone Overlay */
 .beep-overlay {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    z-index: 10;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 10;
 }
 
 /* Content Layer (Buttons, Controls, etc.) */
 .content {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    bottom: 10px;
-    width: 100vw;
-    z-index: 1;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  bottom: 10px;
+  width: 100vw;
+  z-index: 1;
 }
 
 .content button {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.2s ease-in-out;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
 }

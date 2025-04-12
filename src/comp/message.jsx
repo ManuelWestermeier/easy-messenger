@@ -133,7 +133,7 @@ export default function Message({
       key={index}
       style={{ backgroundColor: userColors[msg.author] }}
       className={"message " + className}
-    // onContextMenu={}
+      // onContextMenu={}
     >
       <MessageConetent
         {...msg}

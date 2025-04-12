@@ -47,20 +47,23 @@ export default function CallView({
 
         {/* Remote videos in a scroll snap container */}
         <div className="scroll-snap-container">
-          {remoteStreams.map((stream) => (stream &&
-            <VideoStream
-              key={stream.id}
-              stream={stream}
-              className={!selfWatch ? "big" : "small"}
-              onClick={() => {
-                console.log("Switching self-watch on");
-                setSelfWatch((o) => !o);
-              }}
-              autoPlay
-              playsInline
-              tabIndex={-1}
-            />
-          ))}
+          {remoteStreams.map(
+            (stream) =>
+              stream && (
+                <VideoStream
+                  key={stream.id}
+                  stream={stream}
+                  className={!selfWatch ? "big" : "small"}
+                  onClick={() => {
+                    console.log("Switching self-watch on");
+                    setSelfWatch((o) => !o);
+                  }}
+                  autoPlay
+                  playsInline
+                  tabIndex={-1}
+                />
+              ),
+          )}
         </div>
 
         {/* Beep tone overlay */}

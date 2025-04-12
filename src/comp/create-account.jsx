@@ -11,13 +11,9 @@ export default function CreateAccount({ handleCreateAccount }) {
     <div className="create-account-wrapper">
       <div className="opensource-info">
         <h1>
-          <b>
-            PrivusChat
-          </b>
+          <b>PrivusChat</b>
         </h1>
-        <h3>
-          The secure Messenger.
-        </h3>
+        <h3>The secure Messenger.</h3>
       </div>
       <fieldset className="login">
         <legend>
@@ -33,7 +29,7 @@ export default function CreateAccount({ handleCreateAccount }) {
               name="username"
               className="input"
               value={lastUserName}
-              onInput={e => setLastUserName(e.target.value)}
+              onInput={(e) => setLastUserName(e.target.value)}
             />
           </p>
           <p>

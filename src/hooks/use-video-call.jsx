@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { deriveKey, encryptData, decryptData } from "../comp/call-view/encryption";
+import {
+  deriveKey,
+  encryptData,
+  decryptData,
+} from "../comp/call-view/encryption";
 
 export default function useVideoCall({
   isCalling,
@@ -19,9 +23,9 @@ export default function useVideoCall({
   const beepAudioRef = useRef(null);
   const beepIntervalRef = useRef(null);
 
-  const remoteStreams = useMemo(() =>
-    Object.values(participants).filter(stream => stream !== null),
-    [participants]
+  const remoteStreams = useMemo(
+    () => Object.values(participants).filter((stream) => stream !== null),
+    [participants],
   );
 
   useEffect(() => {
@@ -39,8 +43,9 @@ export default function useVideoCall({
 
     connection.ontrack = (event) => {
       const newStream = event.streams[0];
-      setParticipants(prev => ({ ...prev, [targetUserId]: newStream }));
-      if (beepAudioRef.current) beepAudioRef.current.play().catch(console.error);
+      setParticipants((prev) => ({ ...prev, [targetUserId]: newStream }));
+      if (beepAudioRef.current)
+        beepAudioRef.current.play().catch(console.error);
     };
 
     connection.onicecandidate = (event) => {
@@ -49,15 +54,19 @@ export default function useVideoCall({
           type: "candidate",
           candidate: event.candidate,
           from: userId.current,
-          dest: targetUserId
+          dest: targetUserId,
         });
       }
     };
 
     connection.onconnectionstatechange = () => {
-      if (["closed", "failed", "disconnected"].includes(connection.connectionState)) {
+      if (
+        ["closed", "failed", "disconnected"].includes(
+          connection.connectionState,
+        )
+      ) {
         delete connections.current[targetUserId];
-        setParticipants(prev => {
+        setParticipants((prev) => {
           const updated = { ...prev };
           delete updated[targetUserId];
           return updated;
@@ -65,7 +74,7 @@ export default function useVideoCall({
       }
     };
 
-    localStream.current?.getTracks().forEach(track => {
+    localStream.current?.getTracks().forEach((track) => {
       connection.addTrack(track, localStream.current);
     });
 
@@ -76,8 +85,9 @@ export default function useVideoCall({
     if (isCalling) {
       userId.current = crypto.randomUUID();
 
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(stream => {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then((stream) => {
           localStream.current = stream;
           if (localVideoRef.current) localVideoRef.current.srcObject = stream;
           startBeepTone();
@@ -125,7 +135,7 @@ export default function useVideoCall({
   const handleJoin = (newUserId) => {
     if (newUserId === userId.current || connections.current[newUserId]) return;
 
-    setParticipants(prev => ({ ...prev, [newUserId]: null }));
+    setParticipants((prev) => ({ ...prev, [newUserId]: null }));
     const connection = createPeerConnection(newUserId);
     createOffer(connection, newUserId);
   };
@@ -138,7 +148,7 @@ export default function useVideoCall({
         type: "offer",
         offer,
         from: userId.current,
-        dest: targetUserId
+        dest: targetUserId,
       });
     } catch (error) {
       console.error("Offer error:", error);
@@ -153,7 +163,12 @@ export default function useVideoCall({
       await connection.setRemoteDescription(offer);
       const answer = await connection.createAnswer();
       await connection.setLocalDescription(answer);
-      secureBroadcast({ type: "answer", answer, from: userId.current, dest: from });
+      secureBroadcast({
+        type: "answer",
+        answer,
+        from: userId.current,
+        dest: from,
+      });
     } catch (error) {
       console.error("Answer error:", error);
     }
@@ -196,17 +211,18 @@ export default function useVideoCall({
   useEffect(() => {
     if (remoteStreams.length > 0) {
       stopBeepTone();
-      if (beepAudioRef.current) beepAudioRef.current.play().catch(console.error);
+      if (beepAudioRef.current)
+        beepAudioRef.current.play().catch(console.error);
     } else if (isCalling) startBeepTone();
   }, [remoteStreams]);
 
   const cleanup = () => {
     if (localStream.current) {
-      localStream.current.getTracks().forEach(track => track.stop());
+      localStream.current.getTracks().forEach((track) => track.stop());
       localStream.current = null;
     }
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
-    Object.values(connections.current).forEach(conn => conn.close());
+    Object.values(connections.current).forEach((conn) => conn.close());
     connections.current = {};
     setParticipants({});
     stopBeepTone();
@@ -215,10 +231,10 @@ export default function useVideoCall({
 
   useEffect(() => {
     if (localStream.current) {
-      localStream.current.getAudioTracks().forEach(track => {
+      localStream.current.getAudioTracks().forEach((track) => {
         track.enabled = !muted;
       });
-      localStream.current.getVideoTracks().forEach(track => {
+      localStream.current.getVideoTracks().forEach((track) => {
         track.enabled = cameraOn;
       });
     }
