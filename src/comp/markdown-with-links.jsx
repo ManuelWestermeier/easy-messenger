@@ -25,7 +25,7 @@ const RedditEmbedComponent = ({ url, width, height }) => {
     <div ref={elem} style={{ width, height }}>
       <blockquote
         className="reddit-embed-bq"
-        data-embed-height="30dvh"
+        data-embed-height="250px"
         data-url={url}
         style={{ width, height }}
       >
@@ -361,7 +361,7 @@ export default function MarkdownWithLinks({ text: _text }) {
               <FacebookEmbed
                 url={href}
                 width="100%"
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
               />
             }
@@ -381,7 +381,7 @@ export default function MarkdownWithLinks({ text: _text }) {
             embedContent={
               <InstagramEmbed
                 url={href}
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
                 width="100%"
                 hideCaption={false}
@@ -407,7 +407,7 @@ export default function MarkdownWithLinks({ text: _text }) {
               <LinkedInEmbed
                 url={href}
                 postUrl={href}
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
                 width="100%"
               />
@@ -428,7 +428,7 @@ export default function MarkdownWithLinks({ text: _text }) {
             embedContent={
               <PinterestEmbed
                 url={href}
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
                 width="100%"
               />
@@ -449,7 +449,7 @@ export default function MarkdownWithLinks({ text: _text }) {
             embedContent={
               <TikTokEmbed
                 url={href}
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
                 width="100%"
               />
@@ -470,7 +470,7 @@ export default function MarkdownWithLinks({ text: _text }) {
             embedContent={
               <XEmbed
                 url={href}
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
                 width="100%"
               />
@@ -491,7 +491,7 @@ export default function MarkdownWithLinks({ text: _text }) {
             embedContent={
               <YouTubeEmbed
                 url={href}
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
                 width="100%"
               />
@@ -512,7 +512,7 @@ export default function MarkdownWithLinks({ text: _text }) {
             embedContent={
               <TelegramEmbed
                 src={href}
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
                 width="100%"
               />
@@ -532,7 +532,7 @@ export default function MarkdownWithLinks({ text: _text }) {
             linkTitles={linkTitles}
             embedContent={
               <RedditEmbedComponent
-                height="30dvh"
+                height="250px"
                 style={{ objectFit: "contain" }}
                 width="100%"
                 url={href}
