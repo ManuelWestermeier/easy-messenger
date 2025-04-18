@@ -19,7 +19,7 @@
     "express": "^4.21.2",
     "gh-fs": "^1.0.8",
     "html5-qrcode": "^2.3.8",
-    "react": "^19.0.0",
+    "react": "^19.1.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-player": "^2.16.0",
