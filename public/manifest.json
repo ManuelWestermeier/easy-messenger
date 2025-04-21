@@ -1,6 +1,6 @@
 {
   "name": "PrivusChat - Secure Messenger",
-  "short_name": "Privus 📧",
+  "short_name": "PrivusChat",
   "description": "PrivusChat is an open-source, ultra-secure messenger with end-to-end encryption.",
   "start_url": "/easy-messenger/",
   "display": "standalone",
