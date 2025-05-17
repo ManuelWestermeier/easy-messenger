@@ -4,7 +4,7 @@
   "description": "PrivusChat is an open-source, ultra-secure messenger with end-to-end encryption.",
   "start_url": "/easy-messenger/",
   "display": "standalone",
-  "background_color": "#111827",
+  "background_color": "#fff",
   "theme_color": "#111827",
   "id": "/easy-messenger/",
   "orientation": "portrait-primary",
